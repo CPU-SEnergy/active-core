@@ -21,13 +21,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+        
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
       - name: Cache npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Cache Next.js build
         uses: actions/cache@v4
         with:
           path: |
@@ -38,7 +46,7 @@ jobs:
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-
+            
       - name: Install npm deps
         run: npm install
         
