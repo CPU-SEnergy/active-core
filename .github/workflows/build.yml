@@ -1,0 +1,42 @@
+name: Build Next.js Web App
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - stage
+      - dev
+  pull_request:
+    branches:
+      - main
+      - master
+      - stage
+      - dev
+
+jobs:
+  build-project:
+    name: Build Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Cache npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install npm deps
+        run: npm install
+        
+      - name: Build
+        run: npm run build
