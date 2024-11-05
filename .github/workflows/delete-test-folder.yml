@@ -1,0 +1,23 @@
+name: Delete Test Folder
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  delete-folder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Delete __test__ folder
+        run: |
+          if [ -d "__test__" ]; then
+            rm -rf __test__/
+            echo "__test__ folder and its contents have been deleted."
+          else
+            echo "__test__ folder does not exist."
+          fi
