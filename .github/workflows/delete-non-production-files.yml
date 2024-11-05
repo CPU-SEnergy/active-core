@@ -24,6 +24,6 @@ jobs:
           git config --local user.name "GitHub Action"
           git add -A
           git commit -m "Cleanup: Remove __test__ and Jest files" || echo "No changes to commit"
-          git push origin HEAD:refs/heads/$GITHUB_REF
+          git push origin $GITHUB_REF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
