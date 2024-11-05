@@ -39,34 +39,39 @@ jobs:
           if [ -f "jest.config.ts" ]; then
             rm jest.config.ts
             echo "jest.config.ts has been deleted."
+          else
+            echo "jest.config.ts does not exist."
           fi
 
           if [ -f "jest.setup.ts" ]; then
             rm jest.setup.ts
             echo "jest.setup.ts has been deleted."
+          else
+            echo "jest.setup.ts does not exist."
           fi
 
-      - name: Check for deletions and commit changes
+      - name: Confirm Deletions and Check Status
         id: check_deletions
         run: |
-          # Check if there are deletions to commit
-          if git diff --quiet; then
+          git status
+          # Check if deletions are staged for commit
+          if git diff --cached --exit-code; then
             echo "No files deleted."
             echo "::set-output name=files_deleted::false"
           else
-            echo "Files have been deleted."
+            echo "Files have been deleted and staged."
             git add -A
             git commit -m "Remove __test__ folder and Jest config/setup files"
             echo "::set-output name=files_deleted::true"
           fi
 
       - name: Push cleanup branch
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}  # Only push if files were deleted
         run: |
           git push origin cleanup-branch  # Push the cleanup branch to the remote
 
       - name: Create Pull Request
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}  # Only create PR if files were deleted
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
