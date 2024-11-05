@@ -1,17 +1,11 @@
 name: Build Next.js Web App
 
 on:
-  push:
-    branches:
-      - main
-      - master
-      - stage
-      - dev
   pull_request:
     branches:
       - main
       - master
-      - stage
+      - staging
       - dev
 
 jobs:
@@ -21,7 +15,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
