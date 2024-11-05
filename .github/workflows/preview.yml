@@ -26,19 +26,21 @@ jobs:
         id: get_preview_url
         run: |
           echo "Fetching the latest deployment URL..."
-          DEPLOYMENT_URL=$(vercel ls ${VERCEL_PROJECT_ID} --token=${{ secrets.VERCEL_TOKEN }} --json | jq -r '.[0].url')
+          DEPLOYMENT_INFO=$(vercel ls ${VERCEL_PROJECT_ID} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "$DEPLOYMENT_INFO"
+          DEPLOYMENT_URL=$(echo "$DEPLOYMENT_INFO" | grep -o 'https://[^ ]*' | head -n 1)
           echo "Preview URL: $DEPLOYMENT_URL"
-          echo "::set-output name=preview_url::$DEPLOYMENT_URL"
+          echo "PREVIEW_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
 
       - name: Comment on PR with Preview URL
         uses: actions/github-script@v4
         with:
           script: |
-            const url = '${{ steps.get_preview_url.outputs.preview_url }}';
-            const context = github.context;
-            const comment = `Preview URL: [${url}](https://${url})`;
+            const url = process.env.PREVIEW_URL;  // Get the URL from environment variables
+            const issueNumber = github.context.payload.pull_request.number;
+            const comment = `Preview URL: [${url}](${url})`;
             await github.issues.createComment({
-              ...context.repo,
-              issue_number: context.payload.pull_request.number,
+              ...github.context.repo,
+              issue_number: issueNumber,
               body: comment,
             });
