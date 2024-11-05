@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - main
+
 permissions:
   contents: write
+
 jobs:
   delete-files:
     runs-on: ubuntu-latest
@@ -13,6 +15,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Create new branch for cleanup
+        run: |
+          git checkout -b cleanup-branch  # Create and switch to a new branch
 
       - name: Delete __test__ folder
         run: |
@@ -28,31 +39,38 @@ jobs:
           if [ -f "jest.config.ts" ]; then
             rm jest.config.ts
             echo "jest.config.ts has been deleted."
-            echo "jest.config.ts" >> deleted_files.txt
-          else
-            echo "jest.config.ts does not exist."
           fi
 
           if [ -f "jest.setup.ts" ]; then
             rm jest.setup.ts
             echo "jest.setup.ts has been deleted."
-            echo "jest.setup.ts" >> deleted_files.txt
-          else
-            echo "jest.setup.ts does not exist."
           fi
 
-      - name: Commit changes
+      - name: Check for deletions and commit changes
+        id: check_deletions
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          
-          # Check if any files were deleted and add them to the commit
-          if [ -f deleted_files.txt ]; then
-            xargs git add < deleted_files.txt
-            git commit -m "Remove __test__ folder and Jest config/setup files"
-            git push
+          # Check if there are deletions to commit
+          if git diff --quiet; then
+            echo "No files deleted."
+            echo "::set-output name=files_deleted::false"
           else
-            echo "No files to commit."
+            echo "Files have been deleted."
+            git add -A
+            git commit -m "Remove __test__ folder and Jest config/setup files"
+            echo "::set-output name=files_deleted::true"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push cleanup branch
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
+        run: |
+          git push origin cleanup-branch  # Push the cleanup branch to the remote
+
+      - name: Create Pull Request
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: cleanup-branch
+          base: main
+          title: "Cleanup: Remove __test__ folder and Jest config/setup files"
+          body: "Automated cleanup of test and Jest config/setup files."
