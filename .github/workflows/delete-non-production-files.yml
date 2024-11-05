@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - staging
-
+permissions:
+  contents: write
 jobs:
   delete-test-files:
     runs-on: ubuntu-latest
