@@ -66,16 +66,16 @@ jobs:
           fi
 
       - name: Push cleanup branch
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}  # Only push if files were deleted
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}  
         run: |
           git push origin cleanup-branch  # Push the cleanup branch to the remote
-
+      - name: Install GitHub CLI
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }} 
+        run: |
+          sudo apt update
+          sudo apt install -y gh
       - name: Create Pull Request
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}  # Only create PR if files were deleted
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: cleanup-branch
-          base: main
-          title: "Cleanup: Remove __test__ folder and Jest config/setup files"
-          body: "Automated cleanup of test and Jest config/setup files."
+        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }} 
+        run: gh pr create -B base_branch -H branch_to_merge --title 'Merge branch_to_merge into base_branch' --body 'Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
