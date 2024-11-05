@@ -1,91 +1,29 @@
-name: Clean Up Test Files
+name: Cleanup Jest Files
 
 on:
   push:
     branches:
-      - main  # Trigger on pushes to main, but changes will be made on a new branch
-
-permissions:
-  contents: write
+      - staging
+      - development
 
 jobs:
-  delete-files:
+  delete-test-files:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Git
+      - name: Delete __test__ folder and Jest files
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-      - name: Create new branch for cleanup
-        run: |
-          git checkout -b cleanup-branch  # Create and switch to a new branch
-
-      - name: Delete __test__ folder
-        run: |
-          if [ -d "__test__" ]; then
-            rm -rf __test__/
-            echo "__test__ folder and its contents have been deleted."
-          else
-            echo "__test__ folder does not exist."
-          fi
-
-      - name: Delete Jest config and setup files
-        run: |
-          if [ -f "jest.config.ts" ]; then
-            rm jest.config.ts
-            echo "jest.config.ts has been deleted."
-          else
-            echo "jest.config.ts does not exist."
-          fi
-
-          if [ -f "jest.setup.ts" ]; then
-            rm jest.setup.ts
-            echo "jest.setup.ts has been deleted."
-          else
-            echo "jest.setup.ts does not exist."
-          fi
-
-      - name: Confirm Deletions, Stage Changes, and Check Status
-        id: check_deletions
-        run: |
-          # Use git rm to ensure deletions are staged
-          if [ -d "__test__" ]; then
-            git rm -r --cached "__test__"
-          fi
-          if [ -f "jest.config.ts" ]; then
-            git rm --cached "jest.config.ts"
-          fi
-          if [ -f "jest.setup.ts" ]; then
-            git rm --cached "jest.setup.ts"
-          fi
+          echo "Deleting __test__ directory and Jest configuration files..."
+          rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts # Add any additional Jest files here
           
-          # Check if any files were staged for commit
-          if git diff --cached --exit-code; then
-            echo "files_deleted=false" >> $GITHUB_ENV
-            echo "No files deleted or staged."
-          else
-            echo "files_deleted=true" >> $GITHUB_ENV
-            git commit -m "Remove __test__ folder and Jest config/setup files"
-          fi
-
-      - name: Push cleanup branch
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
+      - name: Commit and push changes
         run: |
-          git push origin cleanup-branch  # Push the cleanup branch to the remote
-
-      - name: Install GitHub CLI
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
-        run: |
-          sudo apt update
-          sudo apt install -y gh
-
-      - name: Create Pull Request
-        if: ${{ steps.check_deletions.outputs.files_deleted == 'true' }}
-        run: |
-          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-          gh pr create -B main -H cleanup-branch --title "Cleanup: Remove __test__ folder and Jest config/setup files" --body "Created by Github action"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Cleanup: Remove __test__ and Jest files" || echo "No changes to commit"
+          git push origin HEAD:refs/heads/$GITHUB_REF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
