@@ -31,9 +31,19 @@ jobs:
             echo "jest.config.ts does not exist."
           fi
 
-          if [ -f "jest.setup.js" ]; then  # Adjust the filename as necessary
-            rm jest.setup.js
-            echo "jest.setup.js has been deleted."
+          if [ -f "jest.setup.ts" ]; then  # Adjust the filename as necessary
+            rm jest.setup.ts
+            echo "jest.setup.ts has been deleted."
           else
-            echo "jest.setup.js does not exist."
+            echo "jest.setup.ts does not exist."
           fi
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add __test__ jest.config.ts jest.setup.ts
+          git commit -m "Remove __test__ folder and Jest config/setup files"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
