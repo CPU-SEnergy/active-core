@@ -3,9 +3,10 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
+    branches:
+      - staging
+      - dev
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
@@ -18,4 +19,26 @@ jobs:
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        id: vercel_deploy
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --confirm
+
+      - name: Get Preview URL
+        id: get_preview_url
+        run: |
+          echo "Fetching the latest deployment URL..."
+          DEPLOYMENT_URL=$(vercel ls ${VERCEL_PROJECT_ID} --token=${{ secrets.VERCEL_TOKEN }} --json | jq -r '.[0].url')
+          echo "Preview URL: $DEPLOYMENT_URL"
+          echo "::set-output name=preview_url::$DEPLOYMENT_URL"
+
+      - name: Comment on PR with Preview URL
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const url = '${{ steps.get_preview_url.outputs.preview_url }}';
+            const context = github.context;
+            const comment = `Preview URL: [${url}](https://${url})`;
+            await github.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.pull_request.number,
+              body: comment,
+            });
