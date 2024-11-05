@@ -18,7 +18,7 @@ jobs:
       - name: Delete __test__ folder and Jest files
         run: |
           echo "Deleting __test__ directory and Jest configuration files..."
-          rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts # Add any additional Jest files here
+          rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
