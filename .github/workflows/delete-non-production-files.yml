@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - staging
+
 permissions:
   contents: write
+
 jobs:
   delete-test-files:
     runs-on: ubuntu-latest
@@ -18,12 +20,11 @@ jobs:
           echo "Deleting __test__ directory and Jest configuration files..."
           rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts # Add any additional Jest files here
           
-      - name: Commit and push changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -A
-          git commit -m "Cleanup: Remove __test__ and Jest files" || echo "No changes to commit"
-          git push origin $GITHUB_REF
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create a pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Cleanup: Remove __test__ and Jest files"
+          body: "This PR removes the __test__ directory and Jest configuration files."
+          base: staging
+          branch: cleanup-jest-files
+          path: .
