@@ -1,0 +1,39 @@
+name: Clean Up Test Files
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  delete-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Delete __test__ folder
+        run: |
+          if [ -d "__test__" ]; then
+            rm -rf __test__/
+            echo "__test__ folder and its contents have been deleted."
+          else
+            echo "__test__ folder does not exist."
+          fi
+
+      - name: Delete Jest config and setup files
+        run: |
+          if [ -f "jest.config.ts" ]; then
+            rm jest.config.ts
+            echo "jest.config.ts has been deleted."
+          else
+            echo "jest.config.ts does not exist."
+          fi
+
+          if [ -f "jest.setup.js" ]; then  # Adjust the filename as necessary
+            rm jest.setup.js
+            echo "jest.setup.js has been deleted."
+          else
+            echo "jest.setup.js does not exist."
+          fi
