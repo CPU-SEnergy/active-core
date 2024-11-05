@@ -20,10 +20,8 @@ jobs:
           echo "Deleting __test__ directory and Jest configuration files..."
           rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts
           
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: delete test files
-          title: Delete Test Files
-          body: run by actions
-          branch: cleanup-branch
+      - name: create pull request
+        run: 
+          gh pr create -B base_branch -H branch_to_merge --title 'Merge branch_to_merge into base_branch' --body 'Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
