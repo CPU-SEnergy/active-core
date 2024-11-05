@@ -21,6 +21,7 @@ jobs:
           rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts # Add any additional Jest files here
           
       - name: Create a pull request
+        id: create_pr
         uses: peter-evans/create-pull-request@v3
         with:
           title: "Cleanup: Remove __test__ and Jest files"
@@ -28,3 +29,18 @@ jobs:
           base: staging
           branch: cleanup-jest-files
           path: .
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "[create-pull-request] automated change"
+          committer: "GitHub <noreply@github.com>"
+          author: "ClydeTeia <ClydeTeia@users.noreply.github.com>"
+          signoff: false
+          delete-branch: true
+          draft: false
+
+      - name: Merge pull request
+        if: steps.create_pr.outputs.pull-request-url != ''
+        uses: peter-evans/merge-pull-request@v3
+        with:
+          pull-request: ${{ steps.create_pr.outputs.pull-request-url }}
+          merge-method: merge
+          token: ${{ secrets.GITHUB_TOKEN }}
