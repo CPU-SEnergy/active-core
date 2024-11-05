@@ -4,7 +4,7 @@ name: Run Testing
 on:
   pull_request:
     branches:
-      - staging
+      - testing
 jobs:
   Run-Test:
     name: Run Testing
