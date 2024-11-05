@@ -42,8 +42,8 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add __test__ jest.config.ts jest.setup.ts
-          git commit -m "Remove __test__ folder and Jest config/setup files"
+          git add test jest.config.ts jest.setup.ts
+          git commit -m "Remove test folder and Jest config/setup files"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
