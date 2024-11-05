@@ -1,0 +1,28 @@
+name: Cleanup Jest Files
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  delete-test-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Delete __test__ folder and Jest files
+        run: |
+          echo "Deleting __test__ directory and Jest configuration files..."
+          rm -rf __test__ jest.config.ts jest.setup.js jest.setup.ts # Add any additional Jest files here
+          
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Cleanup: Remove __test__ and Jest files" || echo "No changes to commit"
+          git push origin HEAD:refs/heads/$GITHUB_REF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
