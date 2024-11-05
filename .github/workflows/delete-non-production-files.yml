@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - staging
-      - development
 
 jobs:
   delete-test-files:
