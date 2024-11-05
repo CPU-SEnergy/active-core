@@ -27,13 +27,15 @@ jobs:
           if [ -f "jest.config.ts" ]; then
             rm jest.config.ts
             echo "jest.config.ts has been deleted."
+            echo "jest.config.ts" >> deleted_files.txt
           else
             echo "jest.config.ts does not exist."
           fi
 
-          if [ -f "jest.setup.ts" ]; then  # Adjust the filename as necessary
+          if [ -f "jest.setup.ts" ]; then
             rm jest.setup.ts
             echo "jest.setup.ts has been deleted."
+            echo "jest.setup.ts" >> deleted_files.txt
           else
             echo "jest.setup.ts does not exist."
           fi
@@ -42,8 +44,14 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add test jest.config.ts jest.setup.ts
-          git commit -m "Remove test folder and Jest config/setup files"
-          git push
+          
+          # Check if any files were deleted and add them to the commit
+          if [ -f deleted_files.txt ]; then
+            xargs git add < deleted_files.txt
+            git commit -m "Remove __test__ folder and Jest config/setup files"
+            git push
+          else
+            echo "No files to commit."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
