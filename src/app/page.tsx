@@ -1,10 +1,26 @@
 import Navbar from '@/components/ui/navbar'
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { clientConfig, serverConfig } from "@/lib/config";
+import HomePage from "./HomePage";
 
+export default async function Home() {
+  const tokens = await getTokens(cookies(), {
+    apiKey: clientConfig.apiKey,
+    cookieName: serverConfig.cookieName,
+    cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+    serviceAccount: serverConfig.serviceAccount,
+  });
 
-export default function Page() {
+  if (!tokens) {
+    notFound();
+  }
   return (
-    <div>     
-        <Navbar />
-    </div>
+  <>
+    <Navbar />
+    <HomePage email={tokens?.decodedToken.email} />
+  </>
   )
+
 }
