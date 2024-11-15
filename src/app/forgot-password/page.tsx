@@ -4,6 +4,11 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { app } from "@/lib/firebaseClient";
+import { z } from "zod";
+
+const emailSchema = z.object({
+  email: z.string().email("Invalid email format").min(1, "Email is required"),
+});
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -15,6 +20,14 @@ export default function ForgotPassword() {
     setError("");
     setMessage("");
 
+    // Validate email input using Zod
+    const result = emailSchema.safeParse({ email });
+
+    if (!result.success) {
+      setError(result.error.errors[0].message);
+      return;
+    }
+
     try {
       await sendPasswordResetEmail(getAuth(app), email);
       setMessage("Password reset email sent! Check your inbox.");
@@ -24,11 +37,11 @@ export default function ForgotPassword() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-cover bg-center" style={{ backgroundImage: "url('/pictures/sportsfitness.jpg')" }}>
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
           <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-            Reset thy secret word!
+            Reset account password
           </h1>
           <form
             onSubmit={handleSubmit}
@@ -40,7 +53,7 @@ export default function ForgotPassword() {
                 htmlFor="email"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Your email
+                Email
               </label>
               <input
                 type="email"
