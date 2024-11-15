@@ -5,16 +5,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from "@/lib/firebaseClient";
+import { z, ZodError } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState<ZodError | null>(null);
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
+    setValidationErrors(null);
+
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setValidationErrors(validation.error);
+      return;
+    }
 
     try {
       const credential = await signInWithEmailAndPassword(
@@ -36,24 +50,24 @@ export default function Login() {
     }
   }
 
+  const getValidationError = (field: string) => {
+    return validationErrors?.errors.find((err) => err.path.includes(field))?.message;
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-cover bg-center" style={{ backgroundImage: "url('/pictures/sportsfitness.jpg')" }}>
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
           <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-            Speak thy secret word!
+            Login to your account
           </h1>
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4 md:space-y-6"
-            action="#"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6" action="#">
             <div>
               <label
                 htmlFor="email"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Your email
+                Email
               </label>
               <input
                 type="email"
@@ -65,6 +79,9 @@ export default function Login() {
                 placeholder="name@company.com"
                 required
               />
+              {getValidationError("email") && (
+                <div className="text-red-500 text-sm">{getValidationError("email")}</div>
+              )}
             </div>
             <div>
               <label
@@ -83,6 +100,9 @@ export default function Login() {
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 required
               />
+              {getValidationError("password") && (
+                <div className="text-red-500 text-sm">{getValidationError("password")}</div>
+              )}
             </div>
             {error && (
               <div
@@ -96,10 +116,10 @@ export default function Login() {
               type="submit"
               className="w-full text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-primary-800"
             >
-              Enter
+              Login
             </button>
-            <Link 
-              href="/forgot-password" 
+            <Link
+              href="/forgot-password"
               id="reset"
               className="font-medium text-gray-600 hover:underline dark:text-gray-500"
             >
