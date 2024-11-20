@@ -23,7 +23,7 @@ export default function Navbar() {
               <Link href="/apparels" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Apparels</Link>
             </div>
             <Button variant="ghost" size="lg" className="text-gray-300 hover:bg-gray-800 hover:text-white" asChild>
-              <Link href="/profile">
+              <Link href="/user-profile">
                 <User className="h-6 w-6 md:mr-2" />
                 <span className="hidden md:inline text-base">Profile</span>
               </Link>
