@@ -1,11 +1,17 @@
-'use client'
+"use client"
 
 import * as React from 'react'
 import Link from 'next/link'
-import { LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import LogoutButton from './LogoutButton'
+import { useAuth } from '@/auth/AuthContext'
 
 export default function Navbar() {
+  const { user } = useAuth()
+  console.log(user)
+
+  if (!user) return
+
   return (
     <nav className="bg-black">
       <div className="w-full px-4">
@@ -22,16 +28,16 @@ export default function Navbar() {
               <Link href="/classes" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Classes</Link>
               <Link href="/apparels" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Apparels</Link>
             </div>
-            <Button variant="ghost" size="lg" className="text-gray-300 hover:bg-gray-800 hover:text-white" asChild>
-              <Link href="/user-profile">
-                <User className="h-6 w-6 md:mr-2" />
-                <span className="hidden md:inline text-base">Profile</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" size="lg" className="text-gray-300 hover:bg-gray-800 hover:text-white">
-              <LogOut className="h-6 w-6 md:mr-2" />
-              <span className="hidden md:inline text-base">Log out</span>
-            </Button>
+            {!user ? (
+              <Button variant="ghost" size="lg" className="text-gray-300 hover:bg-gray-800 hover:text-white" asChild>
+                <Link href="/user-profile">
+                  <span className="hidden md:inline text-base">Profile</span>
+                </Link>
+              </Button>
+            ) : (
+              <LogoutButton />
+            )}
+
           </div>
         </div>
       </div>

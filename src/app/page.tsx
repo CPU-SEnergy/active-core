@@ -1,4 +1,3 @@
-import Navbar from '@/components/navbar'
 import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -17,10 +16,9 @@ export default async function Home() {
     notFound();
   }
   return (
-  <>
-    <Navbar />
-    <HomePage email={tokens?.decodedToken.email} />
-  </>
+    <>
+      <HomePage email={tokens?.decodedToken.email} />
+    </>
   )
 
 }

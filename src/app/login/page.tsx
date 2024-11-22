@@ -12,29 +12,30 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
-import Navbar from "@/components/navbar";
-
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const [validationErrors, setValidationErrors] = useState<ZodError | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setLoading(true);
     setError("");
     setValidationErrors(null);
 
     const validation = loginSchema.safeParse({ email, password });
     if (!validation.success) {
       setValidationErrors(validation.error);
+      setLoading(false);
       return;
     }
 
@@ -55,6 +56,8 @@ export default function Login() {
       router.push("/");
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -63,69 +66,124 @@ export default function Login() {
   };
 
   return (
-<>
-  <Navbar />
-    <div className="min-h-screen w-full flex items-center justify-center p-4"
-    style={{background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)"}}>
-      <Card className="w-full max-w-7xl h-auto flex overflow-hidden rounded-3xl shadow-xl ">
-        <CardContent className="p-8 flex-1">
-          <div className="w-full max-w-sm mx-auto space-y-6">
-            <div className="space-y-2 text-center">
-              <h1 className="text-4xl font-bold tracking-tighter mb-24 mt-10">Login</h1>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2 mb-8">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" placeholder="m@example.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                {getValidationError("email") && (
-                <div className="text-red-500 text-sm">{getValidationError("email")}</div>
-              )}
-              </div>
-              <div className="space-y-2 mb-10">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" placeholder="••••••••" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                {getValidationError("password") && (
-                <div className="text-red-500 text-sm">{getValidationError("password")}</div>
-              )}
-              </div>
-              {error && (
-                <div className="text-red-500 text-sm">{error}</div>
-              )}
-              <Button className="w-full bg-red-500 hover:bg-red-600 mt-4 py-6" type="submit" onClick={handleSubmit}>
-                Sign In
-              </Button>
-            </div>
-            <div className="flex items-center justify-between mt-30 mb-30">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
-                <label
-                  htmlFor="remember"
-                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    <>
+      <div
+        className="min-h-screen w-full flex items-center justify-center p-4"
+        style={{
+          background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
+        }}
+      >
+        <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
+          <CardContent className="flex-1 p-6">
+            <div className="w-full max-w-sm mx-auto space-y-6">
+              <h1 className="text-center text-2xl md:text-4xl font-bold tracking-tighter md:my-6">
+                Login
+              </h1>
+              <div className="space-y-4">
+                <div className="space-y-2 mb-6 md:mb-8">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    placeholder="Enter your email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  {getValidationError("email") && (
+                    <div className="text-red-500 text-sm">
+                      {getValidationError("email")}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2 mb-8 md:mb-10">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    placeholder="••••••••"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {getValidationError("password") && (
+                    <div className="text-red-500 text-sm">
+                      {getValidationError("password")}
+                    </div>
+                  )}
+                </div>
+                {error && <div className="text-red-500 text-sm">{error}</div>}
+                <Button
+                  className={`w-full py-3 md:py-6 ${loading ? "opacity-50" : ""}`}
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={loading}
                 >
-                  Remember me
-                </label>
+                  {loading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8H4z"
+                        ></path>
+                      </svg>
+                      <span>Signing In...</span>
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
               </div>
-              <Link href="/forgot-password"
-              id="reset"
-              className="font-medium text-gray-600 hover:underline dark:text-gray-500">
-                Forgot password?
-              </Link>
+              <div className="flex items-center justify-between mt-6">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="remember" />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Remember me
+                  </label>
+                </div>
+                <Link
+                  href="/forgot-password"
+                  id="reset"
+                  className="font-medium text-gray-600 hover:underline dark:text-gray-500"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+                Don&apos;t have an account?{" "}
+                <Link className="text-blue-500 hover:text-blue-600" href="/register">
+                  Sign up
+                </Link>
+              </p>
             </div>
-            <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
-              Don&apos;t have an account?{" "}
-              <Link className="text-blue-500 hover:text-blue-600" href="/register">
-                Sign up
-              </Link>
-            </p>
+          </CardContent>
+          <div className="relative hidden md:flex bg-zinc-950 w-full md:w-1/2">
+            <Image
+              src="/pictures/loginphoto.jpg"
+              alt="Login Illustration"
+              width={500}
+              height={500}
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/25 flex items-center justify-center p-6"></div>
           </div>
-        </CardContent>
-        <div className="relative hidden md:block flex-1 bg-zinc-950">
-          <Image src='/pictures/loginphoto.jpg' alt="Description" layout="fill" objectFit="cover" />
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-6">
-          </div>
-        </div>
-      </Card>
-    </div>
+        </Card>
+      </div>
     </>
   );
 }
