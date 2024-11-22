@@ -6,6 +6,7 @@ import { cookies, headers } from 'next/headers';
 import { serverConfig, clientConfig } from '@/lib/config'; // Make sure to import clientConfig
 import { AuthProvider } from '@/auth/AuthProvider';
 import { toUser } from '@/utils/helper-functions/user';
+import Navbar from "@/components/navbar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,7 +45,9 @@ export default async function RootLayout({
           fontFamily: 'var(--font-geist-sans), sans-serif',
         }}
       >
-        <AuthProvider user={user}>{children}</AuthProvider>
+        <AuthProvider user={user}>
+          <Navbar />
+          {children}</AuthProvider>
       </body>
     </html>
   );
