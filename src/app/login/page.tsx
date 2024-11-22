@@ -67,14 +67,14 @@ export default function Login() {
   <Navbar />
     <div className="min-h-screen w-full flex items-center justify-center p-4"
     style={{background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)"}}>
-      <Card className="w-full max-w-7xl h-auto  flex overflow-hidden rounded-2xl shadow-xl">
+      <Card className="w-full max-w-7xl h-auto flex overflow-hidden rounded-3xl shadow-xl ">
         <CardContent className="p-8 flex-1">
           <div className="w-full max-w-sm mx-auto space-y-6">
             <div className="space-y-2 text-center">
-              <h1 className="text-4xl font-bold tracking-tighter mb-24">Login</h1>
+              <h1 className="text-4xl font-bold tracking-tighter mb-24 mt-10">Login</h1>
             </div>
             <div className="space-y-4">
-              <div className="space-y-2 mb-5">
+              <div className="space-y-2 mb-8">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" placeholder="m@example.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 {getValidationError("email") && (
@@ -111,7 +111,7 @@ export default function Login() {
                 Forgot password?
               </Link>
             </div>
-            <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 ">
+            <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
               Don&apos;t have an account?{" "}
               <Link className="text-blue-500 hover:text-blue-600" href="/register">
                 Sign up
