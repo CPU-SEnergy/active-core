@@ -1,0 +1,38 @@
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { UserData } from "@/lib/types/user";
+import { FieldValue } from "firebase-admin/firestore";
+
+export async function POST(request: Request) {
+  try {
+    const data: UserData = await request.json();
+    const { email, uid, role = "customer" } = data;
+
+    const adminFirestore = getFirebaseAdminApp().firestore();
+
+    const userRef = adminFirestore.collection("users").doc();
+
+    await userRef.set({
+      uid,
+      email,
+      role,
+      created_at: FieldValue.serverTimestamp(),
+    });
+
+    console.log("User added to Firestore");
+
+    return new Response(
+      JSON.stringify({ message: "User created successfully" }),
+      {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error storing user in Firestore:", error);
+
+    return new Response(JSON.stringify({ message: "Failed to create user" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
