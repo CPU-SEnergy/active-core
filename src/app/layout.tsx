@@ -35,6 +35,7 @@ export default async function RootLayout({
     apiKey: clientConfig.apiKey,
     headers: headers(),
   });
+  /* eslint-disable @typescript-eslint/no-unused-vars */
 
   const user = tokens ? toUser(tokens) : null;
 
