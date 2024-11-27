@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { getAuth, isSignInWithEmailLink, signInWithEmailLink, sendEmailVerification } from "firebase/auth";
+import { getAuth, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/firebaseClient";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Form,
@@ -20,44 +19,34 @@ import {
 import { Input } from "@/components/ui/input"
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
 })
 
 export default function FinishSignup() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
     },
   })
 
   const router = useRouter();
   const auth = getAuth(app);
-  const [email, setEmail] = useState("");
-  const [notice, setNotice] = useState("");
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (isSignInWithEmailLink(auth, window.location.href)) {
-      signInWithEmailLink(auth, email, window.location.href)
+      signInWithEmailLink(auth, values.email, window.location.href)
         .then(() => {
           router.push("/profile");
         })
-        .catch((error) => {
-          setNotice(`An error occurred during sign-in: ${error.message}`);
+        .catch(() => {
+          // setNotice(`An error occurred during sign-in: ${error.message}`);
         });
     } else {
-      setNotice("Invalid email link.");
+      // setNotice("Invalid email link.");
     }
     console.log(values)
   }
-
-  const callSignInWithEmailLink = (e: React.FormEvent) => {
-    e.preventDefault();
-
-
-  };
 
   return (
     <main className="w-full min-h-screen flex items-center justify-center">
@@ -65,15 +54,15 @@ export default function FinishSignup() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
-            name="username"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input placeholder="shadcn" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your public display name.
+                  We&apos;ll send you a link to finish signing up
                 </FormDescription>
                 <FormMessage />
               </FormItem>
