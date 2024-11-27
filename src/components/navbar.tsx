@@ -4,7 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import LogoutButton from './LogoutButton'
-import { useAuth } from '@/auth/AuthContext'
+import { useAuth } from '@/auth/AuthProvider'
 
 export default function Navbar() {
   const { user } = useAuth()

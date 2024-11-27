@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
-import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
+import {
+  authMiddleware,
+  redirectToHome,
+  redirectToLogin,
+} from "next-firebase-auth-edge";
 import { clientConfig, serverConfig } from "@/lib/config";
 
-const PUBLIC_PATHS = ['/register', '/login'];
+const PUBLIC_PATHS = ["/register", "/login"];
 
 export async function middleware(request: NextRequest) {
   return authMiddleware(request, {
@@ -14,39 +18,40 @@ export async function middleware(request: NextRequest) {
     cookieSignatureKeys: serverConfig.cookieSignatureKeys,
     cookieSerializeOptions: serverConfig.cookieSerializeOptions,
     serviceAccount: serverConfig.serviceAccount,
-    handleValidToken: async ({token, decodedToken}, headers) => {
+    handleValidToken: async ({ token, decodedToken }, headers) => {
       if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
         return redirectToHome(request);
       }
 
       return NextResponse.next({
         request: {
-          headers
-        }
+          headers,
+        },
       });
     },
     handleInvalidToken: async (reason) => {
-      console.info('Missing or malformed credentials', {reason});
+      console.info("Missing or malformed credentials", { reason });
 
       return redirectToLogin(request, {
-        path: '/login',
-        publicPaths: PUBLIC_PATHS
+        path: "/auth/login",
+        publicPaths: PUBLIC_PATHS,
       });
     },
     handleError: async (error) => {
-      console.error('Unhandled authentication error', {error});
-      
+      console.error("Unhandled authentication error", { error });
+
       return redirectToLogin(request, {
-        path: '/login',
-        publicPaths: PUBLIC_PATHS
+        path: "/auth/login",
+        publicPaths: PUBLIC_PATHS,
       });
-    }
+    },
   });
 }
 
 export const config = {
   matcher: [
     "/",
+    "/user-profile",
     // "/((?!_next|api|.*\\.).*)",
     "/api/login",
     "/api/logout",

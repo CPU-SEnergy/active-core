@@ -14,7 +14,7 @@ export default function LogoutButton() {
 
     await fetch("/api/logout");
 
-    router.push("/login");
+    router.push("/auth/login");
   }
 
   return (
