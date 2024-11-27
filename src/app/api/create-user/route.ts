@@ -5,7 +5,15 @@ import { FieldValue } from "firebase-admin/firestore";
 export async function POST(request: Request) {
   try {
     const data: UserData = await request.json();
-    const { email, uid, role = "customer" } = data;
+    const {
+      email,
+      uid,
+      role = "customer",
+      firstName,
+      lastName,
+      dob,
+      sex,
+    } = data;
 
     const adminFirestore = getFirebaseAdminApp().firestore();
 
@@ -15,10 +23,14 @@ export async function POST(request: Request) {
       uid,
       email,
       role,
-      created_at: FieldValue.serverTimestamp(),
+      firstName,
+      lastName,
+      dob,
+      sex,
+      createdAt: FieldValue.serverTimestamp(),
     });
 
-    console.log("User added to Firestore");
+    console.log("User added to Firestore" + firstName);
 
     return new Response(
       JSON.stringify({ message: "User created successfully" }),

@@ -54,7 +54,7 @@ export default function Login() {
       });
 
       router.refresh();
-      // router.push("/");
+      router.push("/");
     } catch (e) {
       setError((e as Error).message);
     } finally {

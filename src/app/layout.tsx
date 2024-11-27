@@ -7,6 +7,7 @@ import { serverConfig, clientConfig } from '@/lib/config'; // Make sure to impor
 import { AuthProvider } from '@/auth/AuthProvider';
 import { toUser } from '@/utils/helper-functions/user';
 import Navbar from "@/components/navbar";
+import { Toaster } from "@/components/ui/toaster"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -45,9 +46,11 @@ export default async function RootLayout({
           fontFamily: 'var(--font-geist-sans), sans-serif',
         }}
       >
-        <AuthProvider user={user}>
+        <AuthProvider>
           <Navbar />
-          {children}</AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,8 +4,8 @@ export interface UserData {
   role: string;
   sex?: string;
   dob?: Date | string;
-  updated_at?: Date | string;
-  created_at: Date | string;
-  last_name?: string;
-  first_name?: string;
+  updatedAt?: Date | string;
+  createdAt: Date | string;
+  lastName?: string;
+  firstName?: string;
 }
