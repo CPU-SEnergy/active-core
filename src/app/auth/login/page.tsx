@@ -53,7 +53,8 @@ export default function Login() {
         },
       });
 
-      router.push("/");
+      router.refresh();
+      // router.push("/");
     } catch (e) {
       setError((e as Error).message);
     } finally {
