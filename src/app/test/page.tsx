@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/AuthProvider';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
