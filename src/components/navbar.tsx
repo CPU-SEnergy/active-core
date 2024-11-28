@@ -8,7 +8,6 @@ import { useAuth } from '@/auth/AuthProvider'
 
 export default function Navbar() {
   const { user } = useAuth()
-  console.log(user)
 
   if (!user) return
 

@@ -1,23 +1,18 @@
 "use client";
 
-import {
-  getAuth,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
-  updatePassword,
-} from "firebase/auth";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { app } from "@/lib/firebaseClient";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { InputText } from "@/components/InputText";
-import { useRegisterForm } from "@/hooks/useRegisterForm";
 import { useToast } from "@/hooks/use-toast";
-import { createUserInDatabase } from "@/utils/crud/createUser";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRegisterForm } from "@/hooks/useRegisterForm";
+import { createFirebaseUser, sendVerificationEmail } from "@/utils/firebase/firebaseAuthOperations";
+import { createUserInDatabase } from "@/utils/crud/createUser";
 
-export default function FinishSignup() {
+export default function RegisterPageClient() {
   const { toast } = useToast();
+  const router = useRouter();
   const {
     step,
     formState,
@@ -27,15 +22,6 @@ export default function FinishSignup() {
     handleNextStep,
     handleSignUp,
   } = useRegisterForm();
-
-  const router = useRouter();
-  const auth = getAuth(app);
-
-  useEffect(() => {
-    if (!isSignInWithEmailLink(auth, window.location.href)) {
-      router.push("/auth/expired-link");
-    }
-  }, [auth, router]);
 
   const handleSignUpSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -52,36 +38,28 @@ export default function FinishSignup() {
     const { formState: formResult } = result;
 
     try {
-      const userCredential = await signInWithEmailLink(auth, formResult.email, window.location.href)
-      await updatePassword(userCredential.user, formResult.password);
+      const userCredential = await createFirebaseUser(formResult.email, formResult.password);
       await createUserInDatabase({
         uid: userCredential.user.uid,
         email: formResult.email,
-        firstName: formState.firstName,
+        firstName: formResult.firstName,
         lastName: formResult.lastName,
         dob: formResult.dob,
         sex: formResult.sex
       });
 
-      const idToken = await userCredential.user.getIdToken();
-      await fetch("/api/login", {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
+      await sendVerificationEmail(userCredential.user)
       toast({
-        title: "Sign Up Successful",
-        description: "You will be redirected shortly",
+        title: "Verification email sent!",
+        description: "Please check your email to verify your account.",
       });
 
-      router.refresh();
+      router.refresh()
       router.push("/auth/login");
     } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred";
       toast({
         title: "Error",
-        description: errorMessage,
+        description: e instanceof Error ? e.message : "An unexpected error occurred",
         variant: "destructive",
       });
     }
