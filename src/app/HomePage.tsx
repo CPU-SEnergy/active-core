@@ -1,5 +1,3 @@
-import LogoutButton from "@/components/LogoutButton";
-
 interface HomePageProps {
   email?: string;
 }
@@ -12,7 +10,6 @@ export default function HomePage({ email }: HomePageProps) {
       <p className="mb-8">
         Only <strong>{email}</strong> holds the magic key to this kingdom!
       </p>
-      <LogoutButton />
     </main>
   );
 }
