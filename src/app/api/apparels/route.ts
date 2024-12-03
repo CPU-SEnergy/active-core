@@ -6,8 +6,26 @@ const db = getFirestore(app)
 
 export async function GET(req: Request) {
   try {
-    const apparelsCollection = collection(db, 'products', 'apparels');
-    const q = query(apparelsCollection, where('price', '<', 50));
+    const { searchParams } = new URL(req.url);
+    const maxPrice = searchParams.get("maxPrice");
+    const minPrice = searchParams.get("minPrice");
+    const name = searchParams.get("name");
+
+    const apparelsCollection = collection(db, "products", "apparels");
+
+    let q = query(apparelsCollection);
+
+    if (maxPrice) {
+      q = query(q, where("price", "<=", parseFloat(maxPrice)));
+    };
+
+    if (minPrice) {
+      q = query(q, where("price", ">=", parseFloat(minPrice)));
+    }
+
+    if (name) {
+      q = query(q, where("name", "==", name));
+    }
 
     const querySnapshot = await getDocs(q);
 
