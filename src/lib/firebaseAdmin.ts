@@ -1,12 +1,19 @@
+import "server-only";
+
 import admin from "firebase-admin";
 import { serverConfig } from "@/lib/config";
 
 const initializeApp = (): admin.app.App => {
   if (!serverConfig || !serverConfig.serviceAccount) {
-    throw new Error("Firebase Admin serverConfig or serviceAccount is missing or improperly configured.");
+    throw new Error(
+      "Firebase Admin serverConfig or serviceAccount is missing or improperly configured."
+    );
   }
 
-  if (typeof serverConfig.serviceAccount !== "object" || Object.keys(serverConfig.serviceAccount).length === 0) {
+  if (
+    typeof serverConfig.serviceAccount !== "object" ||
+    Object.keys(serverConfig.serviceAccount).length === 0
+  ) {
     throw new Error("Invalid serviceAccount configuration for Firebase Admin.");
   }
 
