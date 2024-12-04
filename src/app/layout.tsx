@@ -5,7 +5,7 @@ import { getTokens } from 'next-firebase-auth-edge';
 import { cookies, headers } from 'next/headers';
 import { serverConfig, clientConfig } from '@/lib/config'; // Make sure to import clientConfig
 import { AuthProvider } from '@/auth/AuthProvider';
-import { toUser } from '@/utils/helper-functions/user';
+import { toUser } from '@/utils/helpers/user';
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/toaster"
 
