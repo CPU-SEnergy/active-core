@@ -37,8 +37,6 @@ export default function Navbar() {
     );
   }
 
-  if (!user) return null;
-
   return (
     <nav className="bg-black">
       <div className="w-full px-4">
