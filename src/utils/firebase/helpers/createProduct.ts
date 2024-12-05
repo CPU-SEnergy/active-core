@@ -1,6 +1,4 @@
-import { revalidateTag } from "next/cache";
-
-export const createProduct = async (data: Product, fileUrl: string) => {
+export const createProduct = async (data: ProductFormData, fileUrl: string) => {
   try {
     const response = await fetch("/api/create-product", {
       method: "POST",
@@ -19,7 +17,6 @@ export const createProduct = async (data: Product, fileUrl: string) => {
       throw new Error("Failed to create product");
     }
 
-    revalidateTag("products");
     return response;
   } catch (error) {
     console.error(error);
