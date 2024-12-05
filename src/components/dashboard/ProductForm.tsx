@@ -1,40 +1,40 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Upload, Check, AlertCircle, X } from 'lucide-react'
-import { useDropzone } from "react-dropzone"
-import { useToast } from "@/hooks/use-toast"
+import * as React from "react";
+import { Upload, Check, AlertCircle, X } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { useToast } from "@/hooks/use-toast";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { useForm } from "react-hook-form"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { uploadFile } from "@/utils/firebase/helpers/uploadFile"
-import { createProduct } from "@/utils/firebase/helpers/createProduct"
-import { ProductType } from "@/lib/types/product"
-import { formatEnumText } from "@/utils/helpers/formatEnumText"
-import { DisplaySelectFieldTypes } from "./DisplaySelectFieldTypes"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { uploadFile } from "@/utils/firebase/helpers/uploadFile";
+import { createProduct } from "@/utils/firebase/helpers/createProduct";
+import { ProductType } from "@/lib/types/product";
+import { formatEnumText } from "@/utils/helpers/formatEnumText";
+import { DisplaySelectFieldTypes } from "./DisplaySelectFieldTypes";
+import { useRouter } from "next/navigation";
 
 export default function ProductForm() {
-  const { toast } = useToast()
-  const router = useRouter()
+  const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<ProductFormData>({
     defaultValues: {
       name: "",
@@ -43,25 +43,26 @@ export default function ProductForm() {
       description: "",
       file: null,
     },
-  })
+  });
 
-  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null)
+  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'image/png': ['.png'],
-      'image/jpeg': ['.jpg', '.jpeg']
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/webp": [".webp"],
     },
     maxFiles: 1,
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0]
-        form.setValue('file', file)
-        setUploadedFile(file)
+        const file = acceptedFiles[0];
+        form.setValue("file", file);
+        setUploadedFile(file);
         toast({
           title: "File uploaded",
-          description: `${file.name} uploaded successfully.`
-        })
+          description: `${file.name} uploaded successfully.`,
+        });
       }
     },
     onDropRejected: (fileRejections) => {
@@ -69,29 +70,35 @@ export default function ProductForm() {
         toast({
           variant: "destructive",
           title: "File upload error",
-          description: `${file.name}: ${errors.map(e => e.message).join(', ')}`
-        })
-      })
-    }
-  })
+          description: `${file.name}: ${errors.map((e) => e.message).join(", ")}`,
+        });
+      });
+    },
+  });
 
   const clearFile = (show: boolean | undefined = true) => {
-    show = show ?? false
-    form.setValue('file', null)
-    setUploadedFile(null)
+    show = show ?? false;
+    form.setValue("file", null);
+    setUploadedFile(null);
 
     if (show)
       toast({
         title: "File removed",
-        description: "The uploaded file has been cleared."
-      })
+        description: "The uploaded file has been cleared.",
+      });
 
-    return
-  }
+    return;
+  };
 
   const onSubmit = async (data: ProductFormData) => {
-    console.log(data)
-    if (!data.description || !data.name || !data.price || !data.product_type || !data.file) {
+    console.log(data);
+    if (
+      !data.description ||
+      !data.name ||
+      !data.price ||
+      !data.product_type ||
+      !data.file
+    ) {
       toast({
         variant: "destructive",
         title: "Fill up the form",
@@ -109,16 +116,17 @@ export default function ProductForm() {
         title: "Form submitted",
         description: `Product details saved with file: ${data.file.name}`,
       });
-      clearFile(false)
+      clearFile(false);
       form.reset();
 
       // temp fix
-      router.refresh()
+      router.refresh();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Form submission error",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
       });
     }
   };
@@ -145,10 +153,7 @@ export default function ProductForm() {
                         <FormItem>
                           <FormLabel>Name</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="Enter item name"
-                              {...field}
-                            />
+                            <Input placeholder="Enter item name" {...field} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -164,7 +169,9 @@ export default function ProductForm() {
                               placeholder="Enter item price"
                               {...field}
                               value={field.value || ""}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(parseFloat(e.target.value))
+                              }
                             />
                           </FormControl>
                         </FormItem>
@@ -176,7 +183,10 @@ export default function ProductForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Type of Product</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select product type" />
@@ -193,7 +203,10 @@ export default function ProductForm() {
                         </FormItem>
                       )}
                     />
-                    <DisplaySelectFieldTypes form={form} type={form.watch("product_type")} />
+                    <DisplaySelectFieldTypes
+                      form={form}
+                      type={form.watch("product_type")}
+                    />
                     <FormField
                       control={form.control}
                       name="description"
@@ -216,8 +229,11 @@ export default function ProductForm() {
                   <h2 className="text-lg font-semibold mb-4">Upload file</h2>
                   <div
                     {...getRootProps()}
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragActive ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
-                      }`}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      isDragActive
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:bg-muted/50"
+                    }`}
                   >
                     <input {...getInputProps()} />
                     {uploadedFile ? (
@@ -257,7 +273,11 @@ export default function ProductForm() {
                 </div>
               </div>
               <div className="flex justify-end gap-4">
-                <Button variant="outline" type="button" onClick={() => form.reset()}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => form.reset()}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">Create</Button>
@@ -267,6 +287,5 @@ export default function ProductForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
