@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import fs from "fs/promises";
 import path from "path";
@@ -8,10 +8,10 @@ import os from "os";
 
 const storage = getStorage(getFirebaseAdminApp());
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("picture_link") as File;
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });

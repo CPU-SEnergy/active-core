@@ -1,11 +1,35 @@
 export enum ProductType {
-  Classes = "classes",
-  Apparels = "apparels",
-  FoodsDrinks = "foods_drinks",
+  APPARELS = "apparels",
+  FOODS_DRINKS = "foods_drinks",
+  CLASSES = "classes",
+  COACHES = "coaches",
 }
 
-export const productCollectionMap: { [key in ProductType]: string } = {
-  [ProductType.Classes]: "class_id",
-  [ProductType.Apparels]: "apparels_id",
-  [ProductType.FoodsDrinks]: "foods_drinks_id",
-};
+export enum ApparelType {
+  T_SHIRTS = "t_shirt",
+  SHORTS = "shorts",
+  GLOVES = "gloves",
+  TOWEL = "towel",
+}
+
+export enum ClassType {
+  YOGA = "yoga",
+  FITNESS = "fitness",
+  BOXING = "boxing",
+}
+
+export enum CoachType {
+  SIR = "sir",
+  MAAM = "maam",
+  MISS = "miss",
+}
+
+export const productCollectionMap: Record<ProductType, string> = Object.values(
+  ProductType
+).reduce(
+  (map, type) => {
+    map[type] = type;
+    return map;
+  },
+  {} as Record<ProductType, string>
+);
