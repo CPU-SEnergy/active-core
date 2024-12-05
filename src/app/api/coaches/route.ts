@@ -1,23 +1,15 @@
 import { app } from '@/lib/firebaseClient';
 import { NextResponse } from 'next/server';
-import { getFirestore, query, where, getDocs, collection } from 'firebase/firestore';
+import { getFirestore, getDocs, collection } from 'firebase/firestore';
 
 const db = getFirestore(app);
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const name = searchParams.get('name');
-
     const coachCollection = collection(db, "coach");
 
-    let q = query(coachCollection);
 
-    if (name) {
-      q = query(q, where("coach_name", "==", name))
-    }
-
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(coachCollection);
 
     const coaches = querySnapshot.docs.map((doc) => ({
       id: doc.id,
