@@ -1,21 +1,11 @@
-export const uploadFile = async (file: ProductFormData) => {
-  if (
-    !file.file ||
-    !file.name ||
-    !file.price ||
-    !file.type ||
-    !file.description
-  ) {
+export const uploadFile = async (data: ProductFormData) => {
+  if (!data.file) {
     throw new Error("No file provided");
   }
 
   try {
     const formData = new FormData();
-    formData.append("file", file.file);
-    formData.append("name", file.name);
-    formData.append("price", file.price);
-    formData.append("type", file.type);
-    formData.append("description", file.description);
+    formData.append("picture_link", data.file);
 
     const response = await fetch("/api/upload/image", {
       method: "POST",

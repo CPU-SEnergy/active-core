@@ -28,14 +28,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { uploadFile } from "@/utils/firebase/helpers/uploadFile"
 import { createProduct } from "@/utils/firebase/helpers/createProduct"
 import { ProductType } from "@/lib/types/product"
+import { formatEnumText } from "@/utils/helpers/formatEnumText"
+import { DisplaySelectFieldTypes } from "./DisplaySelectFieldTypes"
+import { useRouter } from "next/navigation"
 
 export default function ProductForm() {
   const { toast } = useToast()
+  const router = useRouter()
   const form = useForm<ProductFormData>({
     defaultValues: {
       name: "",
       price: "",
-      type: "apparels",
+      product_type: ProductType.APPARELS,
       description: "",
       file: null,
     },
@@ -71,27 +75,32 @@ export default function ProductForm() {
     }
   })
 
-  const clearFile = () => {
+  const clearFile = (show: boolean | undefined = true) => {
+    show = show ?? false
     form.setValue('file', null)
     setUploadedFile(null)
-    toast({
-      title: "File removed",
-      description: "The uploaded file has been cleared."
-    })
+
+    if (show)
+      toast({
+        title: "File removed",
+        description: "The uploaded file has been cleared."
+      })
+
+    return
   }
 
   const onSubmit = async (data: ProductFormData) => {
-    if (!data.description || !data.name || !data.price || !data.type || !data.file) {
+    console.log(data)
+    if (!data.description || !data.name || !data.price || !data.product_type || !data.file) {
       toast({
         variant: "destructive",
-        title: "Form error",
+        title: "Fill up the form",
         description: "Please fill all the required fields.",
       });
       return;
     }
 
     try {
-
       const fileUrl = await uploadFile(data);
 
       await createProduct(data, fileUrl);
@@ -100,8 +109,11 @@ export default function ProductForm() {
         title: "Form submitted",
         description: `Product details saved with file: ${data.file.name}`,
       });
-
+      clearFile(false)
       form.reset();
+
+      // temp fix
+      router.refresh()
     } catch (error) {
       toast({
         variant: "destructive",
@@ -151,6 +163,8 @@ export default function ProductForm() {
                             <Input
                               placeholder="Enter item price"
                               {...field}
+                              value={field.value || ""}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
                             />
                           </FormControl>
                         </FormItem>
@@ -158,7 +172,7 @@ export default function ProductForm() {
                     />
                     <FormField
                       control={form.control}
-                      name="type"
+                      name="product_type"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Type of Product</FormLabel>
@@ -169,14 +183,17 @@ export default function ProductForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value={ProductType.Apparels}>Apparels</SelectItem>
-                              <SelectItem value={ProductType.Classes}>Classes</SelectItem>
-                              <SelectItem value={ProductType.FoodsDrinks}>FoodsDrinks</SelectItem>
+                              {Object.values(ProductType).map((type) => (
+                                <SelectItem key={type} value={type}>
+                                  {formatEnumText(type)}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormItem>
                       )}
                     />
+                    <DisplaySelectFieldTypes form={form} type={form.watch("product_type")} />
                     <FormField
                       control={form.control}
                       name="description"
@@ -229,7 +246,7 @@ export default function ProductForm() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={clearFile}
+                        onClick={() => clearFile}
                         className="h-8 w-8"
                       >
                         <X className="h-4 w-4" />
