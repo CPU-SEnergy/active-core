@@ -25,7 +25,7 @@ export default function Navbar() {
             <div className="hidden md:flex items-center space-x-6">
               <Link href="/" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Home</Link>
               <Link href="/membership" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Membership</Link>
-              <Link href="/classes" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Classes</Link>
+              <Link href="/sports-classes" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Classes</Link>
               <Link href="/apparels" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">Apparels</Link>
             </div>
             {!user ? (
