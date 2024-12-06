@@ -3,11 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/auth/AuthProvider";
 import {
   Sheet,
   SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -15,8 +17,25 @@ import {
 import { Menu } from "lucide-react";
 
 export default function Navbar() {
-  const { user } = useAuth();
-  if (!user) return null;
+  const { user, loading } = useAuth();
+
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/auth")) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <nav className="bg-black">
+        <div className="w-full px-4">
+          <div className="flex items-center justify-between h-14">
+            <div className="text-white">Loading...</div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-black">
@@ -36,6 +55,7 @@ export default function Navbar() {
               <SheetContent className="w-full">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription></SheetDescription>
                 </SheetHeader>
                 <div className="px-2 pt-2 pb-3 space-y-3 flex flex-col items-center text-black">
                   <SheetClose asChild>

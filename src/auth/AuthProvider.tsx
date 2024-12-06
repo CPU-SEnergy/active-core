@@ -11,18 +11,21 @@ export interface User extends UserInfo {
   customClaims: Claims;
 }
 
+export const useAuth = () => useContext(AuthContext);
+
 export interface AuthContextValue {
   user: User | null;
+  loading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue>({
   user: null,
+  loading: true,
 });
-
-export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(app), (firebaseUser) => {
@@ -36,9 +39,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             emailVerified: firebaseUser.emailVerified,
             customClaims,
           });
+          setLoading(false);
         });
       } else {
         setUser(null);
+        setLoading(false);
       }
     });
 
@@ -46,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );
