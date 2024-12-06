@@ -7,7 +7,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/lib/firebaseClient";
 import { User } from '@/auth/AuthProvider';
 
-export default function LogoutButton({ user }: { user: User }) {
+export default function LogoutButton({ user }: { user: User | null }) {
   const router = useRouter();
 
   async function handleLogout() {

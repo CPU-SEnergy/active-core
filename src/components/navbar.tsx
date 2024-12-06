@@ -1,22 +1,41 @@
-"use client"
+"use client";
 
-import * as React from 'react'
-import Link from 'next/link'
-import LogoutButton from './LogoutButton'
-import { useAuth } from '@/auth/AuthProvider'
+import * as React from "react";
+import Link from "next/link";
+import LogoutButton from "./LogoutButton";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/auth/AuthProvider";
 import {
   Sheet,
   SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { Menu } from 'lucide-react'
+} from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
 export default function Navbar() {
-  const { user } = useAuth()
-  if (!user) return null
+  const { user, loading } = useAuth();
+
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/auth")) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <nav className="bg-black">
+        <div className="w-full px-4">
+          <div className="flex items-center justify-between h-14">
+            <div className="text-white">Loading...</div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-black">
@@ -27,15 +46,16 @@ export default function Navbar() {
               <span className="text-3xl font-bold text-white">Logo</span>
             </Link>
           </div>
-          <h1 className='md:hidden text-white text-xl'>Sports and Fitness</h1>
+          <h1 className="md:hidden text-white text-xl">Sports and Fitness</h1>
           <div className="md:hidden flex-end">
             <Sheet>
               <SheetTrigger className="text-white hover:text-gray-300 active:text-gray-500 focus:outline-none flex">
                 <Menu />
               </SheetTrigger>
-              <SheetContent className='w-full'>
+              <SheetContent className="w-full">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription></SheetDescription>
                 </SheetHeader>
                 <div className="px-2 pt-2 pb-3 space-y-3 flex flex-col items-center text-black">
                   <SheetClose asChild>
@@ -83,5 +103,5 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }
