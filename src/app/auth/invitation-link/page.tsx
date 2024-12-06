@@ -1,8 +1,6 @@
-
-
 import { Metadata } from "next"
 import Link from "next/link"
-import { UserAuthForm } from "./RegisterForm"
+import { UserAuthForm } from "./InviteForm"
 
 export const metadata: Metadata = {
   title: "Authentication",
