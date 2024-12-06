@@ -59,22 +59,34 @@ export default function Navbar() {
                 </SheetHeader>
                 <div className="px-2 pt-2 pb-3 space-y-3 flex flex-col items-center text-black">
                   <SheetClose asChild>
-                    <Link href="/" className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium">
+                    <Link
+                      href="/"
+                      className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
+                    >
                       Home
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link href="/membership" className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium">
+                    <Link
+                      href="/membership"
+                      className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
+                    >
                       Membership
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link href="/classes" className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium">
+                    <Link
+                      href="/sports-classes"
+                      className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
+                    >
                       Classes
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link href="/apparels" className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium">
+                    <Link
+                      href="/apparels"
+                      className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
+                    >
                       Apparels
                     </Link>
                   </SheetClose>
@@ -86,16 +98,28 @@ export default function Navbar() {
             </Sheet>
           </div>
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/"
+              className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+            >
               Home
             </Link>
-            <Link href="/membership" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/membership"
+              className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+            >
               Membership
             </Link>
-            <Link href="/classes" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/sports-classes"
+              className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+            >
               Classes
             </Link>
-            <Link href="/apparels" className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium">
+            <Link
+              href="/apparels"
+              className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+            >
               Apparels
             </Link>
             <LogoutButton user={user} />
