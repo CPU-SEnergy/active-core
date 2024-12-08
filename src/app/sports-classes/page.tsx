@@ -40,7 +40,7 @@ export default function SportsServices() {
               <a href={`/sports-classes/${classes.sports_id}`}>
                 <Button
                   size="sm"
-                  className="bg-[#ff2020] hover:bg-[#000000] text-white w-full text-sm py-2"
+                  className="bg-gray-500 hover:bg-gray-700 text-white w-full text-sm py-2"
                 >
                   Learn More
                 </Button>
