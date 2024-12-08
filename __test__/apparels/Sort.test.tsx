@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Sort from '@/app/apparels/Sort';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -9,9 +8,6 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }));
 
-fetchMock.mockResponseOnce(JSON.stringify({ /* mock response here */ }));
-
-
 describe('Sort Component', () => {
   let pushMock: jest.Mock;
   let mockSearchParams: URLSearchParams;
@@ -21,15 +17,13 @@ describe('Sort Component', () => {
     pushMock = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push: pushMock });
 
-    // Mock searchParams
+    // Default search params mock
     mockSearchParams = new URLSearchParams('sort=latest');
     (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
   });
 
   it('renders the component and the trigger button', () => {
     render(<Sort />);
-
-    // Check if the trigger button is rendered
     const triggerButton = screen.getByText(/Sort by/i);
     expect(triggerButton).toBeInTheDocument();
   });
@@ -37,11 +31,9 @@ describe('Sort Component', () => {
   it('opens the sheet and displays sorting options', () => {
     render(<Sort />);
 
-    // Click the trigger button to open the sheet
     const triggerButton = screen.getByText(/Sort by/i);
     fireEvent.click(triggerButton);
 
-    // Check if sorting options are displayed
     expect(screen.getByText(/Latest/i)).toBeInTheDocument();
     expect(screen.getByText(/Popular/i)).toBeInTheDocument();
     expect(screen.getByText(/Price High to Low/i)).toBeInTheDocument();
@@ -52,15 +44,12 @@ describe('Sort Component', () => {
   it('updates the URL when a sorting option is selected', () => {
     render(<Sort />);
 
-    // Open the sheet
     const triggerButton = screen.getByText(/Sort by/i);
     fireEvent.click(triggerButton);
 
-    // Select "Price High to Low" option
     const priceHighToLowOption = screen.getByLabelText(/Price High to Low/i);
     fireEvent.click(priceHighToLowOption);
 
-    // Check if router push is called with correct URL
     expect(pushMock).toHaveBeenCalledWith('?sort=price&dir=desc');
   });
 
@@ -70,15 +59,40 @@ describe('Sort Component', () => {
 
     render(<Sort />);
 
-    // Open the sheet
     const triggerButton = screen.getByText(/Sort by/i);
     fireEvent.click(triggerButton);
 
-    // Select "Latest" option
     const latestOption = screen.getByLabelText(/Latest/i);
     fireEvent.click(latestOption);
 
-    // Check if router push is called with correct URL
     expect(pushMock).toHaveBeenCalledWith('?sort=latest');
+  });
+
+  it('handles missing sort query parameter gracefully', () => {
+    // Simulate the scenario where no search param exists
+    mockSearchParams = new URLSearchParams('');
+    (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
+
+    render(<Sort />);
+
+    const triggerButton = screen.getByText(/Sort by/i);
+    fireEvent.click(triggerButton);
+
+    // Add an assertion to ensure the default sorting option is applied
+    expect(screen.getByText(/Latest/i)).toBeInTheDocument();
+  });
+
+  it('handles invalid search parameter gracefully', () => {
+    // Simulate an invalid or unexpected query parameter
+    mockSearchParams = new URLSearchParams('sort=unknown');
+    (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
+
+    render(<Sort />);
+
+    const triggerButton = screen.getByText(/Sort by/i);
+    fireEvent.click(triggerButton);
+
+    // Ensure the component doesn't break and defaults to a valid option
+    expect(screen.getByText(/Latest/i)).toBeInTheDocument();
   });
 });

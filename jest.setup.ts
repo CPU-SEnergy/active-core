@@ -1,6 +1,7 @@
 import fetchMock from 'jest-fetch-mock';
+import "@testing-library/jest-dom";
+
 
 fetchMock.enableMocks();
 
-// Optional: Add global settings for fetch-mock if needed
 fetchMock.mockResponse(JSON.stringify({}));

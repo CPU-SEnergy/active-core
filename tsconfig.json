@@ -11,7 +11,8 @@
     "types": ["jest", "jest-fetch-mock"],
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
+    "target": "es6",
     "incremental": true,
     "plugins": [
       {
