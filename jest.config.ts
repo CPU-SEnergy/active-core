@@ -15,7 +15,7 @@ const config: Config = {
     '<rootDir>/.next/', // Ignore built Next.js files
   ],
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest', // Transforms JS/TS files using Babel
+    '^.+\\.(js|jsx|ts|tsx)$': '@swc/jest', // Transforms JS/TS files using Babel
   },
 };
 
