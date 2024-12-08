@@ -1,3 +1,4 @@
+import Link from "next/link"; // Import Link from next/link
 import { coaches } from "@/lib/mock_data/coachesMockData";
 
 export default function CoachTest({ params }: { params: { coachId: number } }) {
@@ -9,6 +10,11 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <Link href="/coaches" passHref>
+        <button className="mb-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">
+          Back
+        </button>
+      </Link>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <div className="flex flex-col items-center space-y-4">
           <img

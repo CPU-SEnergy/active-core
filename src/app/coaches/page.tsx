@@ -4,13 +4,15 @@ import { coaches } from "@/lib/mock_data/coachesMockData";
 
 export default function CoachDeck() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Meet Our Coaches</h1>
+    <div className="container mx-auto py-8 px-4 bg-gray-100">
+      <h1 className="text-5xl font-bold mb-10 mt-5 text-black text-center">
+        Meet the Coaches
+      </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {coaches.map((coach) => (
           <div
             key={coach.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105"
           >
             <img
               src={coach.image}
@@ -24,7 +26,7 @@ export default function CoachDeck() {
               <p className="text-gray-500">{coach.specialization}</p>
               <div className="flex justify-center mt-4">
                 <Link href={`/coaches/profile/${coach.id}`}>
-                  <button className="bg-[#D90429] text-white px-4 py-2 rounded hover:bg-red-700">
+                  <button className="bg-gray-800 text-white px-4 py-2 rounded transition-colors duration-300 hover:bg-gray-700">
                     Details
                   </button>
                 </Link>
