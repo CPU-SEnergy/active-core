@@ -1,21 +1,14 @@
-/**
- * For a detailed explanation regarding each configuration property, visit:
- * https://jestjs.io/docs/configuration
- */
-
-import type { Config } from 'jest'
-import nextJest from 'next/jest.js'
-
-const createJestConfig = nextJest({
-  dir: './',
-})
+import type { Config } from 'jest';
 
 const config: Config = {
-  clearMocks: true,
-  collectCoverage: true,
-  coverageProvider: "v8",
-  testEnvironment: "jsdom",
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']
+  testEnvironment: 'jsdom',
+  moduleDirectories: ['node_modules', '<rootDir>/src'],
+  moduleNameMapper: {
+    '\\.(css|scss|sass)$': 'identity-obj-proxy', // Mock CSS imports
+    '^@/(.*)$': '<rootDir>/src/$1', // Alias for absolute imports
+  },
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Move jest-fetch-mock to this setup
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
 };
 
-export default createJestConfig(config)
+export default config;

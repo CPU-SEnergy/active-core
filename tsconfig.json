@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    "types": ["jest", "jest-fetch-mock"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -26,7 +27,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "types.d.ts"
+    "types.d.ts",
+    "jest.setup.ts"
   ],
   "exclude": ["node_modules"]
 }
