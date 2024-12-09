@@ -1,26 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
-import { app } from "@/lib/firebaseClient";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { firestore } from "@/lib/firebaseAdmin";
 
-const db = getFirestore(app);
+import { Query, QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { ApparelType, ProductType } from "@/lib/types/product";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    // hardcode for now
-    const productsCollection = collection(db, "apparels");
-    const snapshot = await getDocs(productsCollection);
+    const { searchParams } = new URL(request.url);
+    const c = searchParams.get("c");
+    const sort = searchParams.get("sort");
+    const dir = searchParams.get("dir");
 
-    const products = snapshot.docs.map((doc) => ({
+    console.log("c", c, "sort", sort, "dir", dir);
+
+    const apparelsCollection = firestore.collection(ProductType.APPARELS);
+    let firebaseQuery: Query = apparelsCollection;
+
+    if (c) {
+      firebaseQuery = firebaseQuery.where("type", "==", c as ApparelType);
+    }
+
+    if (sort) {
+      if (sort === "price" && dir) {
+        firebaseQuery = firebaseQuery.orderBy(
+          "price",
+          dir === "asc" ? "asc" : "desc"
+        );
+      } else if (sort === "popularity") {
+        console.log("popularity");
+        firebaseQuery = firebaseQuery.orderBy("popularity", "desc");
+      } else if (sort === "latest") {
+        console.log("latest");
+        firebaseQuery = firebaseQuery.orderBy("createdAt", "desc");
+      }
+    }
+
+    const snapshot = await firebaseQuery.get();
+    const data = snapshot.docs.map((doc: QueryDocumentSnapshot) => ({
       id: doc.id,
       ...doc.data(),
     }));
-    console.log("Cache");
-    return NextResponse.json(products);
+
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching apparels:", error);
     return NextResponse.json(
-      { error: "Failed to fetch products" },
+      { error: "Failed to fetch apparels" },
       { status: 500 }
     );
   }

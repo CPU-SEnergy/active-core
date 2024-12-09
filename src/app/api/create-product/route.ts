@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
+import { firestore } from "@/lib/firebaseAdmin";
 import { ProductType, productCollectionMap } from "@/lib/types/product";
-import { revalidateTag } from "next/cache";
-
-const db = getFirestore(getFirebaseAdminApp());
 
 export async function POST(req: Request) {
   try {
@@ -40,7 +37,7 @@ export async function POST(req: Request) {
     const collectionName = productCollectionMap[product_type as ProductType];
     console.log(collectionName);
 
-    const productRef = db.collection(collectionName).doc();
+    const productRef = firestore.collection(collectionName).doc();
 
     const productData = {
       name,
@@ -54,7 +51,6 @@ export async function POST(req: Request) {
 
     await productRef.set(productData);
 
-    revalidateTag("products");
     return NextResponse.json({
       success: true,
       message: "Product created successfully.",

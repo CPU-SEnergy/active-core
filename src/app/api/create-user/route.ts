@@ -1,4 +1,4 @@
-import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { firestore } from "@/lib/firebaseAdmin";
 import { UserData } from "@/lib/types/user";
 import { FieldValue } from "firebase-admin/firestore";
 
@@ -15,9 +15,7 @@ export async function POST(request: Request) {
       sex,
     } = data;
 
-    const adminFirestore = getFirebaseAdminApp().firestore();
-
-    const userRef = adminFirestore.collection("users").doc();
+    const userRef = firestore.collection("users").doc();
 
     await userRef.set({
       uid,

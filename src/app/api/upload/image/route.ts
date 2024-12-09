@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import fs from "fs/promises";
 import path from "path";
-import { getStorage } from "firebase-admin/storage";
-import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { storage } from "@/lib/firebaseAdmin";
 import os from "os";
-
-const storage = getStorage(getFirebaseAdminApp());
 
 export async function POST(req: NextRequest) {
   try {

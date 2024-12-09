@@ -1,4 +1,3 @@
-import "server-only";
 import admin from "firebase-admin";
 import { serverConfig } from "@/lib/config";
 
@@ -43,4 +42,10 @@ export const getFirebaseAdminApp = (): admin.app.App => {
     : initializeApp();
 };
 
-export { initializeApp };
+const firebaseAdminApp = getFirebaseAdminApp();
+
+export const firestore = admin.firestore(firebaseAdminApp);
+export const storage = admin.storage(firebaseAdminApp);
+// export const auth = admin.auth(firebaseAdminApp);
+// export const messaging = admin.messaging(firebaseAdminApp);
+// export const database = admin.database(firebaseAdminApp);
