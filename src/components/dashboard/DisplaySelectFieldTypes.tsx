@@ -1,16 +1,30 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../ui/select";
 import { FormField, FormItem, FormLabel, FormControl } from "../ui/form";
-import { ApparelType, CoachType, ClassType, ProductType } from "@/lib/types/product";
-import { formatEnumText } from "@/utils/helpers/formatEnumText";
+import {
+  ApparelType,
+  CoachType,
+  ClassType,
+  ProductType,
+} from "@/lib/types/product";
+import { formatEnumText } from "@/utils/formatEnumText";
 
 import { UseFormReturn } from "react-hook-form";
 
 interface DisplaySelectFieldTypesProps {
-  type: string
-  form: UseFormReturn<ProductFormData>
+  type: string;
+  form: UseFormReturn<ProductFormData>;
 }
 
-export function DisplaySelectFieldTypes({ type, form }: DisplaySelectFieldTypesProps) {
+export function DisplaySelectFieldTypes({
+  type,
+  form,
+}: DisplaySelectFieldTypesProps) {
   let options: string[] = [];
 
   if (type === ProductType.APPARELS) {

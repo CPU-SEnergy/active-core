@@ -28,7 +28,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { uploadFile } from "@/utils/firebase/helpers/uploadFile";
 import { createProduct } from "@/utils/firebase/helpers/createProduct";
 import { ProductType } from "@/lib/types/product";
-import { formatEnumText } from "@/utils/helpers/formatEnumText";
+import { formatEnumText } from "@/utils/formatEnumText";
 import { DisplaySelectFieldTypes } from "./DisplaySelectFieldTypes";
 import { useRouter } from "next/navigation";
 
@@ -182,14 +182,14 @@ export default function ProductForm() {
                       name="product_type"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Type of Product</FormLabel>
+                          <FormLabel>Product</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select product type" />
+                                <SelectValue placeholder="Select product" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>

@@ -6,10 +6,11 @@ export enum ProductType {
 }
 
 export enum ApparelType {
-  T_SHIRTS = "t_shirt",
-  SHORTS = "shorts",
-  GLOVES = "gloves",
+  T_SHIRT = "t-shirt",
+  SHORT = "short",
+  GLOVE = "glove",
   TOWEL = "towel",
+  HEADGEAR = "headgear",
 }
 
 export enum ClassType {

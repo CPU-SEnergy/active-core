@@ -14,6 +14,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useSearchParams } from "next/navigation";
 import ParamsLink from "@/components/ParamsLink";
+import { ApparelType } from "@/lib/types/product";
 
 export default function CategoryLists() {
   const searchParams = useSearchParams();
@@ -46,25 +47,25 @@ export default function CategoryLists() {
               <SheetClose asChild>
                 <ParamsLink
                   title="T-Shirts"
-                  href={appendSearchParams("t-shirt")}
+                  href={appendSearchParams(ApparelType.T_SHIRT)}
                 />
               </SheetClose>
               <SheetClose asChild>
                 <ParamsLink
                   title="Shorts"
-                  href={appendSearchParams("shorts")}
+                  href={appendSearchParams(ApparelType.SHORT)}
                 />
               </SheetClose>
               <SheetClose asChild>
                 <ParamsLink
                   title="Headgears"
-                  href={appendSearchParams("headgears")}
+                  href={appendSearchParams(ApparelType.HEADGEAR)}
                 />
               </SheetClose>
               <SheetClose asChild>
                 <ParamsLink
                   title="Gloves"
-                  href={appendSearchParams("gloves")}
+                  href={appendSearchParams(ApparelType.GLOVE)}
                 />
               </SheetClose>
             </div>
@@ -76,13 +77,22 @@ export default function CategoryLists() {
       <Card className="hidden md:block p-5 w-60 space-y-4">
         <span className="font-semibold text-xl">Categories</span>
         <div className="flex flex-col gap-2">
-          <ParamsLink title="T-Shirts" href={appendSearchParams("t-shirt")} />
-          <ParamsLink title="Shorts" href={appendSearchParams("shorts")} />
+          <ParamsLink
+            title="T-Shirts"
+            href={appendSearchParams(ApparelType.T_SHIRT)}
+          />
+          <ParamsLink
+            title="Shorts"
+            href={appendSearchParams(ApparelType.SHORT)}
+          />
           <ParamsLink
             title="Headgears"
-            href={appendSearchParams("headgears")}
+            href={appendSearchParams(ApparelType.HEADGEAR)}
           />
-          <ParamsLink title="Gloves" href={appendSearchParams("gloves")} />
+          <ParamsLink
+            title="Gloves"
+            href={appendSearchParams(ApparelType.GLOVE)}
+          />
         </div>
       </Card>
     </>

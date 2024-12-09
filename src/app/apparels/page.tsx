@@ -3,6 +3,7 @@ import CategoryLists from "./CategoryLists";
 import Sort from "./Sort";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import BreadCrumbDisplay from "./BreadCrumbDisplay";
 
 async function fetchProducts() {
   try {
@@ -29,7 +30,7 @@ export default async function ApparelPage({
 
   // Fetch the products
   const products: Product[] = await fetchProducts();
-  console.log(products, "products");
+  // console.log(products, "products");
 
   return (
     <main className="w-full bg-gray-50 h-full">
@@ -44,7 +45,7 @@ export default async function ApparelPage({
         {/* Desktop */}
         <div className="md:block hidden h-16">
           <div className="flex items-center w-full h-full">
-            Home {">"} Apparel
+            <BreadCrumbDisplay c={c} />
           </div>
         </div>
         <div className="flex space-x-4">
@@ -78,7 +79,7 @@ export default async function ApparelPage({
                 className="object-cover max-w-full max-h-[200px] hidden lg:block rounded-sm"
               />
               {/* Display apparels */}
-              <div className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid gap-5 max-w-full">
+              <div className="grid-cols-2 sm:grid-cols-3 grid gap-5 max-w-full">
                 {products.map((product) => (
                   <div key={product.id} className="border rounded-sm shadow-md">
                     <div className="aspect-3/4 rounded-sm ">
