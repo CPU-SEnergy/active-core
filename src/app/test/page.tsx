@@ -1,9 +1,30 @@
-import React from 'react'
+"use client";
 
-export default function TestPage() {
+import { useAuth } from '@/auth/AuthProvider';
+import { useEffect, useState } from 'react';
+
+export default function Home() {
+  const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
-      TestPage
+      <h1>Welcome to Next.js Firebase Auth Example</h1>
+      {user ? (
+        <p>
+          <pre>{JSON.stringify(user, null, 2)}</pre>
+          Logged in as: {user.email}
+        </p>
+      ) : (
+        <p>You are not logged in.</p>
+      )}
     </div>
-  )
+  );
 }
