@@ -68,10 +68,18 @@ export default function Navbar() {
                   </SheetClose>
                   <SheetClose asChild>
                     <Link
-                      href="/membership"
+                      href="/coaches"
                       className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
                     >
-                      Membership
+                      Coaches
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      href="/apparels"
+                      className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
+                    >
+                      Apparels
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
@@ -84,10 +92,10 @@ export default function Navbar() {
                   </SheetClose>
                   <SheetClose asChild>
                     <Link
-                      href="/apparels"
+                      href="/user-profile"
                       className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
                     >
-                      Apparels
+                      My Profile
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
@@ -105,10 +113,16 @@ export default function Navbar() {
               Home
             </Link>
             <Link
-              href="/membership"
+              href="/coaches"
               className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
             >
-              Membership
+              Coaches
+            </Link>
+            <Link
+              href="/apparels"
+              className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+            >
+              Apparels
             </Link>
             <Link
               href="/sports-classes"
@@ -117,10 +131,10 @@ export default function Navbar() {
               Classes
             </Link>
             <Link
-              href="/apparels"
+              href="/user-profile"
               className="text-gray-300 hover:bg-gray-800 hover:text-white px-3 py-2 rounded-md text-base font-medium"
             >
-              Apparels
+              My Profile
             </Link>
             <LogoutButton user={user} />
           </div>
