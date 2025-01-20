@@ -1,25 +1,23 @@
-import { app } from '@/lib/firebaseClient';
 import { NextResponse } from 'next/server';
-import { getFirestore, getDocs, collection } from 'firebase/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getFirebaseAdminApp } from '@/lib/firebaseAdmin';
 import { ProductType } from '@/lib/types/product';
 
-const db = getFirestore(app);
+const db = getFirestore(getFirebaseAdminApp());
 
 export async function GET() {
   try {
-    const coachCollection = collection(db, ProductType.COACHES);
+    const coachCollection = db.collection(ProductType.COACHES);
 
-
-    const querySnapshot = await getDocs(coachCollection);
+    const querySnapshot = await coachCollection.get();
 
     const coaches = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-
-    return NextResponse.json(coaches)
+    console.log(coaches)
+    return NextResponse.json(coaches);
   } catch (error) {
-    console.error("Error fetching coaches: ", error)
-    NextResponse.json({ error: "Failed to fetch coaches" }, { status: 500 }); 
+    return NextResponse.error();
   }
 }
