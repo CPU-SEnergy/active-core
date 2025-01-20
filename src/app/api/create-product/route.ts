@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { ProductType, productCollectionMap } from "@/lib/types/product";
-import { revalidateTag } from "next/cache";
 
 const db = getFirestore(getFirebaseAdminApp());
 
@@ -54,7 +53,6 @@ export async function POST(req: Request) {
 
     await productRef.set(productData);
 
-    revalidateTag("products");
     return NextResponse.json({
       success: true,
       message: "Product created successfully.",
