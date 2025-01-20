@@ -15,7 +15,7 @@ export async function GET() {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(classes)
+    
     return NextResponse.json(classes)
   } catch (error) {
     console.error("Error fetching classes: ", error);
