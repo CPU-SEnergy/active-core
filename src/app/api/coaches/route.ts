@@ -18,7 +18,7 @@ export async function GET() {
 
     return NextResponse.json(coaches)
   } catch (error) {
-    console.error("Error fetching coaches: ", error)
-    NextResponse.json({ error: "Failed to fetch coaches" }, { status: 500 }); 
+    console.error("Error fetching coaches: ", error);
+    return NextResponse.json({ error: "Failed to fetch coaches" });
   }
 }
