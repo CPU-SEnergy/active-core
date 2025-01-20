@@ -2,7 +2,22 @@ import Image from "next/image";
 import Link from "next/link"; // Import Link from next/link
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { classes } from "@/lib/mock_data/classes_data";
+
+
+async function fetchclasses() {
+  try {
+    const res = await fetch("http://localhost:3000/api/classes", {
+      next: { tags: ["classes"] },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch classes");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
 
 export default async function Page({
   params,
@@ -10,6 +25,10 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
+  
+  const classes: Class[] = await fetchclasses();
+  console.log(classes, "classes");
+
 
   return (
     <div
@@ -35,7 +54,7 @@ export default async function Page({
             {classes[Number(id)].title}
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            {classes[Number(id)].discription}
+            {classes[Number(id)].description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
             <Button variant="outline" size="lg" className="w-full sm:w-auto">

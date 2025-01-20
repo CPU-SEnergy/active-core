@@ -18,3 +18,11 @@ interface Product {
   special_price?: number;
   createdAt?: Date | string;
 }
+
+interface Class {
+  sports_id: string;
+  image: string;
+  description: string;
+  title: string;
+  coach: string;
+}

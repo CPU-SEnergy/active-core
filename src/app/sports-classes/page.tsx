@@ -1,12 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { classes } from "@/lib/mock_data/classes_data";
+import Image from "next/image";
 
-export default function SportsServices() {
+
+
+async function fetchclasses() {
+  try {
+    const res = await fetch("http://localhost:3000/api/classes", {
+      next: { tags: ["classes"] },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch classes");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+export default async function SportsServices() {
+
+  const classes: Class[] = await fetchclasses();
+  console.log(classes, "classes");
+  
   return (
     <div className="container mx-auto py-8 min-h-screen max-w-full bg-gray-100">
-      <h1 className="text-5xl font-bold mb-10 mt-5 text-black text-center">Sports Services</h1>
-
+      <h1 className="text-7xl font-bold mb-5 mt-20 text-black text-center">Sports Services</h1>
+      <h2 className="text-center mb-20 mt-3">
+      Achieve your fitness goals with our gym and combat sports classes,
+      <br />
+      including boxing, MMA, and more!
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
         {classes.map((cls, index) => (
           <Card
@@ -16,10 +41,12 @@ export default function SportsServices() {
             <CardContent className="p-0">
               <a href={`/sports-classes/${cls.sports_id}`} className="block">
                 <div className="aspect-square relative rounded-t-lg overflow-hidden">
-                  <img
+                <Image
                     src={cls.image}
                     alt={cls.title}
-                    className="object-cover w-full h-full rounded-t-lg"
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-t-lg"
                   />
                 </div>
                 <div className="p-4">
