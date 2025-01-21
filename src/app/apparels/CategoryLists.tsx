@@ -50,22 +50,16 @@ export default function CategoryLists() {
                 />
               </SheetClose>
               <SheetClose asChild>
-                <ParamsLink
-                  title="Shorts"
-                  href={appendSearchParams("shorts")}
-                />
+                <ParamsLink title="Shorts" href={appendSearchParams("short")} />
               </SheetClose>
               <SheetClose asChild>
                 <ParamsLink
                   title="Headgears"
-                  href={appendSearchParams("headgears")}
+                  href={appendSearchParams("headgear")}
                 />
               </SheetClose>
               <SheetClose asChild>
-                <ParamsLink
-                  title="Gloves"
-                  href={appendSearchParams("gloves")}
-                />
+                <ParamsLink title="Gloves" href={appendSearchParams("glove")} />
               </SheetClose>
             </div>
           </SheetContent>
@@ -77,12 +71,9 @@ export default function CategoryLists() {
         <span className="font-semibold text-xl">Categories</span>
         <div className="flex flex-col gap-2">
           <ParamsLink title="T-Shirts" href={appendSearchParams("t-shirt")} />
-          <ParamsLink title="Shorts" href={appendSearchParams("shorts")} />
-          <ParamsLink
-            title="Headgears"
-            href={appendSearchParams("headgears")}
-          />
-          <ParamsLink title="Gloves" href={appendSearchParams("gloves")} />
+          <ParamsLink title="Shorts" href={appendSearchParams("short")} />
+          <ParamsLink title="Headgears" href={appendSearchParams("headgear")} />
+          <ParamsLink title="Gloves" href={appendSearchParams("glove")} />
         </div>
       </Card>
     </>
