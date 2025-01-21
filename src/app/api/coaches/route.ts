@@ -18,6 +18,7 @@ export async function GET() {
     console.log(coaches)
     return NextResponse.json(coaches);
   } catch (error) {
-    return NextResponse.error();
+    console.error("Error fetching coaches: ", error);
+    return NextResponse.json({ error: "Failed to fetch coaches" });
   }
 }
