@@ -23,7 +23,8 @@ function FetchApparels(
 
   const { data, error, isLoading } = useSWR<Product[]>(
     `/api/apparels?${queryParams.toString()}`,
-    fetcher
+    fetcher,
+    { dedupingInterval: 60 * 1000 }
   );
 
   return { data, error, isLoading };
