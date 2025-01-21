@@ -16,11 +16,7 @@ async function fetchCoaches() {
   }
 }
 
-export default async function CoachDeck({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function CoachDeck() {
   const coaches: Coach[] = await fetchCoaches();
   console.log(coaches, "coaches");
   return (
