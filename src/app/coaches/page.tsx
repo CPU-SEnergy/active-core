@@ -1,8 +1,24 @@
 import Link from "next/link";
 import React from "react";
-import { coaches } from "@/lib/mock_data/coachesMockData";
 
-export default function CoachDeck() {
+async function fetchCoaches() {
+  try {
+    const res = await fetch("http://localhost:3000/api/coaches/", {
+      next: { revalidate: 60000 },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch coaches");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+export default async function CoachDeck() {
+  const coaches: Coach[] = await fetchCoaches();
+  console.log(coaches, "coaches");
   return (
     <div className="container mx-auto py-8 px-4 bg-gray-100">
       <h1 className="text-5xl font-bold mb-10 mt-5 text-black text-center">

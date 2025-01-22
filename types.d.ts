@@ -18,3 +18,15 @@ interface Product {
   special_price?: number;
   createdAt?: Date | string;
 }
+
+interface Coach {
+  id: number;
+  name: string;
+  specialization: string;
+  bio: string;
+  image: string;
+  age: number;
+  experience: string;
+  certifications: string[];
+  contact: string;
+}
