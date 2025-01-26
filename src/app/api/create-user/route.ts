@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     const adminFirestore = getFirebaseAdminApp().firestore();
 
-    const userRef = adminFirestore.collection("users").doc();
+    const userRef = adminFirestore.collection("users").doc(uid);
 
     await userRef.set({
       uid,
