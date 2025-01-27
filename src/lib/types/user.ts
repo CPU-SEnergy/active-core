@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface UserData {
   email: string;
   uid: string;
@@ -8,4 +10,17 @@ export interface UserData {
   createdAt: Date | string;
   lastName?: string;
   firstName?: string;
+}
+
+export interface User {
+  uid: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  sex: "male" | "female" | "other";
+  dob: Date;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  type: "regular" | "student" | "senior";
+  isCustomer: boolean;
 }

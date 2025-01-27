@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { z } from "zod";
 import { step1Schema, step2Schema } from "@/lib/schema/auth/register-info";
+import { RegisterFormProps } from "@/lib/types/registerForm";
 
 export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<RegisterFormProps>({
     email: "",
     password: "",
     confirmation: "",
@@ -14,7 +15,6 @@ export const useRegisterForm = () => {
     sex: "",
   });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleChange =
     (field: string) =>
@@ -49,16 +49,13 @@ export const useRegisterForm = () => {
         sex: formState.sex,
       });
       setError("");
-      setLoading(true);
-      return { formState, loading };
+      return { formState };
     } catch (e) {
       if (e instanceof z.ZodError) {
         setError(e.errors[0].message);
       } else {
         setError("An error occurred during sign-up.");
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -66,7 +63,6 @@ export const useRegisterForm = () => {
     step,
     formState,
     error,
-    loading,
     handleChange,
     handleNextStep,
     handleSignUp,
