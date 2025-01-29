@@ -34,7 +34,7 @@ export const useRegisterForm = () => {
       setStep(2);
     } catch (e) {
       if (e instanceof z.ZodError) {
-        setError(e.errors[0].message);
+        setError(e.errors[0]?.message || "Validation error");
       }
     }
   };
@@ -52,7 +52,7 @@ export const useRegisterForm = () => {
       return { formState };
     } catch (e) {
       if (e instanceof z.ZodError) {
-        setError(e.errors[0].message);
+        setError(e.errors[0]?.message || "Validation error");
       } else {
         setError("An error occurred during sign-up.");
       }

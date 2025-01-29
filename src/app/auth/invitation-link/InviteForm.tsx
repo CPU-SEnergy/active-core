@@ -34,7 +34,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       const formattedErrors: { [key: string]: string } = {};
 
       if (errors.email) {
-        formattedErrors.email = errors.email[0];
+        formattedErrors.email = errors.email[0] || "Invalid email address";
       }
 
       setFormErrors(formattedErrors);

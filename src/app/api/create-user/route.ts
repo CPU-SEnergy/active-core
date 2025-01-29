@@ -1,10 +1,9 @@
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
-import { UserData } from "@/lib/types/user";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(request: Request) {
   try {
-    const data: UserData = await request.json();
+    const data = await request.json();
     const {
       email,
       uid,
