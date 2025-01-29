@@ -13,8 +13,6 @@ export const db = schema(
   { server: { preferRest: true } }
 );
 
-// Infer schema type helper with shortcuts to types in your database:
-//   function getUser(id: Schema["users"]["Id"]): Schema["users"]["Result"]
 export type Schema = Typesaurus.Schema<typeof db>;
 
 interface User {
@@ -48,30 +46,34 @@ interface MembershipPlan {
   planDateEnd: Date;
 }
 
+interface UserBasicInfo {
+  userId: Schema["users"]["Id"];
+  name: string;
+  imageUrl: string;
+}
+
+interface AvailedPlan {
+  membershipPlanId: Schema["membershipPlan"]["Id"];
+  name: string;
+  amount: number;
+  duration: number;
+  startDate: Date;
+  expiryDate: Date;
+}
+
 interface Payment {
   id: string;
   paymentMethod: string;
   status: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  user: {
-    userId: Schema["users"]["Id"];
-    name: string;
-    imageUrl: string;
-  };
-  availedPlan: {
-    membershipPlanId: Schema["membershipPlan"]["Id"];
-    name: string;
-    amount: number;
-    duration: number;
-    startDate: Date;
-    endDate: Date;
-  };
+  user: UserBasicInfo;
+  availedPlan: AvailedPlan;
 }
 
 interface MembershipHistory {
   userId: Schema["users"]["Id"];
-  membershipPlanId: Schema["membershipPlan"]["Id"];
+  paymentId: Schema["payments"]["Id"];
 }
 
 interface KPIs {

@@ -13,7 +13,9 @@ export default function Sort() {
   const handleSortChange = (sortValue: string) => {
     const currentParams = new URLSearchParams(searchParams.toString());
     const [sortField, dir] = sortValue.split('&dir=');
-    currentParams.set('sort', sortField);
+    if (sortField) {
+      currentParams.set('sort', sortField);
+    }
     if (sortField === 'price' && dir) {
       currentParams.set('dir', dir);
     } else {

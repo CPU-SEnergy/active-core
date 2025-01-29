@@ -12,6 +12,8 @@ import {
   parseISO,
   format,
 } from "date-fns";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
 
 interface UserDashboardProps {
   uid: string;
@@ -24,6 +26,15 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
     isError,
   }: { user: Schema["users"]["Data"]; isError: unknown; isLoading: boolean } =
     useGetUserById(uid);
+
+  const {
+    data: history,
+    isLoading: isHistoryLoading,
+    error,
+  } = useSWR<UserHistoryProps[]>(
+    `/api/user-membership-history/${uid}`,
+    fetcher
+  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -84,9 +95,14 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
               </div>
               <div className="flex items-center">
                 <Calendar className="mr-2 text-gray-600" size={20} />
-                <span>
-                  Expires: {format(new Date("2025-11-17"), "MMMM dd, yyyy")}
-                </span>
+                {user.planExpiry ? (
+                  <span>
+                    Expires:{" "}
+                    {format(new Date(user.planExpiry), "MMMM dd, yyyy")}
+                  </span>
+                ) : (
+                  "No active membership"
+                )}
               </div>
             </div>
           </div>
@@ -103,7 +119,7 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
             Membership History
           </CardTitle>
         </CardHeader>
-        {/* <CardContent>
+        <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-gray-600">
               <thead>
@@ -115,25 +131,55 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
                 </tr>
               </thead>
               <tbody>
-                {membershipHistory.map((membership, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-300 last:border-b-0"
-                  >
-                    <td className="p-3">{membership.name}</td>
-                    <td className="p-3">{membership.timeframe}</td>
-                    <td className="p-3">
-                      {new Date(membership.dateJoined).toLocaleDateString()}
-                    </td>
-                    <td className="p-3">
-                      {new Date(membership.dateExpiry).toLocaleDateString()}
+                {isHistoryLoading && (
+                  <tr>
+                    <td colSpan={4} className="p-3 text-center">
+                      Loading...
                     </td>
                   </tr>
-                ))}
+                )}
+                {error && (
+                  <tr>
+                    <td colSpan={4} className="p-3 text-center text-red-500">
+                      Error: {String(error)}
+                    </td>
+                  </tr>
+                )}
+                {history && history.length > 0 ? (
+                  history.map((membership) =>
+                    membership.error ? (
+                      <tr key={membership.id}>
+                        <td colSpan={4} className="p-3 text-center">
+                          No membership history found.
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr
+                        key={membership.id}
+                        className="border-b border-gray-300 last:border-b-0"
+                      >
+                        <td className="p-3">{membership.name}</td>
+                        <td className="p-3">{membership.duration}</td>
+                        <td className="p-3">
+                          {new Date(membership.startDate).toLocaleDateString()}
+                        </td>
+                        <td className="p-3">
+                          {new Date(membership.expiryDate).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    )
+                  )
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="p-3 text-center">
+                      No membership history found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-        </CardContent> */}
+        </CardContent>
       </Card>
     </div>
   );

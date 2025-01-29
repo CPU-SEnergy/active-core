@@ -24,7 +24,7 @@ export default function ForgotPassword() {
     const result = emailSchema.safeParse({ email });
 
     if (!result.success) {
-      setError(result.error.errors[0].message);
+      setError(result.error.errors[0]?.message || "An error occurred");
       return;
     }
 
