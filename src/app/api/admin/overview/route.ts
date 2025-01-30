@@ -4,21 +4,31 @@ import { getFirestore } from "firebase-admin/firestore";
 
 const db = getFirestore(getFirebaseAdminApp());
 
-export async function GET(req: NextRequest) {
+type Params = {
+  year: number;
+  month: number;
+}
+
+export async function GET(req: NextRequest, context: { params: Params }) {
   try {
-    const monthDocRef = db
+    const { year, month } = context.params;
+    const numericYear = Number(year);
+    const numericMonth = Number(month);
+
+    const yearDocRef = db
       .collection('kpis')
-      .doc("2025")
-      .collection('months')
-      .doc("01");
+      .doc("year")
+
+    const monthDocRef = yearDocRef
+      .collection(numericYear.toString())
+      .doc(numericMonth.toString());
 
     const monthDoc = await monthDocRef.get();
 
     if (monthDoc.exists) {
-      console.log(`Data for :`, monthDoc.data());
+      console.log(monthDoc.data());
       return NextResponse.json(monthDoc.data());
     } else {
-      console.log(`No data found for `);
       return NextResponse.json({ error: 'No data found' });
     }
   } catch (error) {
