@@ -4,6 +4,7 @@ import type * as React from "react"
 import { useState } from "react"
 import { BarChart2, MessageSquare, Settings, Users } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +12,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 const menuItems = [
@@ -28,14 +28,17 @@ const menuItems = [
         />
       </svg>
     ),
+    href: "/admin/testss",
   },
   {
     title: "Sales",
     icon: BarChart2,
+    href: "/admin/sales",
   },
   {
     title: "Active Customer",
     icon: Users,
+    href: "/admin/active-customer",
   },
   {
     title: "Inactive Customer",
@@ -50,10 +53,12 @@ const menuItems = [
         />
       </svg>
     ),
+    href: "/admin/inactive-customer",
   },
   {
     title: "Messages",
     icon: MessageSquare,
+    href: "/admin/messages",
   },
   {
     title: "Add Customer",
@@ -68,6 +73,7 @@ const menuItems = [
         />
       </svg>
     ),
+    href: "/admin/add-customer",
   },
   {
     title: "Add Product",
@@ -82,6 +88,7 @@ const menuItems = [
         />
       </svg>
     ),
+    href: "/admin/add-product",
   },
   {
     title: "View Products",
@@ -96,10 +103,12 @@ const menuItems = [
         />
       </svg>
     ),
+    href: "/admin/view-products",
   },
   {
     title: "Add Cashier",
     icon: Users,
+    href: "/admin/add-cashier",
   },
 ]
 
@@ -114,7 +123,7 @@ export default function AdminSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="h-full w-full px-0 hover:bg-transparent hover:text-black">
-                    <a href="/" className="flex items-center gap-2">
+                    <Link href="/overview" className="flex items-center gap-2">
                       <Image
                         src="/sports-fitness-logo.svg"
                         alt="Sports and Fitness Logo"
@@ -123,7 +132,7 @@ export default function AdminSidebar() {
                         height={32}
                       />
                       <span className="font-semibold">Sports and Fitness</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -140,10 +149,10 @@ export default function AdminSidebar() {
                           : ""
                       }`}
                       onClick={() => setActiveItem(item.title)}>
-                      <a href="#">
+                      <Link href={item.href}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -154,22 +163,20 @@ export default function AdminSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    className="h-10 gap-3 px-3 hover:bg-indigo-50 hover:text-indigo-600 [&>svg]:h-5 [&>svg]:w-5"
+                    className="h-10 gap-3 px-3 hover:bg-indigo-50 hover:text-black [&>svg]:h-5 [&>svg]:w-5"
                   >
-                    <a href="#">
+                    <Link href="/admin/settings">
                       <Settings />
                       <span>Settings</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </div>
           </Sidebar>
           <div className="flex-1">
-            {/* Your content goes here */}
           </div>
         </div>
-        <SidebarTrigger className="fixed bottom-4 right-4 md:hidden" />
       </>
   )
 }
