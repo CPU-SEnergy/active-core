@@ -6,7 +6,7 @@ export const db = schema(
     membershipPlan: $.collection<MembershipPlan>(),
     payments: $.collection<Payment>(),
     membershipHistory: $.collection<MembershipHistory>(),
-    kpis: $.collection<KPIs>(),
+    kpis: $.collection<KPIs>().sub({ months: $.collection<MonthKPI>() }),
     customers: $.collection<Customers>(),
     apparels: $.collection<Apparels>(),
   }),
@@ -78,11 +78,9 @@ interface MembershipHistory {
 
 interface KPIs {
   year: string;
-  months: Typesaurus.SharedCollection<MonthKPI>;
 }
 
 interface MonthKPI {
-  monthId: string;
   totalRevenue: number;
   totalCustomers: number;
   newCustomers: number;
