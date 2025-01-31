@@ -6,7 +6,7 @@ export default function GymTour() {
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold mb-8 text-center">GYM TOUR</h2>
         <p className="text-xl mb-8 text-center">
-          &quot;Experience top-tier amenities and elite training at Sports and Fitness Center-where champions are made!&quot;
+          Experience top-tier amenities and elite training at Sports and Fitness Center-where champions are made!
         </p>
         <div className="grid grid-cols-3 gap-4">
           {[...Array(9)].map((_, i) => (
