@@ -1,0 +1,38 @@
+// id: string;
+//     paymentMethod: string;
+//     status: string;
+//     isNewCustomer: boolean;
+//     createdAt: Typesaurus.ServerDate;
+//     user: {
+//         userId: Schema["users"]["Id"];
+//         name: string;
+//         imageUrl: string;
+//     };
+//     availedPlan: {
+//         ...;
+//     };
+
+// interface UserBasicInfo {
+//   userId: Schema["users"]["Id"];
+//   name: string;
+//   imageUrl: string;
+// }
+
+// interface AvailedPlan {
+//   membershipPlanId: Schema["membershipPlan"]["Id"];
+//   name: string;
+//   amount: number;
+//   duration: number;
+//   startDate: Date;
+//   expiryDate: Date;
+// }
+
+// interface Payment {
+//   id: string;
+//   paymentMethod: string;
+//   status: string;
+//   isNewCustomer: boolean;
+//   createdAt: Typesaurus.ServerDate;
+//   user: UserBasicInfo;
+//   availedPlan: AvailedPlan;
+// }
