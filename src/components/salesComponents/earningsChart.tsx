@@ -63,19 +63,22 @@ const years = {
 };
 
 export default function EarningsChart() {
-  const [selectedYear, setSelectedYear] = React.useState<keyof typeof years>("2024");
+  const [selectedYear, setSelectedYear] =
+    React.useState<keyof typeof years>("2024");
 
   return (
-    <Card className="w-full max-w-4xl">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-muted-foreground">Earnings</CardTitle>
+    <Card className="max-w-lg bg-background/50 shadow-sm ">
+      <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          Earnings
+        </CardTitle>
         <Select
           defaultValue={selectedYear}
           onValueChange={(value) =>
             setSelectedYear(value as keyof typeof years)
           }
         >
-          <SelectTrigger className="w-[100px]">
+          <SelectTrigger className="w-[80px] h-7 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -85,8 +88,8 @@ export default function EarningsChart() {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
+      <CardContent className="px-4 pb-4">
+        <div className="h-[200px]">
           <ChartContainer
             config={{
               earnings: {
@@ -98,19 +101,20 @@ export default function EarningsChart() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={years[selectedYear]}
-                margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
               >
                 <CartesianGrid
-                  strokeDasharray="3 3"
+                  strokeDasharray="2 2"
                   vertical={false}
                   stroke="#e0e0e0"
                 />
                 <XAxis
                   dataKey="month"
                   stroke="#888888"
-                  fontSize={12}
+                  fontSize={8}
                   tickLine={false}
                   axisLine={false}
+                  tick={{ dy: 5 }}
                 />
                 <YAxis hide={true} />
                 <Bar dataKey="earnings" fill="var(--color-earnings)" />
@@ -120,12 +124,12 @@ export default function EarningsChart() {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="rounded-md border bg-background p-1 shadow-sm">
                           <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                            <span className="text-[0.60rem] uppercase text-muted-foreground">
                               Earnings
                             </span>
-                            <span className="font-bold text-muted-foreground">
+                            <span className="text-xs font-bold text-muted-foreground">
                               ₱{data.earnings}
                             </span>
                           </div>

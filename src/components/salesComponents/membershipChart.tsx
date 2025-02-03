@@ -63,21 +63,17 @@ export default function MembershipChart() {
   return (
     <Card className="p-4 shadow-none">
       <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center">
-          <div
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: "#757D87" }}
-          ></div>
-          <span className="ml-2 text-base font-medium">Basic Membership</span>
-        </div>
-        <div className="flex items-center">
-          <div
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: "#E3E6EB" }}
-          ></div>
-          <span className="ml-2 text-base font-medium">
-            Membership with Trainer
-          </span>
+        <div className="flex space-x-8">
+          <div className="flex items-center">
+            <div className="w-4 h-4 rounded-full bg-[#9095a0]"></div>
+            <span className="ml-2 text-base font-medium">Basic Membership</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 rounded-full bg-gray-300"></div>
+            <span className="ml-2 text-base font-medium">
+              Membership with Trainer
+            </span>
+          </div>
         </div>
         <Select onValueChange={setSelectedYear} value={selectedYear}>
           <SelectTrigger className="w-24">
@@ -90,24 +86,19 @@ export default function MembershipChart() {
           </SelectContent>
         </Select>
       </div>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={years[selectedYear]}>
+
+      {/* Bar Chart */}
+      <ResponsiveContainer width="100%" height={300} minWidth={800}>
+        <BarChart
+          data={years[selectedYear]}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          barGap={0}
+          barCategoryGap="20%"
+        >
           <XAxis dataKey="name" stroke="#666" />
           <Tooltip contentStyle={{ borderRadius: "8px", color: "#333" }} />
-          <Bar
-            dataKey="basic"
-            fill="#757D87"
-            barSize={30}
-            radius={0}
-            style={{ filter: "none" }}
-          />
-          <Bar
-            dataKey="trainer"
-            fill="#E3E6EB"
-            barSize={30}
-            radius={0}
-            style={{ filter: "none" }}
-          />
+          <Bar dataKey="basic" fill="#9095a0" barSize={20} />
+          <Bar dataKey="trainer" fill="#E3E6EB" barSize={20} />
         </BarChart>
       </ResponsiveContainer>
     </Card>

@@ -5,7 +5,7 @@ export const mockChartData = [
   {
     category: "Student",
     data: [
-      { name: "Trainer", value: 60, color: "#757D87" },
+      { name: "Trainer", value: 60, color: "#9095a0" },
       { name: "Basic", value: 40, color: "#E3E6EB" },
     ],
   },
