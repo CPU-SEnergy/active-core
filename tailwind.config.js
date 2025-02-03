@@ -48,6 +48,9 @@ module.exports = {
           md: "calc(var(--radius) - 2px)",
           sm: "calc(var(--radius) - 4px)",
         },
+        fontFamily: {
+          audiowide: ["Audiowide", "cursive"],
+        },
       },
     },
     // eslint-disable-next-line @typescript-eslint/no-require-imports

@@ -32,19 +32,19 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8 }}
-      className="fixed w-full z-50 bg-black/90 backdrop-blur-sm"
+      className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm"
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <Link href="/home" className="flex items-center space-x-2">
+        <Link href="/home" className="flex items-center space-x-3">
             <Image
               src="/pictures/sports and fitness navigation bar logo.png"
               alt="Sports and Fitness Center"
-              width={40}
-              height={40}
-              className="w-auto h-8"
+              width={50}
+              height={50}
+              className="w-auto h-12"
             />
-            <span className="text-xl font-bold text-white">Sports and Fitness Center</span>
+            <span className="text-2xl font-bold">Sports and Fitness Center</span>
           </Link>
 
           {/* Desktop Navigation */}
