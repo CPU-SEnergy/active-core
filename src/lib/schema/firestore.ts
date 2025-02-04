@@ -81,10 +81,8 @@ interface KPIs {
 }
 
 interface MonthKPI {
-  totalRevenue: number;
-  totalCustomers: number;
-  newCustomers: number;
-  renewals: number;
+  revenue: number;
+  customers: number;
 }
 
 interface Customers {
