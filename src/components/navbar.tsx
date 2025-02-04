@@ -4,7 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/auth/AuthProvider";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 import { usePathname } from "next/navigation";
@@ -35,8 +42,8 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm"
     >
       <div className="w-screen px-4">
-      <div className="flex items-center justify-between h-14">
-        <Link href="/home" className="flex items-center space-x-3">
+        <div className="flex items-center justify-between h-14">
+          <Link href="/home" className="flex items-center space-x-3">
             <Image
               src="/pictures/sports and fitness navigation bar logo.png"
               alt="Sports and Fitness Center"
@@ -44,31 +51,41 @@ export default function Navbar() {
               height={50}
               className="w-auto h-12"
             />
-            <span className="text-2xl font-bold sm:block hidden">Sports and Fitness Center</span>
+            <span className="text-2xl font-bold sm:block hidden">
+              Sports and Fitness Center
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-<div className="hidden md:flex items-center space-x-8">
-  {["Home", "Classes", "Apparels", "Coaches", "My Profile"].map((item, index) => {
-    const href = item === "Home" ? "/home" : item === "Classes" ? "/sports-classes" : item === "My Profile" ? "/user-profile" : `/${item.toLowerCase().replace(" ", "-")}`;
-    return (
-      <motion.div
-        key={item}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 * index, duration: 0.5 }}
-      >
-        <Link
-          href={href}
-          className="text-white hover:text-red-500 transition duration-300"
-        >
-          {item}
-        </Link>
-      </motion.div>
-    );
-  })}
-</div>
-
+          <div className="hidden md:flex items-center space-x-8">
+            {["Home", "Classes", "Apparels", "Coaches", "My Profile"].map(
+              (item, index) => {
+                const href =
+                  item === "Home"
+                    ? "/"
+                    : item === "Classes"
+                      ? "/sports-classes"
+                      : item === "My Profile"
+                        ? "/user-profile"
+                        : `/${item.toLowerCase().replace(" ", "-")}`;
+                return (
+                  <motion.div
+                    key={item}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index, duration: 0.5 }}
+                  >
+                    <Link
+                      href={href}
+                      className="text-white hover:text-red-500 transition duration-300"
+                    >
+                      {item}
+                    </Link>
+                  </motion.div>
+                );
+              }
+            )}
+          </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center">
@@ -81,16 +98,22 @@ export default function Navbar() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col items-center space-y-3 text-black py-4">
-                  {["Home", "Classes", "Apparels", "Coaches", "My Profile"].map((item) => (
-                    <SheetClose asChild key={item}>
-                      <Link
-                        href={item === "Home" ? "/home" : `/${item.toLowerCase().replace(" ", "-")}`}
-                        className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
-                      >
-                        {item}
-                      </Link>
-                    </SheetClose>
-                  ))}
+                  {["Home", "Classes", "Apparels", "Coaches", "My Profile"].map(
+                    (item) => (
+                      <SheetClose asChild key={item}>
+                        <Link
+                          href={
+                            item === "Home"
+                              ? "/"
+                              : `/${item.toLowerCase().replace(" ", "-")}`
+                          }
+                          className="hover:bg-gray-100 px-3 py-2 rounded-md text-lg font-medium"
+                        >
+                          {item}
+                        </Link>
+                      </SheetClose>
+                    )
+                  )}
                   <SheetClose asChild>
                     <LogoutButton user={user} />
                   </SheetClose>
@@ -114,7 +137,9 @@ export default function Navbar() {
                   <Link
                     href={`/${item.toLowerCase()}`}
                     className={`text-white hover:text-red-500 transition duration-300 ${
-                      item === "Register" ? "bg-red-600 px-4 py-2 rounded-full hover:bg-red-700" : ""
+                      item === "Register"
+                        ? "bg-red-600 px-4 py-2 rounded-full hover:bg-red-700"
+                        : ""
                     }`}
                   >
                     {item}
