@@ -24,7 +24,8 @@ function CustomTrigger() {
   );
 }
 
-function Layout({ children }: { children: React.ReactNode }) {
+
+export default function Layout({ children }: { children: React.ReactNode }) {
     
   return (
     <SidebarProvider>
@@ -36,5 +37,3 @@ function Layout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   )
 }
-
-export default Layout;
