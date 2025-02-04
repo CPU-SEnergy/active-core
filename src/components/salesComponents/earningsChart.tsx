@@ -122,7 +122,7 @@ export default function EarningsChart() {
                   cursor={false}
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
-                      const data = payload[0].payload;
+                      const data = payload && payload[0] ? payload[0].payload : null;
                       return (
                         <div className="rounded-md border bg-background p-1 shadow-sm">
                           <div className="flex flex-col">

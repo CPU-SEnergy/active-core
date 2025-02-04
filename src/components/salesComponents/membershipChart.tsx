@@ -90,7 +90,7 @@ export default function MembershipChart() {
       {/* Bar Chart */}
       <ResponsiveContainer width="100%" height={300} minWidth={800}>
         <BarChart
-          data={years[selectedYear]}
+          data={years[selectedYear] || []}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           barGap={0}
           barCategoryGap="20%"
