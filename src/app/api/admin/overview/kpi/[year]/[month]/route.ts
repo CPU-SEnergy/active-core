@@ -22,6 +22,27 @@ export async function GET(request: Request, context: { params: Params}) {
 
     const monthDoc = await monthsCollection.get(monthId);
 
+    const previousMonth = monthId === "01" ? "12" as MonthId : (Number(month)- 1).toString().padStart(2, "0") as MonthId;
+    const previousMonthDoc = await monthsCollection.get(previousMonth, { as: "server" });
+    
+    if (previousMonth === "12") {
+      const previousYear = year - 1;
+      const previousYearId: YearId = previousYear.toString() as YearId;
+      const previousMonthDoc = await db.kpis(previousYearId).months.get(previousMonth, { as: "server" });
+
+      if (monthDoc && previousMonthDoc) {
+        compareKpiMonths(monthDoc, previousMonthDoc);
+      } else if (monthDoc){
+        compareKpiMonths(monthDoc, null);
+      }
+    } else {
+      if (monthDoc && previousMonthDoc) {
+        compareKpiMonths(monthDoc, previousMonthDoc);
+      } else if (monthDoc){
+        compareKpiMonths(monthDoc, null);
+      }
+    }
+
     if (!monthDoc || !monthDoc.data) {
       return new Response(JSON.stringify({ error: "Document not found" }), {
         status: 404,
@@ -40,4 +61,13 @@ export async function GET(request: Request, context: { params: Params}) {
       headers: { "Content-Type": "application/json" },
     });
   }
+}
+
+function compareKpiMonths (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
+  if (!currentMonth || !previousMonth) {
+    return null;
+  } else {
+    return currentMonth.data.totalRevenue / previousMonth.data.totalRevenue;
+  }
+
 }
