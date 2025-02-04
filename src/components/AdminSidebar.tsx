@@ -28,7 +28,7 @@ const menuItems = [
         />
       </svg>
     ),
-    href: "/admin/testss",
+    href: "/admin",
   },
   {
     title: "Sales",

@@ -2,16 +2,12 @@
 
 import { useState } from "react"
 import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-
-// Mock Data
 import { kpis, recentCustomers, timeFilters } from "@/lib/mock_data/overviewMockData"
 
-// Components
 function KPICard({ title, value, change, prefix }: KPI) {
   const isPositive = change >= 0
 
@@ -69,7 +65,6 @@ function CustomerTable({ customers }: { customers: Customer[] }) {
   )
 }
 
-// Main Dashboard Component
 export default function Dashboard() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter["value"]>("24h")
   const [searchQuery, setSearchQuery] = useState("")
@@ -79,21 +74,14 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white p-6 border-r">
+    <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
+      <aside className="w-full lg:w-64 bg-white p-6 border-r">
         <nav className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Overview</h2>
-          </div>
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center justify-between">
               KPIs
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                ⋮
-              </Button>
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-4 lg:flex lg:flex-wrap flex-col">
               {kpis.map((kpi, index) => (
                 <KPICard key={index} {...kpi} />
               ))}
@@ -102,10 +90,8 @@ export default function Dashboard() {
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6">
+      <div className="flex-1 p-6">
         <div className="max-w-4xl">
-          {/* Search Bar */}
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input
@@ -116,10 +102,9 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Recent Activity Section */}
           <div className="bg-white rounded-lg border">
-            <div className="p-4 flex items-center justify-between border-b">
-              <h2 className="text-lg font-semibold">Recent Activity</h2>
+            <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b">
+              <h2 className="text-lg font-semibold mb-4 lg:mb-0">Recent Activity</h2>
               <Select value={timeFilter} onValueChange={(value) => setTimeFilter(value)}>
                 <SelectTrigger className="w-[100px]">
                   <SelectValue />
@@ -133,11 +118,10 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
             </div>
-
             <CustomerTable customers={filteredCustomers} />
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
