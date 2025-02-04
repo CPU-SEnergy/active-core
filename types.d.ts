@@ -30,3 +30,13 @@ interface Coach {
   certifications: string[];
   contact: string;
 }
+
+interface UserHistoryProps {
+  error?: string;
+  id: string;
+  name: string;
+  duration: number;
+  startDate: Date;
+  expiryDate: Date;
+  amount: number;
+}

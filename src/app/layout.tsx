@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { getTokens } from 'next-firebase-auth-edge';
 import { cookies, headers } from 'next/headers';
-import { serverConfig, clientConfig } from '@/lib/config'; // Make sure to import clientConfig
+import { serverConfig, clientConfig } from '@/lib/config';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { toUser } from '@/utils/helpers/user';
 import Navbar from "@/components/navbar";
