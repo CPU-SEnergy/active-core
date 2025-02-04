@@ -52,3 +52,13 @@ interface TimeFilter {
   value: string
   label: string
 }
+
+interface UserHistoryProps {
+  error?: string;
+  id: string;
+  name: string;
+  duration: number;
+  startDate: Date;
+  expiryDate: Date;
+  amount: number;
+}
