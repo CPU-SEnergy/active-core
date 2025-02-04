@@ -24,7 +24,7 @@ function CustomTrigger() {
   );
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: React.ReactNode }) {
     
   return (
     <SidebarProvider>
