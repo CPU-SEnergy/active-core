@@ -21,7 +21,7 @@ export default function Navbar() {
 
   const pathname = usePathname();
 
-  if (pathname.startsWith("/auth")) {
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
     return null;
   }
 
