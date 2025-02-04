@@ -145,6 +145,55 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+      {/* Move Section */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="min-h-screen py-16 bg-gradient-to-r from-red-950 to-black flex items-center"
+      >
+        <div className="container mx-auto px-4">
+          <motion.h2
+            initial={{ y: -30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-3xl font-bold mb-12 text-center"
+          >
+            Move of the Week
+          </motion.h2>
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="relative aspect-square"
+            >
+              <Image
+                src="/pictures/combat.jpg"
+                alt="The Jab"
+                fill
+                className="object-cover rounded-lg"
+              />
+            </motion.div>
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="space-y-4"
+            >
+              <h3 className="text-2xl font-bold text-red-500">The Jab</h3>
+              <p className="text-gray-300 leading-relaxed">
+                The Jab is a highly skilled boxing coach known for his strategic training methods and
+                dedication to developing top-tier fighters. With years of experience in the sport, he has trained both
+                amateur and professional boxers, focusing on technique, endurance, and mental toughness. His expertise
+                has helped athletes sharpen their skills and achieve championship-level performance. Passionate and
+                disciplined, Coach Manaf pushes his fighters to their limits, ensuring they reach their full potential
+                in the ring.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
       {/* Gym Tour Section */}
       <motion.section
         initial={{ opacity: 0 }}
