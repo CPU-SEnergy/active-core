@@ -34,8 +34,8 @@ export default function Navbar() {
       transition={{ duration: 0.8 }}
       className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm"
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+      <div className="w-screen px-4">
+      <div className="flex items-center justify-between h-14">
         <Link href="/home" className="flex items-center space-x-3">
             <Image
               src="/pictures/sports and fitness navigation bar logo.png"
@@ -44,7 +44,7 @@ export default function Navbar() {
               height={50}
               className="w-auto h-12"
             />
-            <span className="text-2xl font-bold">Sports and Fitness Center</span>
+            <span className="text-2xl font-bold sm:block hidden">Sports and Fitness Center</span>
           </Link>
 
           {/* Desktop Navigation */}
