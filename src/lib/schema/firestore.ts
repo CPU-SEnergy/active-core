@@ -86,9 +86,7 @@ interface MonthKPI {
 }
 
 interface Customers {
-  overallCustomers: number;
-  activeCustomers: number;
-  inactiveCustomers: number;
+  totalCustomers: number;
 }
 
 interface Apparels {

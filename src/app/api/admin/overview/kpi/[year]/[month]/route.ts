@@ -24,26 +24,34 @@ export async function GET(request: Request, context: { params: Params}) {
 
     const previousMonth = monthId === "01" ? "12" as MonthId : (Number(month)- 1).toString().padStart(2, "0") as MonthId;
     const previousMonthDoc = await monthsCollection.get(previousMonth, { as: "server" });
+
+    const totalCustomers = await db.customers.all({ as: "server" });
+    const totalCustomer = totalCustomers[0];
+    
     
     if (previousMonth === "12") {
       const previousYear = year - 1;
       const previousYearId: YearId = previousYear.toString() as YearId;
       const previousMonthDoc = await db.kpis(previousYearId).months.get(previousMonth, { as: "server" });
 
-      if (monthDoc && previousMonthDoc) {
+      if (monthDoc && previousMonthDoc && totalCustomer) {
         compareKpiMonths(monthDoc, previousMonthDoc);
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-      } else if (monthDoc){
+        console.log(compareActiveCustomers(monthDoc, totalCustomer));
+      } else if (monthDoc && totalCustomer){
         compareKpiMonths(monthDoc, null);
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
+        console.log(compareActiveCustomers(monthDoc, totalCustomer));
       }
     } else {
-      if (monthDoc && previousMonthDoc) {
+      if (monthDoc && previousMonthDoc && totalCustomer) {
         compareKpiMonths(monthDoc, previousMonthDoc);
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-      } else if (monthDoc){
+        console.log(compareActiveCustomers(monthDoc, totalCustomer));
+      } else if (monthDoc && totalCustomer){
         compareKpiMonths(monthDoc, null);
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
+        console.log(compareActiveCustomers(monthDoc, totalCustomer));
       }
     }
 
@@ -75,7 +83,6 @@ function compareKpiMonths (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"],
   } else {
     return currentMonth.data.revenue / previousMonth.data.revenue;
   }
-
 }
 
 function compareKpiCurrentCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
@@ -86,16 +93,12 @@ function compareKpiCurrentCustomers (currentMonth: Schema["kpis"]["sub"]["months
   } else {
     return currentMonth.data.customers / previousMonth.data.customers;
   }
-
 }
 
-// function compareKpiActiveCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
-//   if (!currentMonth && !previousMonth) {
-//     return null;
-//   } else if (!previousMonth) {
-//     return 0
-//   } else {
-//     return currentMonth.data.customers / previousMonth.data.customers;
-//   }
-
-// }
+function compareActiveCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], totalCustomers: Schema["customers"]["Doc"]) {
+  if (!currentMonth && !totalCustomers) {
+    return null;
+  } else {
+    return currentMonth.data.customers / totalCustomers.data.totalCustomers;
+  }
+}
