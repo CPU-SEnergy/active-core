@@ -32,14 +32,18 @@ export async function GET(request: Request, context: { params: Params}) {
 
       if (monthDoc && previousMonthDoc) {
         compareKpiMonths(monthDoc, previousMonthDoc);
+        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
       } else if (monthDoc){
         compareKpiMonths(monthDoc, null);
+        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
       }
     } else {
       if (monthDoc && previousMonthDoc) {
         compareKpiMonths(monthDoc, previousMonthDoc);
+        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
       } else if (monthDoc){
         compareKpiMonths(monthDoc, null);
+        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
       }
     }
 
@@ -64,10 +68,34 @@ export async function GET(request: Request, context: { params: Params}) {
 }
 
 function compareKpiMonths (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
-  if (!currentMonth || !previousMonth) {
+  if (!currentMonth && !previousMonth) {
     return null;
+  } else if (!previousMonth) {
+    return 0
   } else {
-    return currentMonth.data.totalRevenue / previousMonth.data.totalRevenue;
+    return currentMonth.data.revenue / previousMonth.data.revenue;
   }
 
 }
+
+function compareKpiCurrentCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
+  if (!currentMonth && !previousMonth) {
+    return null;
+  } else if (!previousMonth) {
+    return 0
+  } else {
+    return currentMonth.data.customers / previousMonth.data.customers;
+  }
+
+}
+
+// function compareKpiActiveCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
+//   if (!currentMonth && !previousMonth) {
+//     return null;
+//   } else if (!previousMonth) {
+//     return 0
+//   } else {
+//     return currentMonth.data.customers / previousMonth.data.customers;
+//   }
+
+// }
