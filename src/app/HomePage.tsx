@@ -1,32 +1,25 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Play, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import NavBar from "../components/navbar";
-import router from "next/router";
-
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { Play, X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import NavBar from "../components/navbar"
+import { useRouter } from "next/navigation"
+import { GradientDivider } from "../components/section-dividers"
 
 export default function Home() {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<number | null>(null)
+  const router = useRouter()
+
   return (
     <div className="min-h-screen bg-black text-white">
-      {" "}
-      {/* Add pt-20 for navbar space */}
       <NavBar />
+
       {/* Hero Section */}
       <section className="relative h-screen">
-        {" "}
-        {/* Adjust height for navbar */}
-        <Image
-          src="/pictures/hero 2.jpg"
-          alt="Gym Interior"
-          fill
-          className="object-cover"
-          priority
-        />
+        <Image src="/pictures/hero 2.jpg" alt="Gym Interior" fill className="object-cover" priority />
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -38,7 +31,7 @@ export default function Home() {
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-6xl font-audiowide mb-8"
+              className="text-6xl font-audiowide mb-8 text-shadow-fire"
             >
               GO HARD GET HARD
             </motion.h1>
@@ -57,13 +50,16 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => router.push("/api/auth/register")}
-              className="mt-8 bg-red-600 text-white px-12 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 w-64"
+              className="mt-8 bg-red-600 text-white px-12 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 w-64 relative overflow-hidden group"
             >
-              Start Here
-            </motion.button>;
+              <span className="relative z-10">Start Here</span>
+              <div className="absolute inset-0 geometric-pattern opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            </motion.button>
           </div>
         </motion.div>
       </section>
+
+  
       {/* About Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -71,18 +67,13 @@ export default function Home() {
         transition={{ duration: 1 }}
         className="py-16 bg-gradient-to-b from-black to-red-950 relative"
       >
-        <Image
-          src="/pictures/Second Part Picture.jpg"
-          alt="Background"
-          fill
-          className="object-cover opacity-20"
-        />
+        <Image src="/pictures/Second Part Picture.jpg" alt="Background" fill className="object-cover opacity-20" />
         <div className="container mx-auto px-4 text-center relative z-10">
           <motion.h2
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-4xl font-audiowide mb-4"
+            className="text-4xl font-audiowide mb-4 text-shadow-fire"
           >
             Sports and Fitness Center
           </motion.h2>
@@ -90,7 +81,7 @@ export default function Home() {
             initial={{ y: -20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-2xl mb-8 text-red-500"
+            className="text-2xl mb-8 text-red-500 text-shadow-glow"
           >
             The bearer of champions!
           </motion.h3>
@@ -100,20 +91,19 @@ export default function Home() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="max-w-4xl mx-auto text-lg leading-relaxed text-gray-300"
           >
-            Located in the heart of Iloilo City, Sports & Fitness Center is the
-            premier destination for athletes, fitness enthusiasts, and martial
-            arts practitioners. As Iloilo&apos;s #1 sports and fitness center,
-            we offer state-of-the-art gym facilities, top-tier training
-            programs, and expert coaching in various disciplines, including
-            boxing, Muay Thai, Brazilian Jiu-Jitsu, and more. Our world-class
-            trainers have molded champions, producing elite athletes who compete
-            on national and international stages. Whether you&apos;re a beginner
-            or a professional, our dynamic community fosters discipline,
-            strength, and excellence-helping you achieve peak performance. Join
-            us and become the next champion!
+            Located in the heart of Iloilo City, Sports & Fitness Center is the premier destination for athletes,
+            fitness enthusiasts, and martial arts practitioners. As Iloilo&apos;s #1 sports and fitness center, we offer
+            state-of-the-art gym facilities, top-tier training programs, and expert coaching in various disciplines,
+            including boxing, Muay Thai, Brazilian Jiu-Jitsu, and more. Our world-class trainers have molded champions,
+            producing elite athletes who compete on national and international stages. Whether you&apos;re a beginner or
+            a professional, our dynamic community fosters discipline, strength, and excellence-helping you achieve peak
+            performance. Join us and become the next champion!
           </motion.p>
         </div>
       </motion.section>
+
+      <GradientDivider />
+
       {/* Coach Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -126,7 +116,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-audiowide mb-12 text-center"
+            className="text-3xl font-audiowide mb-12 text-center text-shadow-fire"
           >
             Coach of the Week
           </motion.h2>
@@ -141,7 +131,7 @@ export default function Home() {
                 src="/pictures/Manaf Kassim.png"
                 alt="Coach Manaf Kassim"
                 fill
-                className="object-cover rounded-lg"
+                className="object-cover rounded-lg shadow-neon"
               />
             </motion.div>
             <motion.div
@@ -150,22 +140,22 @@ export default function Home() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="space-y-4"
             >
-              <h3 className="text-2xl font-bold text-red-500">Manaf Kassim</h3>
+              <h3 className="text-2xl font-bold text-red-500 text-shadow-glow">Manaf Kassim</h3>
               <p className="text-gray-300 leading-relaxed">
-                Coach Manaf Kassim is a highly skilled boxing coach known for
-                his strategic training methods and dedication to developing
-                top-tier fighters. With years of experience in the sport, he has
-                trained both amateur and professional boxers, focusing on
-                technique, endurance, and mental toughness. His expertise has
-                helped athletes sharpen their skills and achieve
-                championship-level performance. Passionate and disciplined,
-                Coach Manaf pushes his fighters to their limits, ensuring they
-                reach their full potential in the ring.
+                Coach Manaf Kassim is a highly skilled boxing coach known for his strategic training methods and
+                dedication to developing top-tier fighters. With years of experience in the sport, he has trained both
+                amateur and professional boxers, focusing on technique, endurance, and mental toughness. His expertise
+                has helped athletes sharpen their skills and achieve championship-level performance. Passionate and
+                disciplined, Coach Manaf pushes his fighters to their limits, ensuring they reach their full potential
+                in the ring.
               </p>
             </motion.div>
           </div>
         </div>
       </motion.section>
+
+
+
       {/* Move Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -178,8 +168,11 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-audiowide mb-12 text-center"
+            className="text-3xl font-audiowide mb-12 text-center text-shadow-fire"
           >
+
+
+
             Move of the Week
           </motion.h2>
           <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -189,12 +182,7 @@ export default function Home() {
               transition={{ delay: 0.4, duration: 0.8 }}
               className="relative aspect-square"
             >
-              <Image
-                src="/pictures/combat.jpg"
-                alt="The Jab"
-                fill
-                className="object-cover rounded-lg"
-              />
+              <Image src="/pictures/combat.jpg" alt="The Jab" fill className="object-cover rounded-lg shadow-neon" />
             </motion.div>
             <motion.div
               initial={{ x: 50, opacity: 0 }}
@@ -202,28 +190,27 @@ export default function Home() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="space-y-4"
             >
-              <h3 className="text-2xl font-bold text-red-500">The Jab</h3>
+              <h3 className="text-2xl font-bold text-red-500 text-shadow-glow">The Jab</h3>
               <p className="text-gray-300 leading-relaxed">
-                The Jab is a highly skilled boxing coach known for his strategic
-                training methods and dedication to developing top-tier fighters.
-                With years of experience in the sport, he has trained both
-                amateur and professional boxers, focusing on technique,
-                endurance, and mental toughness. His expertise has helped
-                athletes sharpen their skills and achieve championship-level
-                performance. Passionate and disciplined, Coach Manaf pushes his
-                fighters to their limits, ensuring they reach their full
-                potential in the ring.
+                The Jab is a fundamental boxing technique that serves as the foundation for many combinations. It&apos;s
+                a quick, straight punch thrown with the lead hand, typically aimed at the opponent&apos;s face. The jab
+                is used to maintain distance, set up power punches, and disrupt the opponent&apos;s rhythm. When
+                executed properly, it can be both an offensive and defensive tool, making it an essential move for any
+                boxer to master.
               </p>
             </motion.div>
           </div>
         </div>
       </motion.section>
+
+      <GradientDivider />
+
       {/* Gym Tour Section */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="min-h-screen py-16 bg-gradient-to-b from-black to-red-950 flex items-center"
+        className="min-h-screen py-16 bg-gradient-to-b from-black to-red-950 flex items-center relative"
         style={{
           backgroundImage: 'url("/pictures/gym tour backdrop.jpg")',
           backgroundSize: "cover",
@@ -235,7 +222,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-8 text-center"
+            className="text-3xl font-audiowide mb-8 text-center text-shadow-fire"
           >
             GYM TOUR
           </motion.h2>
@@ -243,22 +230,17 @@ export default function Home() {
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-xl mb-12 text-center text-gray-300"
+            className="text-xl mb-12 text-center text-gray-300 text-shadow-glow"
           >
-            Experience top-tier amenities and elite training at Sports and
-            Fitness Center—where champions are made!
+            Experience top-tier amenities and elite training at Sports and Fitness Center—where champions are made!
           </motion.p>
-
-          <h3 className="text-2xl font-bold text-red-500 mb-8">
-            Discover Strength, Build Champions!
-          </h3>
 
           {/* Main Video Player */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="relative aspect-video mb-12 bg-gray-800 rounded-lg max-w-4xl mx-auto"
+            className="relative aspect-video mb-12 bg-gray-800 rounded-lg max-w-4xl mx-auto shadow-neon"
           >
             <button className="absolute inset-0 flex items-center justify-center">
               <Play className="w-16 h-16 text-white animate-pulse" />
@@ -273,7 +255,7 @@ export default function Home() {
                 initial={{ scale: 0.8, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2 * i, duration: 0.5 }}
-                className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden cursor-pointer"
+                className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden cursor-pointer shadow-neon"
                 onClick={() => setSelectedImage(i)}
               >
                 <Image
@@ -308,7 +290,7 @@ export default function Home() {
                     alt={`Expanded Gym Tour Image ${selectedImage + 1}`}
                     width={1000}
                     height={600}
-                    className="w-full h-auto rounded-lg"
+                    className="w-full h-auto rounded-lg shadow-neon"
                   />
                   <button
                     className="absolute top-4 right-4 text-white bg-red-600 rounded-full p-2"
@@ -327,12 +309,15 @@ export default function Home() {
             transition={{ delay: 1, duration: 0.8 }}
             className="text-center mt-12"
           >
-            <h3 className="text-2xl font-bold text-red-500 mb-8">
+            <h3 className="text-2xl font-bold text-red-500 mb-8 text-shadow-glow">
               Discover Strength, Build Champions!
             </h3>
           </motion.div>
         </div>
       </motion.section>
+
+      <GradientDivider />
+
       {/* Cafe Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -345,7 +330,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
+            className="text-3xl font-audiowide mb-12 text-center text-shadow-fire"
           >
             Café
           </motion.h2>
@@ -359,73 +344,58 @@ export default function Home() {
               src="/pictures/cafe picture.jpg"
               alt="Sports and Fitness Center Cafe"
               fill
-              className="object-cover rounded-lg"
+              className="object-cover rounded-lg shadow-neon"
             />
           </motion.div>
         </div>
       </motion.section>
+
       {/* Footer */}
       <footer className="bg-black py-12 border-t border-red-900">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-red-500 font-semibold mb-4">Product</h3>
+              <h3 className="text-red-500 font-semibold mb-4 text-shadow-glow">Product</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link
-                    href="/apparels"
-                    className="text-gray-300 hover:text-white transition-colors duration-300"
-                  >
+                  <Link href="/apparels" className="text-gray-300 hover:text-white transition-colors duration-300">
                     Apparels
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/services"
-                    className="text-gray-300 hover:text-white transition-colors duration-300"
-                  >
+                  <Link href="/services" className="text-gray-300 hover:text-white transition-colors duration-300">
                     Services
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-red-500 font-semibold mb-4">Company</h3>
+              <h3 className="text-red-500 font-semibold mb-4 text-shadow-glow">Company</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link
-                    href="/classes"
-                    className="text-gray-300 hover:text-white transition-colors duration-300"
-                  >
+                  <Link href="/classes" className="text-gray-300 hover:text-white transition-colors duration-300">
                     Locate Us
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/about"
-                    className="text-gray-300 hover:text-white transition-colors duration-300"
-                  >
+                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-300">
                     About Us
                   </Link>
                 </li>
               </ul>
             </div>
             <div className="md:col-span-2">
-              <h3 className="text-red-500 font-semibold mb-4">
-                Subscribe to our website
-              </h3>
-              <p className="text-gray-300 mb-4">
-                For product announcements and exclusive insights
-              </p>
+              <h3 className="text-red-500 font-semibold mb-4 text-shadow-glow">Subscribe to our website</h3>
+              <p className="text-gray-300 mb-4">For product announcements and exclusive insights</p>
               <form className="flex">
                 <input
                   type="email"
                   placeholder="Input your email"
-                  className="flex-grow px-4 py-2 rounded-l-full bg-gray-800 border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring:red-500 transition-all duration-300"
+                  className="flex-grow px-4 py-2 rounded-l-full bg-gray-800 border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300"
                 />
                 <button
                   type="submit"
-                  className="bg-red-600 text-white px-6 py-2 rounded-r-full hover:bg-red-700 transition-colors duration-300"
+                  className="bg-red-600 text-white px-6 py-2 rounded-r-full hover:bg-red-700 transition-colors duration-300 shadow-neon"
                 >
                   Subscribe
                 </button>
@@ -435,5 +405,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  );
+  )
 }
+

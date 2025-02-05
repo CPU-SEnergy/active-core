@@ -88,7 +88,8 @@
     @apply bg-background text-foreground;
   }
 
-  
+
+@fonts
   :root {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
@@ -99,4 +100,75 @@
     color: rgb(var(--foreground-rgb));
     background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
   }
+
+@section dividers
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+.geometric-pattern {
+  background-image: linear-gradient(45deg, #dc2626 25%, transparent 25%),
+    linear-gradient(-45deg, #dc2626 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #dc2626 75%),
+    linear-gradient(-45deg, transparent 75%, #dc2626 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.text-shadow-fire {
+  text-shadow: 0 0 10px #dc2626, 0 0 20px #dc2626, 0 0 30px #dc2626;
+}
+
+.clip-diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes flame {
+  0% {
+    d: path("M0,0 Q300,120 600,0 T1200,0 V120 H0 V0 Z");
+  }
+  50% {
+    d: path("M0,0 Q300,90 600,30 T1200,0 V120 H0 V0 Z");
+  }
+  100% {
+    d: path("M0,0 Q300,120 600,0 T1200,0 V120 H0 V0 Z");
+  }
+}
+
+.animate-flame {
+  animation: flame 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+
 }
