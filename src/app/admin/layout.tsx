@@ -24,17 +24,16 @@ function CustomTrigger() {
   );
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
+
+export default function Layout({ children }: { children: React.ReactNode }) {
     
   return (
     <SidebarProvider>
       <AdminSidebar />
-      <main>
+      <main className='w-full h-full'>
         <CustomTrigger />
         {children}
       </main>
     </SidebarProvider>
   )
 }
-
-export default Layout;
