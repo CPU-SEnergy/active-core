@@ -1,5 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  theme: {
+    extend: {
+      fontFamily: {
+        audiowide: ["Audiowide", "cursive"],
+      },
+    },
+  },
+  plugins: [],
     darkMode: ["class"],
     content: [
       "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",

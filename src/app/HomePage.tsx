@@ -1,15 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Play, X } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import NavBar from "../components/navbar"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Play, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import NavBar from "../components/navbar";
+import router from "next/router";
 
 
 export default function Home() {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null)
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
   return (
     <div className="min-h-screen bg-black text-white">
       {" "}
@@ -19,7 +20,13 @@ export default function Home() {
       <section className="relative h-screen">
         {" "}
         {/* Adjust height for navbar */}
-        <Image src="/pictures/hero 2.jpg" alt="Gym Interior" fill className="object-cover" priority />
+        <Image
+          src="/pictures/hero 2.jpg"
+          alt="Gym Interior"
+          fill
+          className="object-cover"
+          priority
+        />
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -31,7 +38,7 @@ export default function Home() {
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-6xl font-family: Audiowide mb-4"
+              className="text-6xl font-audiowide mb-8"
             >
               GO HARD GET HARD
             </motion.h1>
@@ -49,10 +56,11 @@ export default function Home() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => router.push("/api/auth/register")}
               className="mt-8 bg-red-600 text-white px-12 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 w-64"
             >
               Start Here
-            </motion.button>
+            </motion.button>;
           </div>
         </motion.div>
       </section>
@@ -63,13 +71,18 @@ export default function Home() {
         transition={{ duration: 1 }}
         className="py-16 bg-gradient-to-b from-black to-red-950 relative"
       >
-        <Image src="/pictures/Second Part Picture.jpg" alt="Background" fill className="object-cover opacity-20" />
+        <Image
+          src="/pictures/Second Part Picture.jpg"
+          alt="Background"
+          fill
+          className="object-cover opacity-20"
+        />
         <div className="container mx-auto px-4 text-center relative z-10">
           <motion.h2
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-4xl font-bold mb-4"
+            className="text-4xl font-audiowide mb-4"
           >
             Sports and Fitness Center
           </motion.h2>
@@ -87,13 +100,17 @@ export default function Home() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="max-w-4xl mx-auto text-lg leading-relaxed text-gray-300"
           >
-            Located in the heart of Iloilo City, Sports & Fitness Center is the premier destination for athletes,
-            fitness enthusiasts, and martial arts practitioners. As Iloilo&apos;s #1 sports and fitness center, we offer
-            state-of-the-art gym facilities, top-tier training programs, and expert coaching in various disciplines,
-            including boxing, Muay Thai, Brazilian Jiu-Jitsu, and more. Our world-class trainers have molded champions,
-            producing elite athletes who compete on national and international stages. Whether you&apos;re a beginner or a
-            professional, our dynamic community fosters discipline, strength, and excellence-helping you achieve peak
-            performance. Join us and become the next champion!
+            Located in the heart of Iloilo City, Sports & Fitness Center is the
+            premier destination for athletes, fitness enthusiasts, and martial
+            arts practitioners. As Iloilo&apos;s #1 sports and fitness center,
+            we offer state-of-the-art gym facilities, top-tier training
+            programs, and expert coaching in various disciplines, including
+            boxing, Muay Thai, Brazilian Jiu-Jitsu, and more. Our world-class
+            trainers have molded champions, producing elite athletes who compete
+            on national and international stages. Whether you&apos;re a beginner
+            or a professional, our dynamic community fosters discipline,
+            strength, and excellence-helping you achieve peak performance. Join
+            us and become the next champion!
           </motion.p>
         </div>
       </motion.section>
@@ -109,7 +126,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
+            className="text-3xl font-audiowide mb-12 text-center"
           >
             Coach of the Week
           </motion.h2>
@@ -135,12 +152,15 @@ export default function Home() {
             >
               <h3 className="text-2xl font-bold text-red-500">Manaf Kassim</h3>
               <p className="text-gray-300 leading-relaxed">
-                Coach Manaf Kassim is a highly skilled boxing coach known for his strategic training methods and
-                dedication to developing top-tier fighters. With years of experience in the sport, he has trained both
-                amateur and professional boxers, focusing on technique, endurance, and mental toughness. His expertise
-                has helped athletes sharpen their skills and achieve championship-level performance. Passionate and
-                disciplined, Coach Manaf pushes his fighters to their limits, ensuring they reach their full potential
-                in the ring.
+                Coach Manaf Kassim is a highly skilled boxing coach known for
+                his strategic training methods and dedication to developing
+                top-tier fighters. With years of experience in the sport, he has
+                trained both amateur and professional boxers, focusing on
+                technique, endurance, and mental toughness. His expertise has
+                helped athletes sharpen their skills and achieve
+                championship-level performance. Passionate and disciplined,
+                Coach Manaf pushes his fighters to their limits, ensuring they
+                reach their full potential in the ring.
               </p>
             </motion.div>
           </div>
@@ -158,7 +178,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
+            className="text-3xl font-audiowide mb-12 text-center"
           >
             Move of the Week
           </motion.h2>
@@ -184,12 +204,15 @@ export default function Home() {
             >
               <h3 className="text-2xl font-bold text-red-500">The Jab</h3>
               <p className="text-gray-300 leading-relaxed">
-                The Jab is a highly skilled boxing coach known for his strategic training methods and
-                dedication to developing top-tier fighters. With years of experience in the sport, he has trained both
-                amateur and professional boxers, focusing on technique, endurance, and mental toughness. His expertise
-                has helped athletes sharpen their skills and achieve championship-level performance. Passionate and
-                disciplined, Coach Manaf pushes his fighters to their limits, ensuring they reach their full potential
-                in the ring.
+                The Jab is a highly skilled boxing coach known for his strategic
+                training methods and dedication to developing top-tier fighters.
+                With years of experience in the sport, he has trained both
+                amateur and professional boxers, focusing on technique,
+                endurance, and mental toughness. His expertise has helped
+                athletes sharpen their skills and achieve championship-level
+                performance. Passionate and disciplined, Coach Manaf pushes his
+                fighters to their limits, ensuring they reach their full
+                potential in the ring.
               </p>
             </motion.div>
           </div>
@@ -222,10 +245,13 @@ export default function Home() {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="text-xl mb-12 text-center text-gray-300"
           >
-            Experience top-tier amenities and elite training at Sports and Fitness Center—where champions are made!
+            Experience top-tier amenities and elite training at Sports and
+            Fitness Center—where champions are made!
           </motion.p>
 
-          <h3 className="text-2xl font-bold text-red-500 mb-8">Discover Strength, Build Champions!</h3>
+          <h3 className="text-2xl font-bold text-red-500 mb-8">
+            Discover Strength, Build Champions!
+          </h3>
 
           {/* Main Video Player */}
           <motion.div
@@ -301,7 +327,9 @@ export default function Home() {
             transition={{ delay: 1, duration: 0.8 }}
             className="text-center mt-12"
           >
-            <h3 className="text-2xl font-bold text-red-500 mb-8">Discover Strength, Build Champions!</h3>
+            <h3 className="text-2xl font-bold text-red-500 mb-8">
+              Discover Strength, Build Champions!
+            </h3>
           </motion.div>
         </div>
       </motion.section>
@@ -344,12 +372,18 @@ export default function Home() {
               <h3 className="text-red-500 font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/apparels" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  <Link
+                    href="/apparels"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
                     Apparels
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  <Link
+                    href="/services"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
                     Services
                   </Link>
                 </li>
@@ -359,25 +393,35 @@ export default function Home() {
               <h3 className="text-red-500 font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/classes" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  <Link
+                    href="/classes"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
                     Locate Us
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  <Link
+                    href="/about"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
                     About Us
                   </Link>
                 </li>
               </ul>
             </div>
             <div className="md:col-span-2">
-              <h3 className="text-red-500 font-semibold mb-4">Subscribe to our website</h3>
-              <p className="text-gray-300 mb-4">For product announcements and exclusive insights</p>
+              <h3 className="text-red-500 font-semibold mb-4">
+                Subscribe to our website
+              </h3>
+              <p className="text-gray-300 mb-4">
+                For product announcements and exclusive insights
+              </p>
               <form className="flex">
                 <input
                   type="email"
                   placeholder="Input your email"
-                   className="flex-grow px-4 py-2 rounded-l-full bg-gray-800 border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring:red-500 transition-all duration-300"
+                  className="flex-grow px-4 py-2 rounded-l-full bg-gray-800 border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring:red-500 transition-all duration-300"
                 />
                 <button
                   type="submit"
@@ -391,5 +435,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

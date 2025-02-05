@@ -49,9 +49,9 @@ export default function Navbar() {
               alt="Sports and Fitness Center"
               width={50}
               height={50}
-              className="w-auto h-12"
+              className="w-auto h-10"
             />
-            <span className="text-2xl font-bold sm:block hidden">
+            <span className="text-2xl font-semibold sm:block hidden">
               Sports and Fitness Center
             </span>
           </Link>

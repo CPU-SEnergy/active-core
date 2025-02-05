@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { getTokens } from 'next-firebase-auth-edge';
-import { cookies, headers } from 'next/headers';
-import { serverConfig, clientConfig } from '@/lib/config';
-import { AuthProvider } from '@/auth/AuthProvider';
-import { toUser } from '@/utils/helpers/user';
+import type React from "react";
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies, headers } from "next/headers";
+import { serverConfig, clientConfig } from "@/lib/config";
+import { AuthProvider } from "@/auth/AuthProvider";
+import { toUser } from "@/utils/helpers/user";
 import Navbar from "@/components/navbar";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,31 +22,35 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Sport and Fitness",
-  description: "Sport and Fitness Registration",
+  title: "Sports and Fitness Center",
+  description: "Premier destination for athletes and fitness enthusiasts.",
 };
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const tokens = await getTokens(cookies(), {
     ...serverConfig,
     apiKey: clientConfig.apiKey,
     headers: headers(),
   });
-  /* eslint-disable @typescript-eslint/no-unused-vars */
 
-  const user = tokens ? toUser(tokens) : null;
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ const user = tokens ? toUser(tokens) : null;
 
   return (
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{
-          fontFamily: 'var(--font-geist-sans), sans-serif',
-        }}
+        style={{ fontFamily: "var(--font-geist-sans), sans-serif" }}
       >
         <AuthProvider>
           <Navbar />
