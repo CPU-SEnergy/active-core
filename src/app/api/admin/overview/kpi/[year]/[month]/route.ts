@@ -25,8 +25,8 @@ export async function GET(request: Request, context: { params: Params}) {
     const previousMonth = monthId === "01" ? "12" as MonthId : (Number(month)- 1).toString().padStart(2, "0") as MonthId;
     const previousMonthDoc = await monthsCollection.get(previousMonth, { as: "server" });
 
-    const totalCustomers = await db.customers.all({ as: "server" });
-    const totalCustomer = totalCustomers[0];
+    const totalCustomersDoc = await db.customers.all({ as: "server" });
+    const totalCustomer = totalCustomersDoc[0];
     
     
     if (previousMonth === "12") {
@@ -35,25 +35,25 @@ export async function GET(request: Request, context: { params: Params}) {
       const previousMonthDoc = await db.kpis(previousYearId).months.get(previousMonth, { as: "server" });
 
       if (monthDoc && previousMonthDoc && totalCustomer) {
-        compareKpiMonths(monthDoc, previousMonthDoc);
+        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer));
+        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
       } else if (monthDoc && totalCustomer){
-        compareKpiMonths(monthDoc, null);
+        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer));
+        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
       }
     } else {
       if (monthDoc && previousMonthDoc && totalCustomer) {
-        compareKpiMonths(monthDoc, previousMonthDoc);
+        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer));
+        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
       } else if (monthDoc && totalCustomer){
-        compareKpiMonths(monthDoc, null);
+        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
         console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer));
+        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
       }
-    }
+    } 
 
     if (!monthDoc || !monthDoc.data) {
       return new Response(JSON.stringify({ error: "Document not found" }), {
@@ -79,9 +79,9 @@ function compareKpiMonths (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"],
   if (!currentMonth && !previousMonth) {
     return null;
   } else if (!previousMonth) {
-    return 0
+    return 100
   } else {
-    return currentMonth.data.revenue / previousMonth.data.revenue;
+    return ((currentMonth.data.revenue - previousMonth.data.revenue) / previousMonth.data.revenue) * 100;
   }
 }
 
@@ -89,16 +89,18 @@ function compareKpiCurrentCustomers (currentMonth: Schema["kpis"]["sub"]["months
   if (!currentMonth && !previousMonth) {
     return null;
   } else if (!previousMonth) {
-    return 0
+    return 100
   } else {
-    return currentMonth.data.customers / previousMonth.data.customers;
+    return ((currentMonth.data.customers - previousMonth.data.customers) / previousMonth.data.customers) * 100;
   }
 }
 
-function compareActiveCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], totalCustomers: Schema["customers"]["Doc"]) {
+function compareActiveCustomers (currentMonth: Schema["kpis"]["sub"]["months"]["Doc"], totalCustomers: Schema["customers"]["Doc"], previousMonth: Schema["kpis"]["sub"]["months"]["Doc"] | null) {
   if (!currentMonth && !totalCustomers) {
     return null;
+  } else if (!previousMonth) {
+    return 100
   } else {
-    return currentMonth.data.customers / totalCustomers.data.totalCustomers;
+    return (((currentMonth.data.customers - previousMonth.data.customers) / previousMonth.data.customers) / totalCustomers.data.totalCustomers) * 100;
   }
-}
+} 
