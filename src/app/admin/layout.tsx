@@ -30,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AdminSidebar />
-      <main>
+      <main className='w-full h-full'>
         <CustomTrigger />
         {children}
       </main>
