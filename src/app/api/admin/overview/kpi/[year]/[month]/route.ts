@@ -27,6 +27,10 @@ export async function GET(request: Request, context: { params: Params}) {
 
     const totalCustomersDoc = await db.customers.all({ as: "server" });
     const totalCustomer = totalCustomersDoc[0];
+
+    let revenueComparison: number | null;
+    let customersComparison: number | null;
+    let activeCustomersComparison: number | null;
     
     if (previousMonth === "12") {
       const previousYear = year - 1;
@@ -34,25 +38,38 @@ export async function GET(request: Request, context: { params: Params}) {
       const previousMonthDoc = await db.kpis(previousYearId).months.get(previousMonth, { as: "server" });
 
       if (monthDoc && previousMonthDoc && totalCustomer) {
-        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
-        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
-      } else if (monthDoc && totalCustomer){
-        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
-        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
+
+        revenueComparison = compareKpiMonths(monthDoc, previousMonthDoc);
+        customersComparison = compareKpiCurrentCustomers(monthDoc, previousMonthDoc);
+        activeCustomersComparison = compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc);
+
+      } else if (monthDoc && totalCustomer) {
+
+        revenueComparison = compareKpiMonths(monthDoc, previousMonthDoc);
+        customersComparison = compareKpiCurrentCustomers(monthDoc, previousMonthDoc);
+        activeCustomersComparison = compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc);
+
       }
     } else {
       if (monthDoc && previousMonthDoc && totalCustomer) {
-        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
-        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
+
+        revenueComparison = compareKpiMonths(monthDoc, previousMonthDoc);
+        customersComparison = compareKpiCurrentCustomers(monthDoc, previousMonthDoc);
+        activeCustomersComparison = compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc);
+
       } else if (monthDoc && totalCustomer){
-        console.log(compareKpiMonths(monthDoc, previousMonthDoc));
-        console.log(compareKpiCurrentCustomers(monthDoc, previousMonthDoc));
-        console.log(compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc));
+
+        revenueComparison = compareKpiMonths(monthDoc, previousMonthDoc);
+        customersComparison = compareKpiCurrentCustomers(monthDoc, previousMonthDoc);
+        activeCustomersComparison = compareActiveCustomers(monthDoc, totalCustomer, previousMonthDoc);
+
+      } else {
+        return new Response(JSON.stringify({ error: "Document not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
       }
-    } 
+    }
 
     if (!monthDoc || !monthDoc.data) {
       return new Response(JSON.stringify({ error: "Document not found" }), {
@@ -61,10 +78,25 @@ export async function GET(request: Request, context: { params: Params}) {
       });
     }
 
-    return new Response(JSON.stringify(monthDoc.data), {
+    const totalMMR = (() => {
+      const monthlyActiveCustomers = (monthDoc.data.customers / Number(totalCustomer) * 100)
+
+
+      return {
+        monthlyRevenue: monthDoc.data.revenue,
+        monthlyCustomers: monthDoc.data.customers,
+        monthlyActiveCustomers,
+        monthlyRevenueComparison: revenueComparison,
+        monthlyCustomersComparison: customersComparison,
+        monthlyActiveCustomersComparison: activeCustomersComparison
+      }
+    })
+
+    return new Response(JSON.stringify(totalMMR), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
+
   } catch (error) {
     console.error("Error fetching document:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
