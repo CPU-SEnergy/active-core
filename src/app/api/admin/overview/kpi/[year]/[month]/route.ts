@@ -26,11 +26,18 @@ export async function GET(request: Request, context: { params: Params}) {
     const previousMonthDoc = await monthsCollection.get(previousMonth, { as: "server" });
 
     const totalCustomersDoc = await db.customers.all({ as: "server" });
-    const totalCustomer = totalCustomersDoc[0];
+    const totalCustomer = totalCustomersDoc.length > 0 ? totalCustomersDoc[0] : null;
 
-    let revenueComparison: number | null;
-    let customersComparison: number | null;
-    let activeCustomersComparison: number | null;
+    if (!totalCustomer) {
+      return new Response(JSON.stringify({ error: "Total customers document not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    let revenueComparison: number | null = 0;
+    let customersComparison: number | null = 0;
+    let activeCustomersComparison: number | null = 0;
     
     if (previousMonth === "12") {
       const previousYear = year - 1;
@@ -78,21 +85,18 @@ export async function GET(request: Request, context: { params: Params}) {
       });
     }
 
-    const totalMMR = (() => {
-      const monthlyActiveCustomers = (monthDoc.data.customers / Number(totalCustomer) * 100)
+    const monthlyActiveCustomers = (monthDoc.data.customers / totalCustomer.data.totalCustomers) * 100;
 
-
-      return {
-        monthlyRevenue: monthDoc.data.revenue,
-        monthlyCustomers: monthDoc.data.customers,
-        monthlyActiveCustomers,
-        monthlyRevenueComparison: revenueComparison,
-        monthlyCustomersComparison: customersComparison,
-        monthlyActiveCustomersComparison: activeCustomersComparison
-      }
-    })
-
-    return new Response(JSON.stringify(totalMMR), {
+    const result = {
+      monthlyRevenue: monthDoc.data.revenue,
+      monthlyCustomers: monthDoc.data.customers,
+      monthlyActive: monthlyActiveCustomers,
+      monthlyRevenueComparison: revenueComparison,
+      monthlyCustomersComparison: customersComparison,
+      monthlyActiveCustomersComparison: activeCustomersComparison
+    }
+    
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
