@@ -3,8 +3,8 @@ import { searchClient } from "@algolia/client-search";
 import { NextResponse } from "next/server";
 
 const client = searchClient(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID as string,
-  process.env.ALGOLIA_ADMIN_API_KEY as string
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
+  process.env.ALGOLIA_ADMIN_API_KEY!
 );
 
 export async function GET() {
