@@ -45,7 +45,7 @@ export default function ApparelPage({
   }
   console.log(apparels);
   return (
-    <main className="w-full bg-gray-50 h-screen pt-20">
+    <main className="w-full bg-gray-50 h-screen">
       <div className="max-w-7xl mx-auto w-full flex flex-col md:px-5 pb-10">
         <div className="flex justify-between mx-4 my-2 md:hidden">
           {/* filter */}
@@ -54,7 +54,6 @@ export default function ApparelPage({
           {/* sort */}
         </div>
         <Separator className="md:hidden" />
-        {/* Desktop */}
         <div className="md:block hidden h-16">
           <div className="flex items-center w-full h-full">
             Home {">"} Apparel {c && `> ${formatEnumText(c as string)}`}
@@ -97,7 +96,6 @@ export default function ApparelPage({
                   Oops... It looks like we don&apos;t have it yet.
                 </div>
               )}
-              {/* Display apparels */}
               <div className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid gap-5 max-w-full">
                 {isLoading && <p>Loading apparels...</p>}
                 {apparels &&
@@ -106,7 +104,7 @@ export default function ApparelPage({
                       key={apparel.id}
                       className="border rounded-sm shadow-md"
                     >
-                      <div className="aspect-3/4 rounded-sm ">
+                      <div className="aspect-[3/4] rounded-sm ">
                         <Image
                           width={250}
                           height={300}
