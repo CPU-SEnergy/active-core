@@ -1,7 +1,6 @@
 "use client";
 
 import type * as React from "react";
-import { useState } from "react";
 import { BarChart2, MessageSquare, Settings, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {
@@ -113,45 +113,48 @@ const menuItems = [
 ];
 
 export default function AdminSidebar() {
-  const [activeItem, setActiveItem] = useState("Overview");
+  const pathname = usePathname();
 
   return (
-    <>
-      <div className="flex">
-        <Sidebar className="w-60 border-r bg-white">
-          <SidebarHeader className="h-16 border-b px-4">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="h-full w-full px-0 hover:bg-transparent hover:text-black"
-                >
-                  <Link href="/overview" className="flex items-center gap-2">
-                    <Image
-                      src="/sports-fitness-logo.svg"
-                      alt="Sports and Fitness Logo"
-                      className="h-8 w-8"
-                      width={32}
-                      height={32}
-                    />
-                    <span className="font-semibold">Sports and Fitness</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarHeader>
-          <SidebarContent className="py-5">
-            <SidebarMenu>
-              {menuItems.map((item) => (
+    <div className="flex">
+      <Sidebar className="w-60 border-r bg-white">
+        {/* Sidebar Header */}
+        <SidebarHeader className="h-16 border-b px-4">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                className="h-full w-full px-0 hover:bg-transparent hover:text-black"
+              >
+                <Link href="/admin" className="flex items-center gap-2">
+                  <Image
+                    src="/sports-fitness-logo.svg"
+                    alt="Sports and Fitness Logo"
+                    className="h-8 w-8"
+                    width={32}
+                    height={32}
+                  />
+                  <span className="font-semibold">Sports and Fitness</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+
+        {/* Sidebar Content */}
+        <SidebarContent className="py-5">
+          <SidebarMenu>
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className={`h-11 gap-3 px-3 hover:bg-white hover:text-black [&>svg]:h-5 [&>svg]:w-5 ${
-                      activeItem === item.title
-                        ? "before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-black"
+                    className={`h-11 gap-3 px-3 hover:bg-gray-100 hover:text-black [&>svg]:h-5 [&>svg]:w-5 ${
+                      isActive
+                        ? "bg-gray-200 text-black before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-black"
                         : ""
                     }`}
-                    onClick={() => setActiveItem(item.title)}
                   >
                     <Link href={item.href}>
                       <item.icon />
@@ -159,27 +162,33 @@ export default function AdminSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-          <div className="mt-auto px-2 pb-4">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="h-10 gap-3 px-3 hover:bg-indigo-50 hover:text-black [&>svg]:h-5 [&>svg]:w-5"
-                >
-                  <Link href="/admin/settings">
-                    <Settings />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </div>
-        </Sidebar>
-        <div className="flex-1"></div>
-      </div>
-    </>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarContent>
+
+        {/* Settings */}
+        <div className="mt-auto px-2 pb-4">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                className={`h-10 gap-3 px-3 hover:bg-gray-100 hover:text-black [&>svg]:h-5 [&>svg]:w-5 ${
+                  pathname === "/admin/settings" ? "bg-gray-200 text-black" : ""
+                }`}
+              >
+                <Link href="/admin/settings">
+                  <Settings />
+                  <span>Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </div>
+      </Sidebar>
+
+      {/* Content area */}
+      <div className="flex-1"></div>
+    </div>
   );
 }
