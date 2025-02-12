@@ -20,7 +20,7 @@ export default async function CoachDeck() {
   const coaches: Coach[] = await fetchCoaches();
   console.log(coaches, "coaches");
   return (
-    <div className="container mx-auto py-8 px-4 bg-gray-100">
+    <div className="container mx-auto py-8 px-4 bg-gray-100 pt-20">
       <h1 className="text-5xl font-bold mb-10 mt-5 text-black text-center">
         Meet the Coaches
       </h1>
@@ -35,6 +35,7 @@ export default async function CoachDeck() {
               alt={coach.name}
               className="w-full h-48 object-cover"
             />
+            
             <div className="p-4">
               <h2 className="text-lg font-semibold text-gray-800">
                 {coach.name}

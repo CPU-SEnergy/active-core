@@ -4,7 +4,7 @@ import { classes } from "@/lib/mock_data/classes_data";
 
 export default function SportsServices() {
   return (
-    <div className="container mx-auto py-8 min-h-screen max-w-full bg-gray-100">
+    <div className="container mx-auto py-8 min-h-screen max-w-full bg-gray-100 pt-20">
       <h1 className="text-5xl font-bold mb-10 mt-5 text-black text-center">Sports Services</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
