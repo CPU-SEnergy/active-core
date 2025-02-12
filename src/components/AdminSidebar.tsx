@@ -140,8 +140,6 @@ export default function AdminSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-
-        {/* Sidebar Content */}
         <SidebarContent className="py-5">
           <SidebarMenu>
             {menuItems.map((item) => {
@@ -166,8 +164,6 @@ export default function AdminSidebar() {
             })}
           </SidebarMenu>
         </SidebarContent>
-
-        {/* Settings */}
         <div className="mt-auto px-2 pb-4">
           <SidebarMenu>
             <SidebarMenuItem>
@@ -186,8 +182,6 @@ export default function AdminSidebar() {
           </SidebarMenu>
         </div>
       </Sidebar>
-
-      {/* Content area */}
       <div className="flex-1"></div>
     </div>
   );
