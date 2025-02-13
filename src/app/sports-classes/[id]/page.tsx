@@ -13,7 +13,7 @@ export default async function Page({
 
   return (
     <div
-      className="flex flex-col lg:flex-row min-h-screen"
+      className="flex flex-col lg:flex-row min-h-screen pt-20"
       style={{
         background:
           "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",

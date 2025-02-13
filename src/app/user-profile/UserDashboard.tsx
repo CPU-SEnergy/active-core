@@ -45,7 +45,7 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 text-black p-8">
+    <div className="min-h-screen bg-gray-100 text-black p-8 pt-20">
       {" "}
       {/* Changed text color to black */}
       <h1 className="text-4xl font-extrabold mb-8 text-black text-center">

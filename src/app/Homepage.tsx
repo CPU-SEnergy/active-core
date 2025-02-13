@@ -5,7 +5,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import NavBar from "../components/navbar"
 
 
 export default function Home() {
@@ -14,7 +13,6 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       {" "}
       {/* Add pt-20 for navbar space */}
-      <NavBar />
       {/* Hero Section */}
       <section className="relative h-screen">
         {" "}
