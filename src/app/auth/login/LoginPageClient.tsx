@@ -3,8 +3,8 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { fireauth } from "@/lib/firebaseClient";
 import { z, ZodError } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +22,9 @@ export default function LoginPageClient() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [validationErrors, setValidationErrors] = useState<ZodError | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ZodError | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
@@ -41,7 +43,7 @@ export default function LoginPageClient() {
 
     try {
       const credential = await signInWithEmailAndPassword(
-        getAuth(app),
+        fireauth,
         email,
         password
       );
@@ -63,7 +65,8 @@ export default function LoginPageClient() {
   }
 
   const getValidationError = (field: string) => {
-    return validationErrors?.errors.find((err) => err.path.includes(field))?.message;
+    return validationErrors?.errors.find((err) => err.path.includes(field))
+      ?.message;
   };
 
   return (
@@ -71,7 +74,8 @@ export default function LoginPageClient() {
       <div
         className="min-h-screen w-full flex items-center justify-center p-4"
         style={{
-          background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
+          background:
+            "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
         }}
       >
         <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
@@ -170,7 +174,10 @@ export default function LoginPageClient() {
               </div>
               <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Don&apos;t have an account?{" "}
-                <Link className="text-blue-500 hover:text-blue-600" href="/auth/register">
+                <Link
+                  className="text-blue-500 hover:text-blue-600"
+                  href="/auth/register"
+                >
                   Sign up
                 </Link>
               </p>

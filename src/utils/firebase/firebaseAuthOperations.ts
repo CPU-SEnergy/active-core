@@ -1,22 +1,20 @@
 import {
   createUserWithEmailAndPassword,
-  getAuth,
   sendEmailVerification,
   User,
 } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
+import { firestore, fireauth } from "@/lib/firebaseClient";
 import { RegisterFormProps } from "@/lib/types/registerForm";
 import {
   collection,
   doc,
-  getFirestore,
   Timestamp,
   setDoc,
 } from "firebase/firestore";
 
 export const createFirebaseUser = async (formResult: RegisterFormProps) => {
   try {
-    const auth = getAuth(app);
+    const auth = fireauth;
 
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -24,7 +22,6 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
       formResult.password
     );
 
-    const firestore = getFirestore(app);
     const userRef = doc(
       collection(firestore, "users"),
       userCredential.user.uid

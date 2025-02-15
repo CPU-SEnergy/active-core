@@ -3,7 +3,7 @@ import React from "react";
 
 async function fetchCoaches() {
   try {
-    const res = await fetch("http://localhost:3000/api/coaches/", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/coaches/`, {
       next: { revalidate: 60000 },
     });
     if (!res.ok) {
@@ -35,7 +35,7 @@ export default async function CoachDeck() {
               alt={coach.name}
               className="w-full h-48 object-cover"
             />
-            
+
             <div className="p-4">
               <h2 className="text-lg font-semibold text-gray-800">
                 {coach.name}

@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  getAuth,
   isSignInWithEmailLink,
   signInWithEmailLink,
   updatePassword,
 } from "firebase/auth";
 import { Button } from "@/components/ui/button";
-import { app } from "@/lib/firebaseClient";
+import { fireauth } from "@/lib/firebaseClient";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { InputText } from "@/components/InputText";
@@ -22,12 +21,12 @@ export default function FinishSignup() {
   const [loading, setLoading] = useState(false);
   const { step, formState, error, handleChange, handleNextStep, handleSignUp } =
     useRegisterForm();
-  const auth = getAuth(app);
+  const auth = fireauth;
 
   const router = useRouter();
 
   useEffect(() => {
-    if (!isSignInWithEmailLink(getAuth(app), window.location.href)) {
+    if (!isSignInWithEmailLink(auth, window.location.href)) {
       router.push("/auth/expired-link");
     }
   }, [auth, router]);

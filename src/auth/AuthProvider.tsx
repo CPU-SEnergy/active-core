@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, UserInfo } from 'firebase/auth';
-import { Claims } from 'next-firebase-auth-edge/lib/auth/claims';
-import { app } from '@/lib/firebaseClient';
+import * as React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged, UserInfo } from "firebase/auth";
+import { Claims } from "next-firebase-auth-edge/lib/auth/claims";
+import { fireauth } from "@/lib/firebaseClient";
 export interface User extends UserInfo {
   idToken: string;
   emailVerified: boolean;
@@ -23,12 +23,14 @@ export const AuthContext = createContext<AuthContextValue>({
   loading: true,
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(app), (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(fireauth, (firebaseUser) => {
       if (firebaseUser) {
         firebaseUser.getIdToken().then(async (idToken) => {
           const idTokenResult = await firebaseUser.getIdTokenResult();
