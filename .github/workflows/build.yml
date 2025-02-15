@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Debug Cache Key
+        run: echo ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+
       - name: Cache Next.js build and node_modules
         uses: actions/cache@v4
         with:
