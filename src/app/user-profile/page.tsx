@@ -15,6 +15,7 @@ export default async function UserProfile() {
   if (!tokens) {
     notFound();
   }
+
   return (
     <>
       <UserDashboard uid={tokens?.decodedToken.uid} />
