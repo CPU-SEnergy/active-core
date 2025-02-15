@@ -1,7 +1,8 @@
 "use client";
 
-import { fireauth } from "@/lib/firebaseClient";
-import { sendSignInLinkToEmail } from "firebase/auth";
+import { app } from "@/lib/firebaseClient";
+import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
+const auth = getAuth(app);
 
 export default async function sendSignInLink(email: string) {
   const actionCodeSettings = {
@@ -10,7 +11,7 @@ export default async function sendSignInLink(email: string) {
   };
 
   try {
-    await sendSignInLinkToEmail(fireauth, email, actionCodeSettings);
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem("emailForSignIn", email);
     console.log("Email sent!");
   } catch (error) {

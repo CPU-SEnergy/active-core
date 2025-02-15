@@ -13,8 +13,9 @@ import {
   push,
   set,
   onDisconnect,
+  getDatabase,
 } from "firebase/database";
-import { rtdb } from "@/lib/firebaseClient";
+import { app } from "@/lib/firebaseClient";
 import { User } from "firebase/auth";
 import { useRead } from "@typesaurus/react";
 import { db, Schema } from "@/lib/schema/firestore";
@@ -35,7 +36,7 @@ interface ChatRoomProps {
 const PAGE_SIZE = 20;
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
-  const database = rtdb;
+  const database = getDatabase(app);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -160,7 +161,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       lastActive: Date.now(),
     });
     onDisconnect(userRef).remove();
-  }, [database, roomId, user, userDisplayName]);
+  }, [roomId, user, userDisplayName]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
