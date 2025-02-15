@@ -2,8 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebaseClient";
 import { z } from "zod";
 
 const emailSchema = z.object({
@@ -29,7 +29,7 @@ export default function ForgotPassword() {
     }
 
     try {
-      await sendPasswordResetEmail(getAuth(app), email);
+      await sendPasswordResetEmail(auth, email);
       setMessage("Password reset email sent! Check your inbox.");
     } catch (e) {
       setError((e as Error).message);
@@ -37,7 +37,10 @@ export default function ForgotPassword() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-cover bg-center" style={{ backgroundImage: "url('/pictures/sportsfitness.jpg')" }}>
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-8 bg-cover bg-center"
+      style={{ backgroundImage: "url('/pictures/sportsfitness.jpg')" }}
+    >
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
           <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">

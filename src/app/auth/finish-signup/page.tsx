@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  getAuth,
   isSignInWithEmailLink,
   signInWithEmailLink,
   updatePassword,
 } from "firebase/auth";
 import { Button } from "@/components/ui/button";
-import { app } from "@/lib/firebaseClient";
+import { auth } from "@/lib/firebaseClient";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { InputText } from "@/components/InputText";
@@ -24,7 +23,6 @@ export default function FinishSignup() {
     useRegisterForm();
 
   const router = useRouter();
-  const auth = getAuth(app);
 
   useEffect(() => {
     if (!isSignInWithEmailLink(auth, window.location.href)) {
