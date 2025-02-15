@@ -13,8 +13,9 @@ import {
   push,
   set,
   onDisconnect,
+  getDatabase,
 } from "firebase/database";
-import { database } from "@/lib/firebaseClient";
+import { app } from "@/lib/firebaseClient";
 import { User } from "firebase/auth";
 import { useRead } from "@typesaurus/react";
 import { db, Schema } from "@/lib/schema/firestore";
@@ -35,6 +36,7 @@ interface ChatRoomProps {
 const PAGE_SIZE = 20;
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
+  const database = getDatabase(app);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -123,7 +125,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
     };
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, loadingMore, messages]);
 
   useEffect(() => {

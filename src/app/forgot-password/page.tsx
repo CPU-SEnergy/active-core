@@ -2,8 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebaseClient";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import { app } from "@/lib/firebaseClient";
 import { z } from "zod";
 
 const emailSchema = z.object({
@@ -29,7 +29,7 @@ export default function ForgotPassword() {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(getAuth(app), email);
       setMessage("Password reset email sent! Check your inbox.");
     } catch (e) {
       setError((e as Error).message);

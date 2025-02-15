@@ -1,8 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { clientConfig } from "@/lib/config";
-import { getDatabase } from "firebase/database";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 
 export const app = (() => {
   if (!clientConfig || Object.keys(clientConfig).length === 0) {
@@ -13,9 +10,9 @@ export const app = (() => {
 
   if (!getApps().length) {
     return initializeApp({
-      ...clientConfig,
-      authDomain: clientConfig.authDomain || "",
       projectId: clientConfig.projectId || "",
+      apiKey: clientConfig.apiKey || "",
+      authDomain: clientConfig.authDomain || "",
       databaseURL: clientConfig.databaseURL || "",
       messagingSenderId: clientConfig.messagingSenderId || "",
     });
@@ -23,7 +20,3 @@ export const app = (() => {
 
   return getApp();
 })();
-
-export const database = getDatabase(app);
-export const auth = getAuth(app);
-export const firestore = getFirestore(app);
