@@ -33,9 +33,10 @@ interface ChatRoomProps {
   user: User;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
+  console.log("roomId", roomId);
   const database = getDatabase(app);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
@@ -150,18 +151,18 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       }
     });
     return () => unsubscribe();
-  }, [roomId, messages]);
+  }, [roomId, messages, database]);
 
   useEffect(() => {
     if (!userDisplayName) return;
-    const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`);
+    const userRef = ref(database, `systemChats/${roomId}/users/${roomId}`);
     set(userRef, {
       name: userDisplayName,
       online: true,
       lastActive: Date.now(),
     });
     onDisconnect(userRef).remove();
-  }, [roomId, user, userDisplayName]);
+  }, [database, roomId, userDisplayName]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -179,8 +180,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-semibold mb-4">Sports and Fitness Chat</h2>
+    <div className="w-full mx-auto p-4">
       <div
         ref={containerRef}
         className="h-80 overflow-y-scroll border border-gray-300 p-4 mb-4 rounded bg-white shadow-sm"

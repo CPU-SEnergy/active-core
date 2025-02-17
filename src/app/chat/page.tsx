@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import ChatRoom from "@/components/ChatRoom";
+import UserChatList from "@/components/ChatList";
 import { app } from "@/lib/firebaseClient";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import { getDatabase, ref, set, get } from "firebase/database";
+// import { getDatabase, ref, set, get } from "firebase/database";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function ChatRoomPage() {
   const router = useRouter();
   const auth = getAuth(app);
-  const database = getDatabase(app);
+  // const database = getDatabase(app);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -41,27 +41,27 @@ export default function ChatRoomPage() {
       </h2>
     );
 
-  const handleOpenUserChat = async () => {
-    const roomId = user.uid;
-    const chatRef = ref(database, `systemChats/${roomId}`);
-    const snapshot = await get(chatRef);
+  // const handleOpenUserChat = async () => {
+  //   const roomId = user.uid;
+  //   const chatRef = ref(database, `systemChats/${roomId}`);
+  //   const snapshot = await get(chatRef);
 
-    if (!snapshot.exists()) {
-      await set(chatRef, {
-        users: {
-          [user.uid]: true,
-        },
-        adminsAccess: true,
-        createdAt: new Date().toISOString(),
-      });
-    }
+  //   if (!snapshot.exists()) {
+  //     await set(chatRef, {
+  //       users: {
+  //         [user.uid]: true,
+  //       },
+  //       adminsAccess: true,
+  //       createdAt: new Date().toISOString(),
+  //     });
+  //   }
 
-    router.push(`/chat/${roomId}`);
-  };
+  //   router.push(`/chat/${roomId}`);
+  // };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-row pt-14">
-      <div className="flex flex-col p-4 w-[400px]">
+      {/* <div className="flex flex-col p-4 w-[400px]">
         <h2 className="font-semibold text-lg mb-4">Chats</h2>
         <button
           onClick={handleOpenUserChat}
@@ -69,8 +69,11 @@ export default function ChatRoomPage() {
         >
           Start Chat
         </button>
-      </div>
-      {user && <ChatRoom roomId={user.uid} user={user} />}
+      </div> */}
+      <UserChatList
+        user={user}
+        onSelectChat={(roomId) => router.push(`/chat/${roomId}`)}
+      />
     </div>
   );
 }
