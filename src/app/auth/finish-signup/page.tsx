@@ -22,12 +22,12 @@ export default function FinishSignup() {
   const [loading, setLoading] = useState(false);
   const { step, formState, error, handleChange, handleNextStep, handleSignUp } =
     useRegisterForm();
-
-  const router = useRouter();
   const auth = getAuth(app);
 
+  const router = useRouter();
+
   useEffect(() => {
-    if (!isSignInWithEmailLink(auth, window.location.href)) {
+    if (!isSignInWithEmailLink(getAuth(app), window.location.href)) {
       router.push("/auth/expired-link");
     }
   }, [auth, router]);
