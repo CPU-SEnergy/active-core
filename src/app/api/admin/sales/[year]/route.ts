@@ -26,8 +26,14 @@ export async function GET(request: Request, context: { params: Params }) {
     }
 
     const earnings = await getEarningsForYear(year);
+    const memberships = await getMembeshipsForYear(year);
 
-    return new Response(JSON.stringify(earnings), {
+    const result = {
+      earnings,
+      memberships
+    }
+
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -62,4 +68,37 @@ async function getEarningsForYear(year: string): Promise<number[]> {
   }
 
   return earnings;
+}
+
+async function getMembeshipsForYear(year: string): Promise<number[]> {
+  const memberships: number[] = [];
+
+  for (let month = 1; month <= 12; month++) {
+    const startDate = new Date(`${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`);
+    const endDate = new Date(startDate);
+    endDate.setMonth(startDate.getMonth() + 1);
+
+    const membershipPlanCollection = await db.membershipPlan.query(($) =>
+      $.field("price").eq({ regular: 0, student: 0, discount: 0 })
+    )
+
+    const regularMembership = membershipPlanCollection.reduce((total, doc) => {
+      return total + (doc.data.price.regular || 0);
+    }, 0);
+
+    memberships.push(regularMembership);
+
+    const studentMembership = membershipPlanCollection.reduce((total, doc) => {
+      return total + (doc.data.price.student || 0);
+    }, 0);
+
+    memberships.push(studentMembership);
+
+    const discountMembership = membershipPlanCollection.reduce((total, doc) => {
+      return total + (doc.data.price.discount || 0);
+    }, 0)
+
+    memberships.push(discountMembership);
+  }
+  return memberships
 }
