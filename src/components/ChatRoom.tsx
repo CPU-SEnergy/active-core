@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   ref,
   query,
@@ -14,6 +15,7 @@ import {
   set,
   onDisconnect,
   getDatabase,
+  update,
 } from "firebase/database";
 import { app } from "@/lib/firebaseClient";
 import { User } from "firebase/auth";
@@ -29,20 +31,20 @@ interface Message {
 }
 
 interface ChatRoomProps {
-  roomId: string;
+  roomId: string | null;
   user: User;
 }
 
 const PAGE_SIZE = 10;
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
-  console.log("roomId", roomId);
   const database = getDatabase(app);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastLoadedTimestampRef = useRef<number>(0);
 
   const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]));
   const userDisplayName =
@@ -50,7 +52,14 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       ? `${userData.data.firstName} ${userData.data.lastName}`
       : "Anonymous";
 
-  const loadInitialMessages = async () => {
+  const scrollToBottom = useCallback(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, []);
+
+  const loadInitialMessages = useCallback(async () => {
+    if (!roomId) return;
     const messagesRef = ref(database, `systemChats/${roomId}/messages`);
     const messagesQuery = query(
       messagesRef,
@@ -67,26 +76,25 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
         })
       );
       messagesList.sort((a, b) => a.timestamp - b.timestamp);
+      if (messagesList.length > 0) {
+        lastLoadedTimestampRef.current =
+          messagesList.length > 0 ? messagesList[messagesList.length - 1]?.timestamp ?? 0 : 0;
+      }
       setMessages(messagesList);
-      if (messagesList.length < PAGE_SIZE) {
-        setHasMore(false);
-      }
-      if (containerRef.current) {
-        containerRef.current.scrollTop = containerRef.current.scrollHeight;
-      }
+      setHasMore(messagesList.length === PAGE_SIZE);
+      scrollToBottom();
     } else {
       setMessages([]);
       setHasMore(false);
     }
-  };
+  }, [database, roomId, scrollToBottom]);
 
   useEffect(() => {
     loadInitialMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [loadInitialMessages]);
 
-  const loadOlderMessages = async () => {
-    if (messages.length === 0) return;
+  const loadOlderMessages = useCallback(async () => {
+    if (!roomId || messages.length === 0) return;
     setLoadingMore(true);
     const oldestTimestamp = messages[0]?.timestamp || 0;
     const messagesRef = ref(database, `systemChats/${roomId}/messages`);
@@ -114,7 +122,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       setHasMore(false);
     }
     setLoadingMore(false);
-  };
+  }, [database, roomId, messages]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -126,35 +134,29 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
     };
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMore, loadingMore, messages]);
+  }, [hasMore, loadingMore, loadOlderMessages]);
 
   useEffect(() => {
+    if (!roomId) return;
     const messagesRef = ref(database, `systemChats/${roomId}/messages`);
-    const lastTimestamp =
-      messages.length > 0 ? (messages[messages.length - 1]?.timestamp ?? 0) : 0;
     const newMessagesQuery = query(
       messagesRef,
       orderByChild("timestamp"),
-      startAt(lastTimestamp + 1)
+      startAt(lastLoadedTimestampRef.current + 1)
     );
     const unsubscribe = onChildAdded(newMessagesQuery, (snapshot) => {
       const newMsg = snapshot.val() as Message;
       setMessages((prev) => {
         if (prev.find((m) => m.id === snapshot.key)) return prev;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, ...rest } = newMsg;
-        return [...prev, { id: snapshot.key || "", ...rest }];
+        return [...prev, { ...newMsg, id: snapshot.key || "" }];
       });
-      if (containerRef.current) {
-        containerRef.current.scrollTop = containerRef.current.scrollHeight;
-      }
+      scrollToBottom();
     });
     return () => unsubscribe();
-  }, [roomId, messages, database]);
+  }, [database, roomId, scrollToBottom]);
 
   useEffect(() => {
-    if (!userDisplayName) return;
+    if (!roomId || !userDisplayName) return;
     const userRef = ref(database, `systemChats/${roomId}/users/${roomId}`);
     set(userRef, {
       name: userDisplayName,
@@ -164,20 +166,26 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
     onDisconnect(userRef).remove();
   }, [database, roomId, userDisplayName]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const messageRef = push(ref(database, `systemChats/${roomId}/messages`));
-    await set(messageRef, {
+  const sendMessage = useCallback(async () => {
+    if (!roomId || !input.trim()) return;
+    const newMessage = {
       senderId: user.uid,
       senderName: userDisplayName || "Anonymous",
       text: input,
       timestamp: Date.now(),
-    });
+    };
+    const messagesRef = ref(database, `systemChats/${roomId}/messages`);
+    const newMessageRef = push(messagesRef);
+    const updates: { [key: string]: any } = {};
+    updates[`systemChats/${roomId}/recentMessage`] = newMessage;
+    updates[`systemChats/${roomId}/messages/${newMessageRef.key}`] = newMessage;
+    await update(ref(database), updates);
     setInput("");
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  };
+    scrollToBottom();
+  }, [database, roomId, input, user.uid, userDisplayName, scrollToBottom]);
+
+  if (!roomId) return null;
+  if (!userData) return <div>user Loading...</div>;
 
   return (
     <div className="w-full mx-auto p-4">
