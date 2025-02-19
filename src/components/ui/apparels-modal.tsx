@@ -1,102 +1,162 @@
-// components/ui/apparels-modal.tsx
-import { useEffect, useRef, useState } from "react";
-import { Button } from "./button";
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Button } from "./button"
+import { Input } from "./input"
+import { Label } from "./label"
+import { Textarea } from "./textarea"
+import { Upload } from "lucide-react"
+import { toast } from "sonner"
 
-interface ModalProps {
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  type: z.string().min(1, "Type is required"),
+  price: z.string().min(1, "Price is required"),
+  description: z.string().min(1, "Description is required"),
+  image: z.any().optional(),
+})
+
+type FormData = z.infer<typeof formSchema>
+
+interface ApparelFormProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-export const Modal = ({ isOpen, onClose }: ModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const [formData, setFormData] = useState({ name: "", size: "", price: "" });
+export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
+  const [preview, setPreview] = useState<string | null>(null)
+  const [dragActive, setDragActive] = useState(false)
 
-  useEffect(() => {
-    if (isOpen) {
-      modalRef.current?.focus();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  })
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      console.log("Form data:", data)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      toast.success("Apparel created successfully!")
+      onSuccess()
+      onClose()
+    } catch (error) {
+      console.error("Error creating apparel:", error)
+      toast.error("Error creating apparel. Please try again.")
     }
-  }, [isOpen]);
+  }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(e.type === "dragenter" || e.type === "dragover")
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    onClose();
-  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0])
+  }
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return toast.error("Please upload an image file")
+    setValue("image", file)
+    setPreview(URL.createObjectURL(file))
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
-    <div
-      className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
-      role="dialog"
-      aria-labelledby="modal-title"
-      aria-hidden={!isOpen}
-      onClick={handleOverlayClick}
-    >
-      <div
-        className="bg-white p-6 rounded-lg w-1/3"
-        ref={modalRef}
-        tabIndex={-1}
-      >
-        <h2 id="modal-title" className="text-2xl font-semibold mb-4">
-          Add Apparel
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm mb-2">Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter apparel name"
-              className="w-full p-2 border rounded"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              autoFocus
-            />
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-semibold mb-4 text-center">Add Apparel</h2>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" placeholder="Enter item name" className="bg-gray-50" {...register("name")} />
+            {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
           </div>
-          <div className="mb-4">
-            <label className="block text-sm mb-2">Size</label>
-            <input
-              type="text"
-              name="size"
-              placeholder="Enter apparel size"
-              className="w-full p-2 border rounded"
-              value={formData.size}
-              onChange={handleChange}
-              required
-            />
+
+          <div className="grid gap-2">
+  <Label htmlFor="type">Type of Apparel</Label>
+  <select
+    id="type"
+    {...register("type")}
+    className="bg-gray-50 border rounded-md px-3 py-2"
+  >
+    <option value="">Select apparel type</option>
+    <option value="Gloves">Gloves</option>
+    <option value="T-Shirt">T-Shirt</option>
+    <option value="Pants">Pants</option>
+    <option value="Jersey">Jersey</option>
+    <option value="Shorts">Shorts</option>
+    <option value="Tracksuits">Tracksuits</option>
+  </select>
+  {errors.type && <p className="text-sm text-red-500">{errors.type.message}</p>}
+</div>
+
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="price">Price</Label>
+              <Input id="price" placeholder="Enter item price" className="bg-gray-50" {...register("price")} />
+              {errors.price && <p className="text-sm text-red-500">{errors.price.message}</p>}
+            </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-sm mb-2">Price</label>
-            <input
-              type="number"
-              name="price"
-              placeholder="Enter price"
-              className="w-full p-2 border rounded"
-              value={formData.price}
-              onChange={handleChange}
-              required
-            />
+
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea id="description" placeholder="Enter item description" className="bg-gray-50 min-h-[80px]" {...register("description")} />
+            {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
           </div>
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
+
+          <div className="grid gap-2">
+            <Label>Upload Image</Label>
+            <div
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="h-8 w-8 text-gray-400" />
+                <p className="text-sm text-gray-500">Drop files here or click to browse</p>
+                <Button type="button" variant="outline" className="mt-2" onClick={() => document.getElementById("file-upload")?.click()}>
+                  Browse Files
+                </Button>
+                <input
+                  id="file-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".png,.jpg,.jpeg"
+                  onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                />
+              </div>
+            </div>
+            {preview && (
+              <div className="flex justify-center mt-2">
+                <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded-md" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" className="bg-black hover:bg-gray-800" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create"}
             </Button>
-            <Button type="submit">Create</Button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
