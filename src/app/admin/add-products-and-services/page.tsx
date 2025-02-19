@@ -17,7 +17,7 @@ export default function AddProductsPage() {
             </Card>
           </Link>
   
-          <Link href="/admin/products/membership" className="block">
+          <Link href="/admin/add-products-and-services/membership" className="block">
             <Card variant="dark" className="p-6 hover:bg-[#2C2C2C] transition-all duration-300 hover:scale-105">
               <div className="flex items-center space-x-4">
                 <Users className="w-12 h-12 text-white" />
@@ -26,7 +26,7 @@ export default function AddProductsPage() {
             </Card>
           </Link>
   
-          <Link href="/admin/products/classes" className="block">
+          <Link href="/admin/add-products-and-services/classes" className="block">
             <Card variant="dark" className="p-6 hover:bg-[#2C2C2C] transition-all duration-300 hover:scale-105">
               <div className="flex items-center space-x-4">
                 <Dumbbell className="w-12 h-12 text-white" />
@@ -35,7 +35,7 @@ export default function AddProductsPage() {
             </Card>
           </Link>
   
-          <Link href="/admin/products/coaches" className="block">
+          <Link href="/admin/add-products-and-services/coaches" className="block">
             <Card variant="dark" className="p-6 hover:bg-[#2C2C2C] transition-all duration-300 hover:scale-105">
               <div className="flex items-center space-x-4">
                 <UserCog className="w-12 h-12 text-white" />

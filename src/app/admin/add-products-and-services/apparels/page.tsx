@@ -1,3 +1,5 @@
+//apparels
+
 "use client";
 
 import { useState } from "react"
@@ -7,7 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Pencil } from "lucide-react"
 import { ApparelForm } from "@/components/ui/apparels-modal"
-//import { ApparelForm } from "./apparel-form"
+
 
 
 // Mock data for apparels
