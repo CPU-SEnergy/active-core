@@ -9,13 +9,18 @@ import { Trash } from "lucide-react";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  specialty: z.string().min(1, "Specialty is required"),
-  experience: z.string().min(1, "Experience is required"),
-  certifications: z.array(z.string().min(1, "Certification is required")),
-  bio: z.string().min(1, "Bio is required"),
-  image: z.any().optional(),
-});
+    name: z.string().min(1, "Name is required"),
+    specialty: z.string().min(1, "Specialty is required"),
+    experience: z.string().min(1, "Experience is required"),
+    certifications: z.array(
+      z.object({
+        value: z.string().min(1, "Certification is required"),
+      })
+    ),
+    bio: z.string().min(1, "Bio is required"),
+    image: z.any().optional(),
+  });
+  
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -26,7 +31,6 @@ interface CoachFormProps {
 }
 
 export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
-
   const {
     register,
     handleSubmit,
@@ -34,13 +38,15 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: { certifications: [""] },
+    defaultValues: { certifications: [{ value: "" }] },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray<FormData>({
     control,
     name: "certifications",
   });
+  
+  
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -85,23 +91,25 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
             <Label>Certifications</Label>
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-2">
-                <Input
-                  placeholder="Enter certification"
-                  {...register(`certifications.${index}` as const)}
-                />
+                <Input placeholder="Enter certification" {...register(`certifications.${index}` as const)} />
                 <Button type="button" variant="ghost" onClick={() => remove(index)}>
                   <Trash className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
             ))}
             <Button type="button" variant="outline" onClick={() => append("")}>+ Add Certification</Button>
-            {errors.certifications && <p className="text-sm text-red-500">{errors.certifications.message as string}</p>}
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="bio">Bio</Label>
             <Textarea id="bio" placeholder="Enter coach bio" {...register("bio")} />
             {errors.bio && <p className="text-sm text-red-500">{errors.bio.message}</p>}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="image">Upload Image</Label>
+            <Input id="image" type="file" accept="image/*" {...register("image")} />
+            {errors.image && <p className="text-sm text-red-500">{errors.image.message as string}</p>}
           </div>
 
           <div className="flex justify-end gap-2">
