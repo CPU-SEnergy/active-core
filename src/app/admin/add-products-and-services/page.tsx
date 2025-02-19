@@ -8,7 +8,7 @@ export default function AddProductsPage() {
         <h1 className="text-2xl font-semibold">Add Products and Services</h1>
   
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Link href="/admin/products/apparels" className="block">
+          <Link href="/admin/add-products-and-services/apparels" className="block">
             <Card variant="dark" className="p-6 hover:bg-[#2C2C2C] transition-all duration-300 hover:scale-105">
               <div className="flex items-center space-x-4">
                 <Shirt className="w-12 h-12 text-white" />

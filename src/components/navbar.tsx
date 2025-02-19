@@ -25,13 +25,7 @@ export default function Navbar() {
   }
 
   if (loading) {
-    return (
-      <nav className="bg-black text-white fixed w-full z-50">
-        <div className="container mx-auto px-4 flex items-center justify-between h-20">
-          <div className="text-white">Loading...</div>
-        </div>
-      </nav>
-    );
+    return;
   }
 
   return (
