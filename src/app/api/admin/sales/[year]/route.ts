@@ -75,7 +75,6 @@ async function getMembershipsForYear(year: string): Promise<{ regular: number[],
   const studentMemberships: number[] = [];
   const discountMemberships: number[] = [];
 
-  // Fetch all membership plans
   const membershipPlans = await db.membershipPlan.all();
 
   for (let month = 1; month <= 12; month++) {
