@@ -17,7 +17,7 @@ export default function AddProductsPage() {
             </Card>
           </Link>
   
-          <Link href="/admin/add-products-and-services/membership" className="block">
+          <Link href="/admin/add-products-and-services/membership-plans" className="block">
             <Card variant="dark" className="p-6 hover:bg-[#2C2C2C] transition-all duration-300 hover:scale-105">
               <div className="flex items-center space-x-4">
                 <Users className="w-12 h-12 text-white" />
