@@ -70,12 +70,9 @@ async function getEarningsForYear(year: string): Promise<number[]> {
   return earnings;
 }
 
-async function getMembershipsForYear(year: string): Promise<{ regular: number[], student: number[], discount: number[] }> {
-  const regularMemberships: number[] = [];
-  const studentMemberships: number[] = [];
-  const discountMemberships: number[] = [];
-
-  const membershipPlans = await db.membershipPlan.all();
+async function getMembershipsForYear(year: string): Promise<{ regular: number, student: number }> {
+  let regularCount = 0;
+  let studentCount = 0;
 
   for (let month = 1; month <= 12; month++) {
     const startDate = new Date(`${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`);
@@ -87,34 +84,9 @@ async function getMembershipsForYear(year: string): Promise<{ regular: number[],
       $.field("createdAt").lt(endDate)
     ]);
 
-    const regularMembership = paymentsCollection.reduce((total, doc) => {
-      const plan = membershipPlans.find(plan => plan.ref.id === doc.data.availedPlan.membershipPlanId);
-      if (plan && doc.data.availedPlan.amount === plan.data.price.regular) {
-        return total + doc.data.availedPlan.amount;
-      }
-      return total;
-    }, 0);
-
-    const studentMembership = paymentsCollection.reduce((total, doc) => {
-      const plan = membershipPlans.find(plan => plan.ref.id === doc.data.availedPlan.membershipPlanId);
-      if (plan && doc.data.availedPlan.amount === plan.data.price.student) {
-        return total + doc.data.availedPlan.amount;
-      }
-      return total;
-    }, 0);
-
-    const discountMembership = paymentsCollection.reduce((total, doc) => {
-      const plan = membershipPlans.find(plan => plan.ref.id === doc.data.availedPlan.membershipPlanId);
-      if (plan && doc.data.availedPlan.amount === plan.data.price.discount) {
-        return total + doc.data.availedPlan.amount;
-      }
-      return total;
-    }, 0);
-
-    regularMemberships.push(regularMembership);
-    studentMemberships.push(studentMembership);
-    discountMemberships.push(discountMembership);
+    regularCount += paymentsCollection.filter(doc => doc.data.user.type === "regular").length;
+    studentCount += paymentsCollection.filter(doc => doc.data.user.type === "student").length;
   }
 
-  return { regular: regularMemberships, student: studentMemberships, discount: discountMemberships };
+  return { regular: regularCount, student: studentCount };
 }
