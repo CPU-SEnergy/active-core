@@ -26,7 +26,7 @@ export async function GET(request: Request, context: { params: Params }) {
     }
 
     const earnings = await getEarningsForYear(year);
-    const memberships = await getMembeshipsForYear(year);
+    const memberships = await getMembershipsForYear(year);
 
     const result = {
       earnings,
@@ -70,35 +70,52 @@ async function getEarningsForYear(year: string): Promise<number[]> {
   return earnings;
 }
 
-async function getMembeshipsForYear(year: string): Promise<number[]> {
-  const memberships: number[] = [];
+async function getMembershipsForYear(year: string): Promise<{ regular: number[], student: number[], discount: number[] }> {
+  const regularMemberships: number[] = [];
+  const studentMemberships: number[] = [];
+  const discountMemberships: number[] = [];
+
+  // Fetch all membership plans
+  const membershipPlans = await db.membershipPlan.all();
 
   for (let month = 1; month <= 12; month++) {
     const startDate = new Date(`${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`);
     const endDate = new Date(startDate);
     endDate.setMonth(startDate.getMonth() + 1);
 
-    const membershipPlanCollection = await db.membershipPlan.query(($) =>
-      $.field("price").eq({ regular: 0, student: 0, discount: 0 })
-    )
+    const paymentsCollection = await db.payments.query(($) => [
+      $.field("createdAt").gte(startDate),
+      $.field("createdAt").lt(endDate)
+    ]);
 
-    const regularMembership = membershipPlanCollection.reduce((total, doc) => {
-      return total + (doc.data.price.regular || 0);
+    const regularMembership = paymentsCollection.reduce((total, doc) => {
+      const plan = membershipPlans.find(plan => plan.ref.id === doc.data.availedPlan.membershipPlanId);
+      if (plan && doc.data.availedPlan.amount === plan.data.price.regular) {
+        return total + doc.data.availedPlan.amount;
+      }
+      return total;
     }, 0);
 
-    memberships.push(regularMembership);
-
-    const studentMembership = membershipPlanCollection.reduce((total, doc) => {
-      return total + (doc.data.price.student || 0);
+    const studentMembership = paymentsCollection.reduce((total, doc) => {
+      const plan = membershipPlans.find(plan => plan.ref.id === doc.data.availedPlan.membershipPlanId);
+      if (plan && doc.data.availedPlan.amount === plan.data.price.student) {
+        return total + doc.data.availedPlan.amount;
+      }
+      return total;
     }, 0);
 
-    memberships.push(studentMembership);
+    const discountMembership = paymentsCollection.reduce((total, doc) => {
+      const plan = membershipPlans.find(plan => plan.ref.id === doc.data.availedPlan.membershipPlanId);
+      if (plan && doc.data.availedPlan.amount === plan.data.price.discount) {
+        return total + doc.data.availedPlan.amount;
+      }
+      return total;
+    }, 0);
 
-    const discountMembership = membershipPlanCollection.reduce((total, doc) => {
-      return total + (doc.data.price.discount || 0);
-    }, 0)
-
-    memberships.push(discountMembership);
+    regularMemberships.push(regularMembership);
+    studentMemberships.push(studentMembership);
+    discountMemberships.push(discountMembership);
   }
-  return memberships
+
+  return { regular: regularMemberships, student: studentMemberships, discount: discountMemberships };
 }
