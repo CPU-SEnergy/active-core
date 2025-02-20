@@ -118,7 +118,6 @@ export default function AdminSidebar() {
   return (
     <div className="flex">
       <Sidebar className="w-60 border-r bg-white">
-        {/* Sidebar Header */}
         <SidebarHeader className="h-16 border-b px-4">
           <SidebarMenu>
             <SidebarMenuItem>
