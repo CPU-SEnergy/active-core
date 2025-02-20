@@ -7,18 +7,18 @@ import { ChevronLeft, ChevronRight } from "lucide-react"; // Import icons for na
 const testimonials = [
   {
     text: "“This program completely changed my life! I feel more confident and energized every day.”",
-    name: "- Sarah M.",
-    image: "/images/sarah.jpg",
+    name: "- I love Social Work",
+    image: "/pictures/Clyde.png",
   },
   {
     text: "“The coaches are phenomenal, and the community is incredibly supportive. Highly recommend!”",
-    name: "- James L.",
-    image: "/images/james.jpg",
+    name: "- Shiri Lalums",
+    image: "/pictures/Sheree.jpg",
   },
   {
     text: "“I've never felt stronger or more capable. This experience has been life-changing!”",
-    name: "- Emily R.",
-    image: "/images/emily.jpg",
+    name: "- Barbie Poral",
+    image: "/pictures/Chito.jpg",
   },
 ];
 
@@ -35,31 +35,31 @@ export default function Testimonials() {
 
   return (
     <section className="py-16 px-6 text-center bg-neutral-900 text-white relative">
-      <motion.h2
-        className="text-4xl font-bold mb-8 text-red-500"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+ <motion.h2
+  className="text-4xl font-bold mb-12 text-red-500 mt-[-30px]"
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+>
         What Our Clients Say
       </motion.h2>
 
-      {/* Navigation Buttons */}
+      {/* Navigation Buttons with Higher Z-Index */}
       <button
         onClick={prevTestimonial}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 p-3 rounded-full hover:bg-gray-600 transition"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 p-3 rounded-full hover:bg-gray-600 transition z-10 w-fit"
       >
         <ChevronLeft className="text-white w-6 h-6" />
       </button>
       <button
         onClick={nextTestimonial}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-700 p-3 rounded-full hover:bg-gray-600 transition"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-700 p-3 rounded-full hover:bg-gray-600 transition z-10 w-fit"
       >
         <ChevronRight className="text-white w-6 h-6" />
       </button>
 
       {/* Testimonials Container */}
-      <div className="flex justify-center items-center gap-4">
+      <div className="flex justify-center items-center gap-4 relative">
         {testimonials.map((testimonial, index) => {
           // Calculate scaling based on the active index
           const isActive = index === activeIndex;
