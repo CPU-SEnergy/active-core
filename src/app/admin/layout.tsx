@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/sidebar";
 
 
+
 function CustomTrigger() {
   const { toggleSidebar } = useSidebar();
   return (
@@ -37,3 +38,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   )
 }
+
+

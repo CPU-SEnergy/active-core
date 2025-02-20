@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { useSearchParams } from "next/navigation";
 import CategoryLists from "@/app/apparels/CategoryLists";
 
-// Mocking external dependencies
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
@@ -47,7 +46,7 @@ describe("CategoryLists Component", () => {
     );
     expect(screen.getByText("Shorts").closest("a")).toHaveAttribute(
       "href",
-      "/apparels?c=shorts"
+      "/apparels?c=short"
     );
   });
 
