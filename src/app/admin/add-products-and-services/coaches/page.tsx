@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
-import { CoachForm } from "@/components/ui/coaches-modal";
+import { CoachForm } from "@/components/AddProductAndServices/CoachFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 
 const coaches = [
@@ -81,23 +81,31 @@ export default function CoachesPage() {
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500 mb-2">{coach.specialization}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  {coach.specialization}
+                </p>
                 <p className="text-sm text-gray-500 mb-2">Age: {coach.age}</p>
-                <p className="text-sm text-gray-500 mb-2">Experience: {coach.experience}</p>
-                <p className="text-sm text-gray-500 mb-2">Certifications: {coach.certifications}</p>
-                <p className="text-sm text-gray-500">Contact: {coach.contact}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Experience: {coach.experience}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Certifications: {coach.certifications}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Contact: {coach.contact}
+                </p>
               </div>
             </Card>
           ))}
         </div>
       </div>
 
-      <CoachForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <CoachForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
           console.log("Coach form submitted successfully");
-        }} 
+        }}
       />
     </div>
   );

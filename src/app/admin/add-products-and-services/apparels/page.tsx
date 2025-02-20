@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
-import { ApparelForm } from "@/components/ui/apparels-modal";
+import { ApparelForm } from "@/components/AddProductAndServices/ApparelFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 
 const apparels = [

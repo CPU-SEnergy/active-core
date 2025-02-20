@@ -14,7 +14,7 @@ export default function SelectProductAndServices() {
   const pathname = usePathname();
 
   const segments = pathname.split("/");
-  const currentCategory = segments[segments.length - 1] || "";
+  const currentCategory = segments[segments.length - 1] || "loading...";
 
   const handleSelect = (value: string) => {
     router.push(`/admin/add-products-and-services/${value}`);

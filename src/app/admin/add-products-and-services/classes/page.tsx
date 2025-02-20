@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
-import { ClassesModal } from "@/components/ui/classes-modal";
+import { ClassesModal } from "@/components/AddProductAndServices/ClassFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 
 const classes = [

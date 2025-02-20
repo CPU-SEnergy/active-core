@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
-import { MembershipPlanForm } from "@/components/ui/membership-plans-modal";
+import { MembershipPlanForm } from "@/components/AddProductAndServices/MembershipPlanFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 
 const membershipPlans = [
@@ -14,8 +14,8 @@ const membershipPlans = [
     type: "Premium",
     description: "Full access to all facilities and priority booking.",
     price: { regular: 5000.0, student: 4000.0, special: 3500.0 },
-    duration: "1 Year",
-    status: "Active",
+    duration: 12,
+    status: "active",
   },
   {
     id: 2,
@@ -23,8 +23,8 @@ const membershipPlans = [
     type: "Standard",
     description: "Access to gym and selected classes.",
     price: { regular: 3500.0, student: 3000.0, special: 2500.0 },
-    duration: "6 Months",
-    status: "Archived",
+    duration: 6,
+    status: "archived",
   },
 ];
 
