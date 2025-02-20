@@ -334,6 +334,49 @@ export default function Home() {
           </motion.div>
         </div>
       </motion.section>
+
+
+      <section className="py-16 px-6 text-center bg-neutral-900 text-white">
+      <motion.h2
+        className="text-4xl font-bold mb-8 text-red-500"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        What Our Clients Say
+      </motion.h2>
+      <div className="flex flex-col md:flex-row justify-center items-center gap-8">
+        {[
+          {
+            text: "“This program completely changed my life! I feel more confident and energized every day.”",
+            name: "- Sarah M.",
+          },
+          {
+            text: "“The coaches are phenomenal, and the community is incredibly supportive. Highly recommend!”",
+            name: "- James L.",
+          },
+          {
+            text: "“I've never felt stronger or more capable. This experience has been life-changing!”",
+            name: "- Emily R.",
+          },
+        ].map((testimonial, index) => (
+          <motion.div
+            key={index}
+            className="max-w-md bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:scale-105 transition-transform"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.2 }}
+            viewport={{ once: true }}
+          >
+            <p className="italic text-gray-300">{testimonial.text}</p>
+            <h4 className="mt-4 font-bold text-red-500">{testimonial.name}</h4>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  
+
+
       {/* Footer */}
       <footer className="bg-black py-12 border-t border-red-900">
         <div className="container mx-auto px-4">
@@ -389,5 +432,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+);
 }
