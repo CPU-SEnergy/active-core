@@ -6,9 +6,9 @@ export enum ProductType {
 }
 
 export enum ApparelType {
-  T_SHIRTS = "t_shirt",
-  SHORTS = "shorts",
-  GLOVES = "gloves",
+  T_SHIRTS = "t-shirt",
+  SHORTS = "short",
+  GLOVES = "glove",
   TOWEL = "towel",
 }
 
