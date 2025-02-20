@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   ref,
   query,
@@ -15,12 +14,12 @@ import {
   set,
   onDisconnect,
   getDatabase,
-  update,
 } from "firebase/database";
 import { app } from "@/lib/firebaseClient";
 import { User } from "firebase/auth";
 import { useRead } from "@typesaurus/react";
 import { db, Schema } from "@/lib/schema/firestore";
+import { Send } from "lucide-react";
 
 interface Message {
   id: string;
@@ -31,11 +30,11 @@ interface Message {
 }
 
 interface ChatRoomProps {
-  roomId: string | null;
+  roomId: string;
   user: User;
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 15;
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
   const database = getDatabase(app);
@@ -44,22 +43,15 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastLoadedTimestampRef = useRef<number>(0);
 
   const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]));
+  const [customerData] = useRead(db.users.get(roomId as Schema["users"]["Id"]));
   const userDisplayName =
     userData?.data.firstName && userData?.data.lastName
       ? `${userData.data.firstName} ${userData.data.lastName}`
       : "Anonymous";
 
-  const scrollToBottom = useCallback(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, []);
-
-  const loadInitialMessages = useCallback(async () => {
-    if (!roomId) return;
+  const loadInitialMessages = async () => {
     const messagesRef = ref(database, `systemChats/${roomId}/messages`);
     const messagesQuery = query(
       messagesRef,
@@ -76,25 +68,26 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
         })
       );
       messagesList.sort((a, b) => a.timestamp - b.timestamp);
-      if (messagesList.length > 0) {
-        lastLoadedTimestampRef.current =
-          messagesList.length > 0 ? messagesList[messagesList.length - 1]?.timestamp ?? 0 : 0;
-      }
       setMessages(messagesList);
-      setHasMore(messagesList.length === PAGE_SIZE);
-      scrollToBottom();
+      if (messagesList.length < PAGE_SIZE) {
+        setHasMore(false);
+      }
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
     } else {
       setMessages([]);
       setHasMore(false);
     }
-  }, [database, roomId, scrollToBottom]);
+  };
 
   useEffect(() => {
     loadInitialMessages();
-  }, [loadInitialMessages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
 
-  const loadOlderMessages = useCallback(async () => {
-    if (!roomId || messages.length === 0) return;
+  const loadOlderMessages = async () => {
+    if (messages.length === 0) return;
     setLoadingMore(true);
     const oldestTimestamp = messages[0]?.timestamp || 0;
     const messagesRef = ref(database, `systemChats/${roomId}/messages`);
@@ -122,7 +115,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       setHasMore(false);
     }
     setLoadingMore(false);
-  }, [database, roomId, messages]);
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -134,89 +127,110 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
     };
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loadingMore, loadOlderMessages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMore, loadingMore, messages]);
 
   useEffect(() => {
-    if (!roomId) return;
     const messagesRef = ref(database, `systemChats/${roomId}/messages`);
+    const lastTimestamp =
+      messages.length > 0 ? (messages[messages.length - 1]?.timestamp ?? 0) : 0;
     const newMessagesQuery = query(
       messagesRef,
       orderByChild("timestamp"),
-      startAt(lastLoadedTimestampRef.current + 1)
+      startAt(lastTimestamp + 1)
     );
     const unsubscribe = onChildAdded(newMessagesQuery, (snapshot) => {
       const newMsg = snapshot.val() as Message;
       setMessages((prev) => {
         if (prev.find((m) => m.id === snapshot.key)) return prev;
-        return [...prev, { ...newMsg, id: snapshot.key || "" }];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, ...rest } = newMsg;
+        return [...prev, { id: snapshot.key || "", ...rest }];
       });
-      scrollToBottom();
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
     });
     return () => unsubscribe();
-  }, [database, roomId, scrollToBottom]);
+  }, [roomId, messages]);
 
   useEffect(() => {
-    if (!roomId || !userDisplayName) return;
-    const userRef = ref(database, `systemChats/${roomId}/users/${roomId}`);
+    if (!userDisplayName) return;
+    const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`);
     set(userRef, {
       name: userDisplayName,
       online: true,
       lastActive: Date.now(),
     });
     onDisconnect(userRef).remove();
-  }, [database, roomId, userDisplayName]);
+  }, [roomId, user, userDisplayName]);
 
-  const sendMessage = useCallback(async () => {
-    if (!roomId || !input.trim()) return;
-    const newMessage = {
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const messageRef = push(ref(database, `systemChats/${roomId}/messages`));
+    await set(messageRef, {
       senderId: user.uid,
       senderName: userDisplayName || "Anonymous",
       text: input,
       timestamp: Date.now(),
-    };
-    const messagesRef = ref(database, `systemChats/${roomId}/messages`);
-    const newMessageRef = push(messagesRef);
-    const updates: { [key: string]: any } = {};
-    updates[`systemChats/${roomId}/recentMessage`] = newMessage;
-    updates[`systemChats/${roomId}/messages/${newMessageRef.key}`] = newMessage;
-    await update(ref(database), updates);
+    });
     setInput("");
-    scrollToBottom();
-  }, [database, roomId, input, user.uid, userDisplayName, scrollToBottom]);
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  };
 
-  if (!roomId) return null;
-  if (!userData) return <div>user Loading...</div>;
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      sendMessage();
+    }
+  };
 
   return (
-    <div className="w-full mx-auto p-4">
+    <div className="flex flex-col h-full">
+      <div className="p-4 bg-gray-50 pt-10 pb-5">
+        <h2 className="text-lg font-bold">Chat with {customerData?.data.firstName + " " + (customerData?.data.lastName || "")}</h2>
+      </div>
       <div
         ref={containerRef}
-        className="h-80 overflow-y-scroll border border-gray-300 p-4 mb-4 rounded bg-white shadow-sm"
+        className="flex-grow overflow-y-auto border border-gray-300 p-4 mx-5 rounded bg-gray-50 shadow-sm"
       >
         {loadingMore && (
           <div className="text-center">Loading older messages...</div>
         )}
         {messages.map((msg) => (
-          <div key={msg.id} className="mb-2">
-            <span className="font-bold text-blue-600">{msg.senderName}:</span>{" "}
-            <span>{msg.text}</span>
+          <div
+            key={msg.id}
+            className={`mb-2 p-2 rounded w-full ${
+              msg.senderId === user.uid ? "text-right" : "self-start text-left"
+            }`}
+          >
+            {msg.senderId !== user.uid && (
+              <span className="font-bold text-blue-black"></span>
+            )}{" "}
+            <span className={`mb-2 p-2 rounded max-w-xs ${
+              msg.senderId === user.uid ? "bg-gray-300 text-right" : "self-start text-left"
+            }`}>{msg.text}</span>
           </div>
         ))}
       </div>
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={sendMessage}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-        >
-          Send
-        </button>
+      <div className="p-2 mx-4 border-t border-gray-300 bg-white rounded shadow-sm">
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Type a message"
+            className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={sendMessage}
+            className="absolute right-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
+          >
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
