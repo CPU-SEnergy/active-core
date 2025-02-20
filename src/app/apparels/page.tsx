@@ -45,7 +45,7 @@ export default function ApparelPage({
   }
   console.log(apparels);
   return (
-    <main className="w-full bg-gray-50 h-screen">
+    <main className="w-full bg-gray-50 h-screen pt-20">
       <div className="max-w-7xl mx-auto w-full flex flex-col md:px-5 pb-10">
         <div className="flex justify-between mx-4 my-2 md:hidden">
           {/* filter */}
