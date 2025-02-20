@@ -1,18 +1,13 @@
-//apparels
-
 "use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pencil } from "lucide-react"
-import { ApparelForm } from "@/components/ui/apparels-modal"
+import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Pencil } from "lucide-react";
+import { ApparelForm } from "@/components/ui/apparels-modal";
+import SelectProductAndServices from "../SelectProductAndServices";
 
-
-
-// Mock data for apparels
 const apparels = [
   {
     id: 1,
@@ -42,7 +37,7 @@ const apparels = [
     price: { regular: 1900.0, sale: 1200.0 },
     image: "/placeholder.svg",
   },
-  
+
   {
     id: 5,
     name: "Sweatpants",
@@ -71,31 +66,19 @@ const apparels = [
     price: { regular: 1900.0, sale: 1200.0 },
     image: "/placeholder.svg",
   },
-]
+];
 
 export default function ApparelsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
       <div className="p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-semibold">Apparels</h1>
-          <Select defaultValue="apparels">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="apparels">Apparels</SelectItem>
-              <SelectItem value="equipment">Membership</SelectItem>
-              <SelectItem value="accessories">Coaches</SelectItem>
-              <SelectItem value="accessories">Classes</SelectItem>
-            </SelectContent>
-          </Select>
+          <SelectProductAndServices />
         </div>
 
-        {/* Add Apparels Button */}
         <Button
           className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
           variant="outline"
@@ -104,7 +87,6 @@ export default function ApparelsPage() {
           Add Apparels
         </Button>
 
-        {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {apparels.map((apparel) => (
             <Card key={apparel.id} className="relative group">
@@ -136,7 +118,8 @@ export default function ApparelsPage() {
                 </div>
                 <p className="text-sm text-gray-500 mb-2">{apparel.size}</p>
                 <p className="text-sm">
-                  P {apparel.price.regular.toFixed(2)} | P {apparel.price.sale.toFixed(2)}
+                  P {apparel.price.regular.toFixed(2)} | P{" "}
+                  {apparel.price.sale.toFixed(2)}
                 </p>
               </div>
             </Card>
@@ -144,15 +127,13 @@ export default function ApparelsPage() {
         </div>
       </div>
 
-      {/* Modal Component */}
-      <ApparelForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ApparelForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-          // Handle success action here
           console.log("Apparel form submitted successfully");
-        }} 
+        }}
       />
     </div>
-  )
+  );
 }
