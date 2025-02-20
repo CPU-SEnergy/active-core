@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import Testimonials from "@/components/Testimonials"
 
 
 export default function Home() {
@@ -334,6 +335,13 @@ export default function Home() {
           </motion.div>
         </div>
       </motion.section>
+
+
+      <Testimonials />
+
+
+
+
       {/* Footer */}
       <footer className="bg-black py-12 border-t border-red-900">
         <div className="container mx-auto px-4">
@@ -389,5 +397,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+);
 }
