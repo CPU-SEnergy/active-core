@@ -4,11 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil } from "lucide-react";
-import { CoachForm } from "@/components/ui/coaches-modal";
+import { CoachForm } from "@/components/AddProductAndServices/CoachFormModal";
+import SelectProductAndServices from "../SelectProductAndServices";
 
-// Mock data for coaches
 const coaches = [
   {
     id: 1,
@@ -40,23 +39,10 @@ export default function CoachesPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-semibold">Coaches</h1>
-          <Select defaultValue="coaches">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="apparels">Apparels</SelectItem>
-              <SelectItem value="equipment">Membership</SelectItem>
-              <SelectItem value="accessories">Coaches</SelectItem>
-              <SelectItem value="accessories">Classes</SelectItem>
-            </SelectContent>
-          </Select>
+          <SelectProductAndServices />
         </div>
-
-        {/* Add Coach Button */}
         <Button
           className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
           variant="outline"
@@ -65,7 +51,6 @@ export default function CoachesPage() {
           Add Coach
         </Button>
 
-        {/* Coaches Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {coaches.map((coach) => (
             <Card key={coach.id} className="relative group">
@@ -95,24 +80,31 @@ export default function CoachesPage() {
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500 mb-2">{coach.specialization}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  {coach.specialization}
+                </p>
                 <p className="text-sm text-gray-500 mb-2">Age: {coach.age}</p>
-                <p className="text-sm text-gray-500 mb-2">Experience: {coach.experience}</p>
-                <p className="text-sm text-gray-500 mb-2">Certifications: {coach.certifications}</p>
-                <p className="text-sm text-gray-500">Contact: {coach.contact}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Experience: {coach.experience}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Certifications: {coach.certifications}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Contact: {coach.contact}
+                </p>
               </div>
             </Card>
           ))}
         </div>
       </div>
 
-      {/* Modal Component */}
-      <CoachForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <CoachForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
           console.log("Coach form submitted successfully");
-        }} 
+        }}
       />
     </div>
   );

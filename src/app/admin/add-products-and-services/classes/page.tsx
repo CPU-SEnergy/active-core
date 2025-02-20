@@ -4,16 +4,16 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil } from "lucide-react";
-import { ClassesModal } from "@/components/ui/classes-modal";
+import { ClassesModal } from "@/components/AddProductAndServices/ClassFormModal";
+import SelectProductAndServices from "../SelectProductAndServices";
 
-// Mock data for classes
 const classes = [
   {
     id: 1,
     name: "Yoga Basics",
-    description: "A beginner-friendly yoga class to improve flexibility and relaxation.",
+    description:
+      "A beginner-friendly yoga class to improve flexibility and relaxation.",
     picture: "/placeholder.svg",
     coaches: ["Coach A", "Coach B"],
   },
@@ -32,23 +32,10 @@ export default function ClassesPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-semibold">Classes</h1>
-          <Select defaultValue="classes">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="apparels">Apparels</SelectItem>
-              <SelectItem value="equipment">Membership</SelectItem>
-              <SelectItem value="accessories">Coaches</SelectItem>
-              <SelectItem value="classes">Classes</SelectItem>
-            </SelectContent>
-          </Select>
+          <SelectProductAndServices />
         </div>
-
-        {/* Add Class Button */}
         <Button
           className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
           variant="outline"
@@ -56,8 +43,6 @@ export default function ClassesPage() {
         >
           Add Class
         </Button>
-
-        {/* Classes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {classes.map((classItem) => (
             <Card key={classItem.id} className="relative group">
@@ -87,23 +72,26 @@ export default function ClassesPage() {
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500 mb-2">{classItem.description}</p>
-                <p className="text-sm font-semibold">Coaches: {classItem.coaches.join(", ")}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  {classItem.description}
+                </p>
+                <p className="text-sm font-semibold">
+                  Coaches: {classItem.coaches.join(", ")}
+                </p>
               </div>
             </Card>
           ))}
         </div>
       </div>
-
-      {/* Modal Component */}
-      <ClassesModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ClassesModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-          // Handle success action here
           console.log("Class form submitted successfully");
-        }} 
-        coaches={classes.flatMap(classItem => classItem.coaches.map(coach => ({ id: coach, name: coach })))}
+        }}
+        coaches={classes.flatMap((classItem) =>
+          classItem.coaches.map((coach) => ({ id: coach, name: coach }))
+        )}
       />
     </div>
   );

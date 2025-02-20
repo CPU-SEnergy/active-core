@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/add-products-and-services-cards"
+import { Card } from "@/components/AddProductAndServices/CustomCard"
 import { Shirt, Users, Dumbbell, UserCog } from "lucide-react"
 import Link from "next/link"
 

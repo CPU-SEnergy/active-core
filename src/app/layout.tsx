@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { getTokens } from 'next-firebase-auth-edge';
-import { cookies, headers } from 'next/headers';
-import { serverConfig, clientConfig } from '@/lib/config';
-import { AuthProvider } from '@/auth/AuthProvider';
-import { toUser } from '@/utils/helpers/user';
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies, headers } from "next/headers";
+import { serverConfig, clientConfig } from "@/lib/config";
+import { AuthProvider } from "@/auth/AuthProvider";
+import { toUser } from "@/utils/helpers/user";
 import Navbar from "@/components/navbar";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as ToasterSonner } from "sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,13 +45,14 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{
-          fontFamily: 'var(--font-geist-sans), sans-serif',
+          fontFamily: "var(--font-geist-sans), sans-serif",
         }}
       >
         <AuthProvider>
           <Navbar />
           {children}
           <Toaster />
+          <ToasterSonner />
         </AuthProvider>
       </body>
     </html>
