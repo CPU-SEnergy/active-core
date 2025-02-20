@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
 import { MembershipPlanForm } from "@/components/AddProductAndServices/MembershipPlanFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
-
 const membershipPlans = [
   {
     id: 1,

@@ -51,6 +51,7 @@ interface MembershipPlan {
 interface UserBasicInfo {
   userId: Schema["users"]["Id"];
   name: string;
+  type: "regular" | "student";
   imageUrl: string;
 }
 

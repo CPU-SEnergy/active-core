@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
 import { ApparelForm } from "@/components/AddProductAndServices/ApparelFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
-
 const apparels = [
   {
     id: 1,
@@ -78,7 +77,6 @@ export default function ApparelsPage() {
           <h1 className="text-2xl font-semibold">Apparels</h1>
           <SelectProductAndServices />
         </div>
-
         <Button
           className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
           variant="outline"
@@ -126,7 +124,6 @@ export default function ApparelsPage() {
           ))}
         </div>
       </div>
-
       <ApparelForm
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -137,3 +134,4 @@ export default function ApparelsPage() {
     </div>
   );
 }
+

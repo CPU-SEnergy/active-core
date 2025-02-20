@@ -36,7 +36,6 @@ export default function ClassesPage() {
           <h1 className="text-2xl font-semibold">Classes</h1>
           <SelectProductAndServices />
         </div>
-
         <Button
           className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
           variant="outline"
@@ -44,7 +43,6 @@ export default function ClassesPage() {
         >
           Add Class
         </Button>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {classes.map((classItem) => (
             <Card key={classItem.id} className="relative group">
@@ -85,7 +83,6 @@ export default function ClassesPage() {
           ))}
         </div>
       </div>
-
       <ClassesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

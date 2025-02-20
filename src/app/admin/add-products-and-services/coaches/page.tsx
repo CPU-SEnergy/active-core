@@ -43,7 +43,6 @@ export default function CoachesPage() {
           <h1 className="text-2xl font-semibold">Coaches</h1>
           <SelectProductAndServices />
         </div>
-
         <Button
           className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
           variant="outline"
