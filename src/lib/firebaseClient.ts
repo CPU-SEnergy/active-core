@@ -9,7 +9,13 @@ export const app = (() => {
   }
 
   if (!getApps().length) {
-    return initializeApp(clientConfig);
+    return initializeApp({
+      projectId: clientConfig.projectId || "",
+      apiKey: clientConfig.apiKey || "",
+      authDomain: clientConfig.authDomain || "",
+      databaseURL: clientConfig.databaseURL || "",
+      messagingSenderId: clientConfig.messagingSenderId || "",
+    });
   }
 
   return getApp();

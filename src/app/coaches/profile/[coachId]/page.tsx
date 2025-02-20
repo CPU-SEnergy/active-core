@@ -1,4 +1,5 @@
-import Link from "next/link"; // Import Link from next/link
+import Link from "next/link";
+import Image from "next/image"; 
 import { coaches } from "@/lib/mock_data/coachesMockData";
 
 export default function CoachTest({ params }: { params: { coachId: number } }) {
@@ -9,7 +10,7 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 pt-20">
       <Link href="/coaches" passHref>
         <button className="mb-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">
           Back
@@ -17,9 +18,11 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
       </Link>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <div className="flex flex-col items-center space-y-4">
-          <img
+          <Image
             src={coach.image}
             alt={coach.name}
+            width={192}
+            height={192}
             className="w-48 h-48 rounded-full object-cover shadow-md"
           />
           <div className="text-center">
@@ -55,3 +58,27 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
     </div>
   );
 }
+
+// async function fetchCoaches(id: string) {
+//   try {
+//     const res = await fetch(`http://localhost:3000/api/coaches/${id}`, {
+//       next: { revalidate: 60000 },
+//     });
+//     if (!res.ok) {
+//       throw new Error("Failed to fetch coaches");
+//     }
+//     return await res.json();
+//   } catch (error) {
+//     console.error(error);
+//     return [];
+//   }
+// }
+
+// export default async function CoachTest({
+//   params,
+// }: {
+//   params: Promise<{ id: string }>;
+// }) {
+//   const coach: Coach = await fetchCoaches((await params).id);
+//   console.log(coaches, "coaches");
+// }

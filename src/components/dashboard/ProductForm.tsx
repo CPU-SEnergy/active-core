@@ -57,12 +57,14 @@ export default function ProductForm() {
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
-        form.setValue("file", file);
-        setUploadedFile(file);
-        toast({
-          title: "File uploaded",
-          description: `${file.name} uploaded successfully.`,
-        });
+        if (file) {
+          form.setValue("file", file);
+          setUploadedFile(file);
+          toast({
+            title: "File uploaded",
+            description: `${file.name} uploaded successfully.`,
+          });
+        }
       }
     },
     onDropRejected: (fileRejections) => {

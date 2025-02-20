@@ -1,42 +1,51 @@
-import { app } from '@/lib/firebaseClient';
-import { NextResponse } from 'next/server';
-import { collection, query, where, getDocs, getFirestore } from 'firebase/firestore';
+import { NextRequest, NextResponse } from "next/server";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { getFirestore } from "firebase-admin/firestore";
+import { ProductType } from "@/lib/types/product";
 
-const db = getFirestore(app)
+const db = getFirestore(getFirebaseAdminApp());
 
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const c = searchParams.get("c");
+  const sort = searchParams.get("sort");
+  const dir = searchParams.get("dir") as FirebaseFirestore.OrderByDirection;
+
   try {
-    const { searchParams } = new URL(req.url);
-    const maxPrice = searchParams.get("maxPrice");
-    const minPrice = searchParams.get("minPrice");
-    const name = searchParams.get("name");
+    let query: FirebaseFirestore.Query = db.collection(ProductType.APPARELS);
 
-    const apparelsCollection = collection(db, "products", "apparels");
-
-    let q = query(apparelsCollection);
-
-    if (maxPrice) {
-      q = query(q, where("price", "<=", parseFloat(maxPrice)));
-    };
-
-    if (minPrice) {
-      q = query(q, where("price", ">=", parseFloat(minPrice)));
+    if (c) {
+      query = query.where("type", "==", c);
     }
 
-    if (name) {
-      q = query(q, where("name", "==", name));
+    if (sort) {
+      if (sort === "price") {
+        query = query.orderBy(sort, dir);
+      } else if (sort === "latest") {
+        query = query.orderBy("createdAt", "desc");
+      }
     }
 
-    const querySnapshot = await getDocs(q);
+    const snapshot = await query.get();
 
-    const apparels = querySnapshot.docs.map((doc) => ({
+    if (snapshot.empty) {
+      return NextResponse.json(
+        { error: "No products found." },
+        { status: 404 }
+      );
+    }
+
+    const products = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    return NextResponse.json(apparels);
+    return NextResponse.json(products);
   } catch (error) {
-    console.error("Error fetching apparels: ", error);
-    return NextResponse.json({ error: "Failed to fetch apparels" }, { status: 500 });
+    console.error("Error fetching products:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products. Please try again later." },
+      { status: 500 }
+    );
   }
 }
