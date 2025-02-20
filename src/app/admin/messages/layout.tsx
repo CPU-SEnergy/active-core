@@ -50,7 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="pt-5">Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
   if (!user)
     return (
@@ -60,7 +60,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-row">
+    <div className="min-h-screen h-screen bg-gray-100 flex flex-row">
       <UserChatList
         user={user}
         onSelectChat={(roomId) => router.push(`/admin/chat/${roomId}`)}
