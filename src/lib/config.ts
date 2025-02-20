@@ -17,6 +17,7 @@ export const serverConfig = {
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n")!,
   },
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
 };
 
 export const clientConfig = {

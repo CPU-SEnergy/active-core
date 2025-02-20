@@ -13,7 +13,7 @@ export default async function Page({
 
   return (
     <div
-      className="flex flex-col lg:flex-row min-h-screen"
+      className="flex flex-col lg:flex-row min-h-screen pt-20"
       style={{
         background:
           "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
@@ -32,10 +32,10 @@ export default async function Page({
             Now enrolling new students
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-red-600 sm:text-7xl mb-6">
-            {classes[Number(id)].title}
+            {classes[Number(id)]?.title}
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            {classes[Number(id)].discription}
+            {classes[Number(id)]?.discription}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
             <Button variant="outline" size="lg" className="w-full sm:w-auto">
@@ -67,7 +67,7 @@ export default async function Page({
       <div className="w-full lg:w-1/2 relative order-1 lg:order-2 mt-10 mb-10 ">
         <Image
           className="absolute inset-0 h-full w-full object-cover rounded-l-3xl"
-          src={classes[Number(id)].image}
+          src={classes[Number(id)]?.image || "/picture/sportsfitness.jpgs"}
           alt="Students practicing taekwondo in a traditional dojang"
           width={1080}
           height={1080}
