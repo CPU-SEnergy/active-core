@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen h-screen bg-gray-100 flex flex-row">
       <UserChatList
         user={user}
-        onSelectChat={(roomId) => router.push(`/admin/chat/${roomId}`)}
+        onSelectChat={(roomId) => router.push(`/admin/messages/${roomId}`)}
         isAdmin={isAdmin}
       />
       {children}
