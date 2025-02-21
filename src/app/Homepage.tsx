@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Testimonials from "@/components/Testimonials"
-
+import StudentAppreciation from "@/components/StudentAppreciation"
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
@@ -194,6 +194,12 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+
+      <StudentAppreciation />
+
+
+
       {/* Gym Tour Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -338,8 +344,6 @@ export default function Home() {
 
 
       <Testimonials />
-
-
 
 
       {/* Footer */}
