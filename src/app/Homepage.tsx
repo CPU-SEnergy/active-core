@@ -6,11 +6,7 @@ import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Testimonials from "@/components/Testimonials"
-<<<<<<< HEAD
 import StudentAppreciation from "@/components/StudentAppreciation"
-=======
->>>>>>> 9fdfcd078ecc5d017cdd1d76fa72b56d4679f2af
-
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
@@ -349,12 +345,7 @@ export default function Home() {
 
       <Testimonials />
 
-<<<<<<< HEAD
-=======
 
-
-
->>>>>>> 9fdfcd078ecc5d017cdd1d76fa72b56d4679f2af
       {/* Footer */}
       <footer className="bg-black py-12 border-t border-red-900">
         <div className="container mx-auto px-4">
