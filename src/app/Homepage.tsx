@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Testimonials from "@/components/Testimonials"
+import StudentAppreciation from "@/components/StudentAppreciation"
 
 
 export default function Home() {
@@ -194,6 +195,12 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+
+      <StudentAppreciation />
+
+
+
       {/* Gym Tour Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -338,9 +345,6 @@ export default function Home() {
 
 
       <Testimonials />
-
-
-
 
       {/* Footer */}
       <footer className="bg-black py-12 border-t border-red-900">
