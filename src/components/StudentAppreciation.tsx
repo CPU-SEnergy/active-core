@@ -71,7 +71,7 @@ export default function StudentAppreciation() {
     <section className="py-16 px-6 text-center bg-gradient-to-r from-red-950 to-black text-white w-full max-w-full mx-auto">
       {/* Title Animation */}
       <motion.h2
-        className="text-4xl font-bold mb-8 text-red-500"
+        className="text-4xl font-audiowide mb-8 mb-8 text-white"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: "spring", stiffness: 100 }}

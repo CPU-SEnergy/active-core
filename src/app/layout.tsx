@@ -8,7 +8,6 @@ import { AuthProvider } from "@/auth/AuthProvider";
 import { toUser } from "@/utils/helpers/user";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as ToasterSonner } from "sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -42,19 +41,23 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{
-          fontFamily: "var(--font-geist-sans), sans-serif",
-        }}
+        style={{ fontFamily: "var(--font-geist-sans), sans-serif" }}
       >
         <AuthProvider>
           <Navbar />
           {children}
           <Toaster />
-          <ToasterSonner />
         </AuthProvider>
       </body>
     </html>
   );
 }
+

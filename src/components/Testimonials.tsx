@@ -36,7 +36,7 @@ export default function Testimonials() {
   return (
     <section className="py-20 px-6 text-center bg-neutral-900 text-white relative">
       <motion.h2
-        className="text-4xl font-bold mb-16 text-red-500 relative z-10"
+        className="text-4xl font-bold mb-16 text-white relative z-10 font-audiowide text-shadow-fire"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -68,7 +68,7 @@ export default function Testimonials() {
                 />
               </div>
               <p className="italic text-gray-300 text-center mt-10">{testimonial.text}</p>
-              <h4 className="mt-4 font-bold text-red-500">{testimonial.name}</h4>
+              <h4 className="mt-4 font-bold text-red-500 text-shadow-fire">{testimonial.name}</h4>
             </motion.div>
           );
         })}
