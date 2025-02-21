@@ -44,7 +44,7 @@ export default function ChatRoomPage({ params }: ChatRoomPageParams) {
     );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-row">
+    <div className="flex-grow h-full bg-gray-50 ">
       {user && <ChatRoom roomId={params.roomId} user={user} />}
     </div>
   );

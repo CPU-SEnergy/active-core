@@ -18,13 +18,13 @@ const athletes = [
     name: "Lois Bruha",
     achievement: "Champion - Regional Track and Field",
     image: "/pictures/Lois.jpg",
-    news: "Jessica Lee emerged as the champion in the highly competitive Regional Track and Field competition...",
+    news: "Lois Bruha emerged as the champion in the highly competitive Regional Track and Field competition...",
   },
   {
     name: "Patrick Pineda",
     achievement: "MVP - Collegiate Basketball League",
     image: "/pictures/Patrick.jpg",
-    news: "Carlos Dela Cruz led his team to victory in the Collegiate Basketball League, earning the MVP title...",
+    news: "Patrick Pineda led his team to victory in the Collegiate Basketball League, earning the MVP title...",
   },
 ];
 
@@ -39,8 +39,24 @@ export default function StudentAppreciation() {
     slidesToScroll: 1,
     centerMode: true,
     centerPadding: "0px",
-    nextArrow: <div style={{ fontSize: "48px", right: "-50px", position: "absolute", cursor: "pointer" }}>➡</div>,
-    prevArrow: <div style={{ fontSize: "48px", left: "-50px", position: "absolute", cursor: "pointer" }}>⬅</div>,
+    nextArrow: (
+      <motion.div
+        whileHover={{ scale: 1.2 }}
+        whileTap={{ scale: 0.9 }}
+        style={{ fontSize: "48px", right: "-50px", position: "absolute", cursor: "pointer" }}
+      >
+        ➡
+      </motion.div>
+    ),
+    prevArrow: (
+      <motion.div
+        whileHover={{ scale: 1.2 }}
+        whileTap={{ scale: 0.9 }}
+        style={{ fontSize: "48px", left: "-50px", position: "absolute", cursor: "pointer" }}
+      >
+        ⬅
+      </motion.div>
+    ),
     responsive: [
       {
         breakpoint: 768,
@@ -52,19 +68,34 @@ export default function StudentAppreciation() {
   };
 
   return (
-    <section className="py-16 px-6 text-center bg-neutral-900 text-white w-full max-w-full mx-auto">
+    <section className="py-16 px-6 text-center bg-gradient-to-r from-red-950 to-black text-white w-full max-w-full mx-auto">
+      {/* Title Animation */}
       <motion.h2
         className="text-4xl font-bold mb-8 text-red-500"
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+        whileHover={{
+          textShadow: "0px 0px 10px rgba(255, 0, 0, 0.8)",
+          scale: 1.05,
+        }}
       >
         Sports and Fitness Marvels!
       </motion.h2>
 
-      <p className="text-lg text-gray-300 mb-6">
+      {/* Subtitle Animation */}
+      <motion.p
+        className="text-lg text-gray-300 mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.2 }}
+        whileHover={{
+          textShadow: "0px 0px 8px rgba(255, 255, 255, 0.6)",
+          scale: 1.02,
+        }}
+      >
         We honor our talented athletes who have brought pride and glory to our Sports and Fitness Center.
-      </p>
+      </motion.p>
 
       <div className="w-full max-w-4xl mx-auto">
         <Slider {...settings}>
@@ -74,16 +105,38 @@ export default function StudentAppreciation() {
               className="w-full bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 cursor-pointer mx-auto"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.5, type: "spring" }}
               onClick={() => setSelectedAthlete(athlete)}
             >
-              {/* Athlete Image */}
-              <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-red-500">
+              {/* Athlete Image with Hover Animation */}
+              <motion.div
+                className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-red-500"
+                whileHover={{ scale: 1.1 }}
+              >
                 <Image src={athlete.image} alt={athlete.name} width={128} height={128} className="object-cover" />
-              </div>
+              </motion.div>
 
-              <h4 className="mt-4 font-bold text-red-500 text-xl text-center">{athlete.name}</h4>
-              <p className="text-gray-300 mt-2 italic text-center">{athlete.achievement}</p>
+              {/* Animated Athlete Name */}
+              <motion.h4
+                className="mt-4 font-bold text-red-500 text-xl text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                {athlete.name}
+              </motion.h4>
+
+              {/* Animated Achievement Text */}
+              <motion.p
+                className="text-gray-300 mt-2 italic text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                whileHover={{ scale: 1.02, textShadow: "0px 0px 6px rgba(255,255,255,0.5)" }}
+              >
+                {athlete.achievement}
+              </motion.p>
             </motion.div>
           ))}
         </Slider>
