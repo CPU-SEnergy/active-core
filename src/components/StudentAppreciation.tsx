@@ -15,7 +15,7 @@ const athletes = [
     news: "Michael Santos dominated the National Swimming Championship, securing the gold medal in the 200m freestyle...",
   },
   {
-    name: "Lois Bruha",
+    name: "Lois Gwapa",
     achievement: "Champion - Regional Track and Field",
     image: "/pictures/Lois.jpg",
     news: "Lois Bruha emerged as the champion in the highly competitive Regional Track and Field competition...",
@@ -71,7 +71,7 @@ export default function StudentAppreciation() {
     <section className="py-16 px-6 text-center bg-gradient-to-r from-red-950 to-black text-white w-full max-w-full mx-auto">
       {/* Title Animation */}
       <motion.h2
-        className="text-4xl font-audiowide mb-8 mb-8 text-white"
+        className="text-4xl font-audiowide mb-8 mb-8 text-white text-shadow-flicker"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
@@ -85,9 +85,9 @@ export default function StudentAppreciation() {
 
       {/* Subtitle Animation */}
       <motion.p
-        className="text-lg text-gray-300 mb-6"
+        className="text-lg text-gray-300 mb-6 text-shadow-fire"
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 8, y: 0 }}
         transition={{ duration: 1, delay: 0.2 }}
         whileHover={{
           textShadow: "0px 0px 8px rgba(255, 255, 255, 0.6)",

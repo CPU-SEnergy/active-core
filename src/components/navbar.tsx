@@ -71,7 +71,7 @@ export default function Navbar() {
                   >
                     <Link
                       href={href}
-                      className="text-white hover:text-red-500 transition duration-300"
+                      className="text-white hover:text-red-500 transition duration-300 text-shadow-fire"
                     >
                       {item}
                     </Link>

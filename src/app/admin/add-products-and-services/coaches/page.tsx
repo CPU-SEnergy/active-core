@@ -11,25 +11,25 @@ import SelectProductAndServices from "../SelectProductAndServices";
 const coaches = [
   {
     id: 1,
-    name: "John Doe",
+    name: "Doraemon",
     specialization: "Strength Training",
     bio: "Expert in strength and conditioning.",
     age: 35,
     experience: "10 years",
     certifications: "Certified Strength Coach",
     contact: "123-456-7890",
-    image: "/placeholder.svg",
+    image: "/pictures/combat.jpg",
   },
   {
     id: 2,
-    name: "Jane Smith",
+    name: "HAhaa",
     specialization: "Yoga Instructor",
     bio: "Passionate about holistic wellness.",
     age: 29,
     experience: "8 years",
     certifications: "Registered Yoga Teacher",
     contact: "987-654-3210",
-    image: "/placeholder.svg",
+    image: "/pictures/combat.jpg",
   },
 ];
 

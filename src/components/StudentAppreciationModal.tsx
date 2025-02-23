@@ -26,7 +26,7 @@ export default function StudentAppreciationModal({ athlete, onClose }: StudentAp
           className="absolute top-4 right-4 text-gray-400 hover:text-white p-2"
           onClick={onClose}
         >
-          <X size={60} />
+          <X size={30} />
         </button>
 
         <h2 className="text-3xl font-bold text-red-500 mb-6">{athlete.name}</h2>

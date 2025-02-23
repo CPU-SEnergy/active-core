@@ -14,14 +14,14 @@ const classes = [
     name: "Yoga Basics",
     description:
       "A beginner-friendly yoga class to improve flexibility and relaxation.",
-    picture: "/placeholder.svg",
+    picture: "/pictures/combat.jpg",
     coaches: ["Coach A", "Coach B"],
   },
   {
     id: 2,
     name: "HIIT Workout",
     description: "High-intensity interval training for endurance and strength.",
-    picture: "/placeholder.svg",
+    picture: "/pictures/combat.jpg",
     coaches: ["Coach C"],
   },
 ];
