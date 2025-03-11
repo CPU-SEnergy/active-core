@@ -1,7 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFormState } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -11,21 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import apparelFormSchema from "@/lib/zod/schemas/apparels";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  type: z.string().min(1, "Type is required"),
-  price: z.preprocess(
-    (val) => Number(val),
-    z.number().gt(0, "Price must be greater than 0")
-  ),
-  description: z.string().min(1, "Description is required"),
-  image: z.custom<File>((file) => file instanceof File, {
-    message: "Image is required",
-  }),
-});
-
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof apparelFormSchema>;
 
 interface ApparelFormProps {
   isOpen: boolean;
@@ -41,11 +27,13 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    control,
+    formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(apparelFormSchema),
   });
 
+  const { isSubmitting } = useFormState({ control });
   const onSubmit = async (data: FormData) => {
     try {
       console.log("Form data:", data);
@@ -126,7 +114,8 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               <Input
                 id="price"
                 type="number"
-                min="0.01"
+                min="0.00"
+                step="0.01"
                 placeholder="Enter item price"
                 className="bg-gray-50"
                 {...register("price")}
