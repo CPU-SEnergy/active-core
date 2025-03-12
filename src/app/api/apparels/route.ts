@@ -29,10 +29,7 @@ export async function GET(request: NextRequest) {
     const snapshot = await query.get();
 
     if (snapshot.empty) {
-      return NextResponse.json(
-        { error: "No products found." },
-        { status: 404 }
-      );
+      return NextResponse.json(null);
     }
 
     const products = snapshot.docs.map((doc) => ({

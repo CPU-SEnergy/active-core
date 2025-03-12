@@ -92,7 +92,7 @@ interface Customers {
   totalCustomers: number;
 }
 
-interface Apparels {
+export interface Apparels {
   name: string;
   price: number;
   discount?: number;

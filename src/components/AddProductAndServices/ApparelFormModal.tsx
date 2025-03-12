@@ -10,8 +10,10 @@ import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import apparelFormSchema from "@/lib/zod/schemas/apparels";
+import { createApparel } from "../../../actions/admin/createApparel";
+import { mutate } from "swr";
 
-type FormData = z.infer<typeof apparelFormSchema>;
+type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
 
 interface ApparelFormProps {
   isOpen: boolean;
@@ -27,19 +29,28 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
     register,
     handleSubmit,
     setValue,
-    control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(apparelFormSchema),
+    resolver: zodResolver(apparelFormSchema(false)),
   });
 
-  const { isSubmitting } = useFormState({ control });
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("type", data.type);
+      formData.append("price", data.price.toString());
+      formData.append("discount", data.discount?.toString() || "");
+      formData.append("description", data.description);
+      if (data.image) {
+        formData.append("image", data.image);
+      }
+
+      await createApparel(formData);
       toast.success("Apparel created successfully!");
+
       onSuccess();
+      mutate("/api/apparels");
       onClose();
     } catch (error) {
       console.error("Error creating apparel:", error);
@@ -71,7 +82,7 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto scroll-m-0">
         <h2 className="text-xl font-semibold mb-4 text-center">Add Apparel</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -87,7 +98,6 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
-
           <div className="grid gap-2">
             <Label htmlFor="type">Type of Apparel</Label>
             <select
@@ -107,7 +117,6 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               <p className="text-sm text-red-500">{errors.type.message}</p>
             )}
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="price">Price</Label>
@@ -126,6 +135,26 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="discount">Discount (Optional)</Label>
+              <Input
+                id="discount"
+                type="number"
+                min="0.00"
+                step="0.01"
+                placeholder="Enter discount price"
+                className="bg-gray-50"
+                {...register("discount")}
+              />
+              {errors.discount && (
+                <p className="text-sm text-red-500">
+                  {errors.discount.message}
+                </p>
+              )}
+            </div>
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -140,7 +169,6 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               </p>
             )}
           </div>
-
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
