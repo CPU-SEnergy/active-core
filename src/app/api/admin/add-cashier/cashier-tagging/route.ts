@@ -8,18 +8,29 @@ const { setCustomUserClaims, getUser } = getFirebaseAuth({
   apiKey: serverConfig.apiKey,
 });
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const tokens = await getTokens(request.cookies, serverConfig);
 
   if (!tokens) {
     throw new Error('Cannot update custom claims of unauthenticated user');
   }
 
-  await setCustomUserClaims(tokens.decodedToken.uid, {
+  const { targetUid } = await request.json()
+
+  if (!targetUid) {
+    return new NextResponse(
+      JSON.stringify({ error: 'Target UID is required' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' }
+      } 
+    );
+  }
+
+  await setCustomUserClaims(targetUid, {
     role: 'cashier',
   });
 
-  const user = await getUser(tokens.decodedToken.uid);
+  const user = await getUser(targetUid);
   console.log('User custom claims updated', user!.customClaims);
   const response = new NextResponse(
     JSON.stringify({
@@ -30,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  console.log(await getUser(tokens.decodedToken.uid));
+  console.log(await getUser(targetUid));
 
   return refreshNextResponseCookies(request, response, serverConfig);
 }
