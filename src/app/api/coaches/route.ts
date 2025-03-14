@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getFirebaseAdminApp } from '@/lib/firebaseAdmin';
-import { ProductType } from '@/lib/types/product';
+import { NextResponse } from "next/server";
+import { getFirestore } from "firebase-admin/firestore";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { ProductType } from "@/lib/types/product";
 
 const db = getFirestore(getFirebaseAdminApp());
 
@@ -15,7 +15,7 @@ export async function GET() {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(coaches)
+    console.log("coaches api", coaches);
     return NextResponse.json(coaches);
   } catch (error) {
     console.error("Error fetching coaches: ", error);

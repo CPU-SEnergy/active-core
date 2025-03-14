@@ -16,3 +16,17 @@ export interface APPARELDATA {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface COACHDATA {
+  id: string;
+  name: string;
+  specialization: string;
+  imageUrl: string;
+  contactInfo: string;
+  dob: Date;
+  experience: number;
+  certifications: string[];
+  bio: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

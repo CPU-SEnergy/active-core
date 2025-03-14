@@ -2,17 +2,18 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pencil, Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Trash, Upload, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
-import { editApparel } from "@/app/actions/admin/editApparel";
+import { editCoach } from "@/app/actions/admin/editCoach";
+
 import {
   Dialog,
   DialogTrigger,
@@ -23,33 +24,44 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { APPARELDATA } from "@/lib/types/product-services";
 import { mutate } from "swr";
+import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
+import { formatDOB } from "@/utils/firebase/helpers/convertTimestampToDate";
+import { COACHDATA } from "@/lib/types/product-services";
 
-type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
+type FormData = z.infer<typeof coachFormSchema>;
 
-export function EditApparel({ data }: { data: APPARELDATA }) {
+export function EditCoach({ data }: { data: COACHDATA }) {
   const [open, setOpen] = useState(false);
+  const [preview, setPreview] = useState<string | null>(data.imageUrl);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(apparelFormSchema(true)),
+    resolver: zodResolver(coachFormSchema),
     defaultValues: {
       name: data.name,
-      type: data.type,
-      price: data.price,
-      description: data.description,
-      discount: data.discount ? Number(data.discount) : undefined,
+      specialization: data.specialization,
+      contactInfo: data.contactInfo,
+      dob: formatDOB(data.dob),
+      experience: data.experience,
+      certifications: data.certifications || [""],
+      bio: data.bio,
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "certifications",
+  });
+
   const selectedFile = watch("image") as File | undefined;
-  const preview = selectedFile
+  const imagePreview = selectedFile
     ? URL.createObjectURL(selectedFile)
     : data.imageUrl;
 
@@ -59,6 +71,7 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
       return;
     }
     setValue("image", file, { shouldValidate: true });
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -70,13 +83,15 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
     const updatedFormData = new FormData();
     updatedFormData.append("id", data.id);
     updatedFormData.append("name", formData.name);
-    updatedFormData.append("type", formData.type);
-    updatedFormData.append("price", formData.price.toString());
-    updatedFormData.append("description", formData.description);
+    updatedFormData.append("specialization", formData.specialization);
+    updatedFormData.append("contactInfo", formData.contactInfo);
+    updatedFormData.append("dob", formData.dob);
+    updatedFormData.append("experience", formData.experience.toString());
+    updatedFormData.append("bio", formData.bio);
 
-    if (formData.discount) {
-      updatedFormData.append("discount", formData.discount.toString());
-    }
+    formData.certifications.forEach((cert) =>
+      updatedFormData.append("certifications", cert)
+    );
 
     updatedFormData.append("existingImageUrl", data.imageUrl);
     if (formData.image instanceof File) {
@@ -84,13 +99,13 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
     }
 
     try {
-      const result = await editApparel(updatedFormData);
+      const result = await editCoach(updatedFormData);
       if (result.success) {
-        toast.success("Apparel updated successfully!");
-        mutate("/api/apparels", undefined, { revalidate: true });
+        toast.success("Coach updated successfully!");
+        mutate("/api/coaches", undefined, { revalidate: true });
         setOpen(false);
       } else {
-        toast.error(result.error || "Failed to update apparel.");
+        toast.error(result.error || "Failed to update coach.");
       }
     } catch (err) {
       console.error(err);
@@ -109,11 +124,11 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
           <Pencil size={24} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Apparel</DialogTitle>
+          <DialogTitle>Edit Coach</DialogTitle>
           <DialogDescription>
-            Update the details of this apparel.
+            Update the details of this coach.
           </DialogDescription>
         </DialogHeader>
 
@@ -127,52 +142,80 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
           </div>
 
           <div>
-            <Label htmlFor="type">Type</Label>
-            <Input id="type" {...register("type")} />
-            {errors.type && (
-              <p className="text-sm text-red-500">{errors.type.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="price">Price</Label>
-            <Input
-              id="price"
-              type="number"
-              min="0.00"
-              step={0.01}
-              {...register("price")}
-            />
-            {errors.price && (
-              <p className="text-sm text-red-500">{errors.price.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Input id="description" {...register("description")} />
-            {errors.description && (
+            <Label htmlFor="specialization">Specialization</Label>
+            <Input id="specialization" {...register("specialization")} />
+            {errors.specialization && (
               <p className="text-sm text-red-500">
-                {errors.description.message}
+                {errors.specialization.message}
               </p>
             )}
           </div>
 
           <div>
-            <Label htmlFor="discount">Discount</Label>
-            <Input
-              id="discount"
-              type="number"
-              min="0.00"
-              step={0.01}
-              {...register("discount")}
-            />
-            {errors.discount && (
-              <p className="text-sm text-red-500">{errors.discount.message}</p>
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Input id="dob" type="date" {...register("dob")} />
+            {errors.dob && (
+              <p className="text-sm text-red-500">{errors.dob.message}</p>
             )}
           </div>
 
+          <div>
+            <Label htmlFor="contactInfo">Contact Info</Label>
+            <Input id="contactInfo" {...register("contactInfo")} />
+            {errors.contactInfo && (
+              <p className="text-sm text-red-500">
+                {errors.contactInfo.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="experience">Experience</Label>
+            <Input
+              id="experience"
+              type="number"
+              min="0"
+              {...register("experience")}
+            />
+            {errors.experience && (
+              <p className="text-sm text-red-500">
+                {errors.experience.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label>Certifications</Label>
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <Input {...register(`certifications.${index}` as const)} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => remove(index)}
+                >
+                  <Trash className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            ))}
+            <Button type="button" variant="outline" onClick={() => append("")}>
+              + Add Certification
+            </Button>
+          </div>
+
           <div className="grid gap-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              placeholder="Enter coach bio"
+              {...register("bio")}
+            />
+            {errors.bio && (
+              <p className="text-sm text-red-500">{errors.bio.message}</p>
+            )}
+          </div>
+
+          <div>
             <Label>Upload Image</Label>
             <div
               className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer"
@@ -205,28 +248,24 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
                 />
               </div>
             </div>
-            {errors.image && (
-              <p className="text-sm text-red-500">{errors.image?.message}</p>
-            )}
             {preview && (
-              <div className="flex justify-center mt-2">
-                <Image
-                  width={96}
-                  height={96}
-                  src={preview}
-                  alt="Preview"
-                  className="w-24 h-24 object-cover rounded-md"
-                />
-              </div>
+              <Image
+                width={96}
+                height={96}
+                src={imagePreview}
+                sizes="96px"
+                alt="Preview"
+                className="w-24 h-24 object-cover rounded-md"
+              />
             )}
           </div>
 
           <DialogFooter>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
             <DialogClose asChild>
-              <Button className="w-full" type="button" variant="secondary">
+              <Button type="button" variant="secondary">
                 Close
               </Button>
             </DialogClose>

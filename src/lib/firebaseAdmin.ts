@@ -42,5 +42,3 @@ export const getFirebaseAdminApp = (): admin.app.App => {
     ? admin.apps[0]
     : initializeApp();
 };
-
-export { initializeApp };

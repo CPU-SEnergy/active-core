@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/schema/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { getFirestore } from "firebase-admin/firestore";
-import { ProductType } from "@/lib/types/product";
-
-const db = getFirestore(getFirebaseAdminApp());
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -12,37 +10,48 @@ export async function GET(request: NextRequest) {
   const dir = searchParams.get("dir") as FirebaseFirestore.OrderByDirection;
 
   try {
-    let query: FirebaseFirestore.Query = db.collection(ProductType.APPARELS);
+    getFirestore(getFirebaseAdminApp());
+    const $ = db.apparels.query.build();
 
     if (c) {
-      query = query.where("type", "==", c);
+      $.field("type").eq(c);
     }
 
     if (sort) {
       if (sort === "price") {
-        query = query.orderBy(sort, dir);
+        $.field(sort).order(dir);
       } else if (sort === "latest") {
-        query = query.orderBy("createdAt", "desc");
+        $.field("createdAt").order(dir);
       }
     }
+    const results = await $.run();
 
-    const snapshot = await query.get();
-
-    if (snapshot.empty) {
+    if (results.length === 0) {
       return NextResponse.json(null);
     }
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    console.log("resultsssssssssssss", results);
+    const data = results.map((result) => {
+      return {
+        id: result.ref.id,
+        name: result.data.name,
+        price: result.data.price,
+        discount: result.data.discount,
+        description: result.data.description,
+        imageUrl: result.data.imageUrl,
+        type: result.data.type,
+      };
+    });
 
-    return NextResponse.json(products);
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch products. Please try again later." },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

@@ -4,6 +4,7 @@ import { db, Schema } from "@/lib/schema/firestore";
 import { uploadImage } from "../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { revalidatePath } from "next/cache";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function editApparel(formData: FormData) {
   const id = formData.get("id") as Schema["apparels"]["Id"];
@@ -20,6 +21,7 @@ export async function editApparel(formData: FormData) {
   }
 
   try {
+    getFirebaseAdminApp();
     let imageUrl = existingImageUrl;
 
     if (file && file.size > 0) {
@@ -45,11 +47,16 @@ export async function editApparel(formData: FormData) {
       imageUrl,
     };
 
-    if (discount !== null) {
+    if (discount === null || discount === 0) {
+      await db.apparels.update(id, ($) => ({
+        ...updateData,
+        discount: $.remove(),
+      }));
+      console.log("Discount removed");
+    } else {
       updateData.discount = discount;
+      await db.apparels.update(id, updateData);
     }
-
-    await db.apparels.update(id, updateData);
 
     revalidatePath("/");
 

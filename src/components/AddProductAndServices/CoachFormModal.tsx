@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-"use client";
-
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,41 +10,28 @@ import { Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
+import { createCoach } from "@/app/actions/admin/createCoach";
+import { mutate } from "swr";
+import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  specialization: z.string().min(1, "Specialty is required"),
-  contactInfo: z.string().min(1, "Contact info is required"),
-  dob: z.preprocess(
-    (val) => {
-      if (typeof val === "string" || val instanceof Date) {
-        return new Date(val);
-      }
-      return val;
-    },
-    z.date({ required_error: "Date of birth is required" })
-  ),
-  experience: z.preprocess(
-    (val) => Number(val),
-    z.number().gt(0, "Experience must be greater than 0")
-  ),
-  certifications: z
-    .array(z.string().min(1, "Certification is required"))
-    .min(1, { message: "At least one certification is required" }),
-  bio: z.string().min(1, "Bio is required"),
-  image: z.any().optional(),
-});
-
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof coachFormSchema>;
 
 interface CoachFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  coach?: Partial<FormData> & { id?: string };
 }
 
-export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
-  const [preview, setPreview] = useState<string | null>(null);
+export function CoachForm({
+  isOpen,
+  onClose,
+  onSuccess,
+  coach,
+}: CoachFormProps) {
+  const [preview, setPreview] = useState<string | null>(
+    coach?.image ? String(coach.image) : null
+  );
   const [dragActive, setDragActive] = useState(false);
 
   const {
@@ -58,7 +42,17 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(coachFormSchema),
+    defaultValues: coach || {
+      name: "",
+      specialization: "",
+      contactInfo: "",
+      dob: "",
+      experience: 0,
+      certifications: [""],
+      bio: "",
+      image: undefined,
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -68,16 +62,36 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("specialization", data.specialization);
+      formData.append("contactInfo", data.contactInfo);
+      formData.append("dob", data.dob);
+      formData.append("experience", data.experience.toString());
+      formData.append("bio", data.bio);
+      data.certifications.forEach((cert) =>
+        formData.append("certifications", cert)
+      );
+      if (data.image) {
+        formData.append("image", data.image);
+      }
+
+      if (coach && coach.id) {
+        // await editCoach(coach.id, formData);
+        toast.success("Coach updated successfully!");
+      } else {
+        await createCoach(formData);
+        toast.success("Coach added successfully!");
+      }
+
       reset();
-      toast.success("Coach added successfully!");
       setPreview(null);
+      await mutate("/api/coaches");
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Error adding coach:", error);
-      toast.error("Error adding coach. Please try again.");
+      console.error("Error processing coach:", error);
+      toast.error("Error processing coach. Please try again.");
     }
   };
 
@@ -106,7 +120,9 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4 text-center">Add Coach</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          {coach ? "Edit Coach" : "Add Coach"}
+        </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
@@ -144,7 +160,7 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="specialty">Contact Info</Label>
+            <Label htmlFor="contactInfo">Contact Info</Label>
             <Input
               id="contactInfo"
               placeholder="Enter coach contact info"
@@ -158,7 +174,7 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="experience">Experience</Label>
+            <Label htmlFor="experience">Years Experience</Label>
             <Input
               id="experience"
               type="number"
@@ -222,7 +238,9 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
+                dragActive ? "border-black bg-gray-50" : ""
+              }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -259,6 +277,7 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
                 <Image
                   width={96}
                   height={96}
+                  sizes="96px"
                   src={preview}
                   alt="Preview"
                   className="w-24 h-24 object-cover rounded-md"
@@ -276,7 +295,13 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
               className="bg-black hover:bg-gray-800"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Adding..." : "Add Coach"}
+              {isSubmitting
+                ? coach
+                  ? "Updating..."
+                  : "Adding..."
+                : coach
+                  ? "Update Coach"
+                  : "Add Coach"}
             </Button>
           </div>
         </form>

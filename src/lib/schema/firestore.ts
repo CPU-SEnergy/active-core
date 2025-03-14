@@ -110,7 +110,7 @@ interface Coaches {
   dob: Date;
   experience: number;
   imageUrl: string;
-  description: string;
+  contactInfo: string;
   certifications: string[];
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;

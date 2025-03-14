@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import apparelFormSchema from "@/lib/zod/schemas/apparels";
-import { createApparel } from "../../../actions/admin/createApparel";
+import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
 import { mutate } from "swr";
+import { createApparel } from "@/app/actions/admin/createApparel";
 
 type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
 
@@ -29,6 +29,7 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(apparelFormSchema(false)),
@@ -47,8 +48,9 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
       }
 
       await createApparel(formData);
+      reset();
       toast.success("Apparel created successfully!");
-
+      setPreview(null);
       onSuccess();
       mutate("/api/apparels");
       onClose();

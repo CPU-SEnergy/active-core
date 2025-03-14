@@ -25,10 +25,6 @@ export default function ApparelsPage() {
     return <>Error fetching apparels</>;
   }
 
-  if (isLoading) {
-    <>Loading...</>;
-  }
-
   return (
     <div className="min-h-screen bg-white">
       <div className="p-6">
@@ -45,7 +41,7 @@ export default function ApparelsPage() {
         </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {!data && <p>No apparels found</p>}
+          {isLoading && <p>Loading apparels...</p>}
           {data &&
             data.length > 0 &&
             data.map((apparel) => (

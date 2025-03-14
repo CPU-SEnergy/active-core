@@ -2,12 +2,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import apparelFormSchema from "@/lib/zod/schemas/apparels";
+import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
 import { db } from "@/lib/schema/firestore";
 import { uploadImage } from "../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function createApparel(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
@@ -48,6 +49,7 @@ export async function createApparel(formData: FormData) {
   const data = parse.data;
 
   try {
+    getFirebaseAdminApp();
     console.log("Parsed data:", data);
 
     const file = formData.get("image");
@@ -64,7 +66,7 @@ export async function createApparel(formData: FormData) {
       };
     }
 
-    let apparelData: {
+    const apparelData: {
       name: string;
       type: string;
       price: number;
@@ -93,7 +95,10 @@ export async function createApparel(formData: FormData) {
 
     return { message: "Apparel created successfully!" };
   } catch (error) {
-    console.error("Error creating apparel:", error);
-    return { message: "Failed to create apparel" };
+    console.error("Error updating apparel:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
