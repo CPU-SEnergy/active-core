@@ -12,7 +12,7 @@ import StudentAppreciation from "@/components/StudentAppreciation"
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden">
       {" "}
       {/* Add pt-20 for navbar space */}
       {/* Hero Section */}
