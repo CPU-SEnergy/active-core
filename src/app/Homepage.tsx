@@ -41,7 +41,7 @@ export default function Home() {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="space-y-2"
             >
-              <p className="text-3xl">YOUR FITNESS,</p>
+              <p className="text-3xl">YOUR FIGHT,</p>
               <p className="text-3xl">YOUR JOURNEY,</p>
               <p className="text-3xl">OUR MISSION</p>
             </motion.div>

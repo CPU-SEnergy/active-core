@@ -39,14 +39,14 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-14">
           <Link href="/" className="flex items-center space-x-3">
             <Image
-              src="/pictures/sports and fitness navigation bar logo.png"
+              src="/pictures/new-logo.png"
               alt="Sports and Fitness Center"
               width={50}
               height={50}
               className="w-auto h-12"
             />
             <span className="text-2xl font-bold sm:block hidden text-white">
-              Sports and Fitness Center
+              Fight Fusion Academy
             </span>
           </Link>
 
