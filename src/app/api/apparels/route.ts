@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/schema/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
-import { getFirestore } from "firebase-admin/firestore";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -10,7 +9,7 @@ export async function GET(request: NextRequest) {
   const dir = searchParams.get("dir") as FirebaseFirestore.OrderByDirection;
 
   try {
-    getFirestore(getFirebaseAdminApp());
+    getFirebaseAdminApp();
     const $ = db.apparels.query.build();
 
     if (c) {
