@@ -5,15 +5,15 @@ export async function GET() {
   try {
     getFirebaseAdminApp();
 
-    const paymentsCollection = await db.payments.query(($) => [
-      $.field("createdAt").order("desc"),
-    ]);
+    const paymentsCollection = await db.payments.query(($) => 
+      $.field("createdAt").order("desc")
+    );
 
     const cleanPayments = paymentsCollection.map((doc) => {
       return {
         ...doc.data,
       }
-    })
+    });
 
     return new Response(JSON.stringify(cleanPayments), {
       status: 200,
