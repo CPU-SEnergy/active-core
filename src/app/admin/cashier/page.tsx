@@ -3,16 +3,39 @@
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cashiers } from "@/lib/mock_data/cashierMockData";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { cashiers } from "@/lib/mock_data/cashierMockData"
+import Search from "../clydetest/search";
 
 export default function CashierManagement() {
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Add Cashier</h1>
-        <Button className="bg-black hover:bg-gray-800 text-white">
-          add cashier
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-black hover:bg-gray-800 text-white">
+              Add Cashier
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Cashier</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Search />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost">Cancel</Button>
+              <Button className="bg-black text-white">Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="border rounded-lg overflow-hidden">
         <Table>
