@@ -30,3 +30,18 @@ export interface COACHDATA {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface MEMBERSHIPDATA {
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  price: {
+    regular: number;
+    student: number;
+    discount: number;
+  };
+  duration: number;
+  status: "active" | "archived";
+  planDateEnd?: Date;
+}

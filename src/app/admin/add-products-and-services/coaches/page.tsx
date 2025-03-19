@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CoachForm } from "@/components/AddProductAndServices/CoachFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
@@ -13,7 +11,6 @@ import { EditCoach } from "@/components/AddProductAndServices/EditCoachModal";
 import { convertTimestampToDate } from "@/utils/firebase/helpers/convertTimestampToDate";
 
 export default function CoachesPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const {
     data: coaches,
     error,
@@ -38,13 +35,7 @@ export default function CoachesPage() {
               <h1 className="text-2xl font-semibold">Coaches</h1>
               <SelectProductAndServices />
             </div>
-            <Button
-              className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
-              variant="outline"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Add Coach
-            </Button>
+            <CoachForm />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {coaches.map((coach) => (
@@ -55,6 +46,7 @@ export default function CoachesPage() {
                       alt={coach.name}
                       sizes="300px"
                       fill
+                      priority
                       className="object-cover rounded-t-lg"
                     />
                     <EditCoach data={coach} />
@@ -84,14 +76,6 @@ export default function CoachesPage() {
               ))}
             </div>
           </div>
-
-          <CoachForm
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={() => {
-              console.log("Coach form submitted successfully");
-            }}
-          />
         </div>
       )}
     </>

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,8 +28,6 @@ import { mutate } from "swr";
 type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
 
 export function EditApparel({ data }: { data: APPARELDATA }) {
-  const [open, setOpen] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -88,7 +85,6 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
       if (result.success) {
         toast.success("Apparel updated successfully!");
         mutate("/api/apparels");
-        setOpen(false);
       } else {
         toast.error(result.message || "Failed to update apparel.");
         console.log(result);
@@ -100,7 +96,7 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button
           size="icon"
@@ -149,13 +145,7 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
 
           <div>
             <Label htmlFor="price">Price</Label>
-            <Input
-              id="price"
-              type="number"
-              min="0.00"
-              step={0.01}
-              {...register("price")}
-            />
+            <Input id="price" type="number" min="0.00" {...register("price")} />
             {errors.price && (
               <p className="text-sm text-red-500">{errors.price.message}</p>
             )}
@@ -177,7 +167,6 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
               id="discount"
               type="number"
               min="0.00"
-              step={0.01}
               {...register("discount")}
             />
             {errors.discount && (
@@ -235,14 +224,14 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
           </div>
 
           <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary" className="w-full">
+                Cancel
+              </Button>
+            </DialogClose>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
-            <DialogClose asChild>
-              <Button className="w-full" type="button" variant="secondary">
-                Close
-              </Button>
-            </DialogClose>
           </DialogFooter>
         </form>
       </DialogContent>

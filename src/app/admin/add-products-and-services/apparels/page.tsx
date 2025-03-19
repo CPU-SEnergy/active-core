@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ApparelForm } from "@/components/AddProductAndServices/ApparelFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
@@ -12,7 +10,6 @@ import { APPARELDATA } from "@/lib/types/product-services";
 import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
 
 export default function ApparelsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data, error, isLoading } = useSWR<APPARELDATA[]>(
     "/api/apparels",
     fetcher,
@@ -32,13 +29,7 @@ export default function ApparelsPage() {
           <h1 className="text-2xl font-semibold">Apparels</h1>
           <SelectProductAndServices />
         </div>
-        <Button
-          className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
-          variant="outline"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Add Apparels
-        </Button>
+        <ApparelForm />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {isLoading && <p>Loading apparels...</p>}
@@ -82,13 +73,6 @@ export default function ApparelsPage() {
             ))}
         </div>
       </div>
-      <ApparelForm
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          console.log("Apparel form submitted successfully");
-        }}
-      />
     </div>
   );
 }

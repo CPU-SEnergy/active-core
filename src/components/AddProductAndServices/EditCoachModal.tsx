@@ -33,7 +33,6 @@ type FormData = z.infer<typeof coachFormSchema>;
 
 export function EditCoach({ data }: { data: COACHDATA }) {
   const [open, setOpen] = useState(false);
-  const [preview, setPreview] = useState<string | null>(data.imageUrl);
 
   const {
     register,
@@ -53,6 +52,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
       experience: data.experience,
       certifications: data.certifications || [""],
       bio: data.bio,
+      image: data.imageUrl,
     },
   });
 
@@ -61,10 +61,12 @@ export function EditCoach({ data }: { data: COACHDATA }) {
     name: "certifications",
   });
 
-  const selectedFile = watch("image") as File | undefined;
-  const imagePreview = selectedFile
-    ? URL.createObjectURL(selectedFile)
-    : data.imageUrl;
+  const selectedFile = watch("image");
+
+  const preview =
+    selectedFile instanceof File
+      ? URL.createObjectURL(selectedFile)
+      : data.imageUrl;
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -72,7 +74,6 @@ export function EditCoach({ data }: { data: COACHDATA }) {
       return;
     }
     setValue("image", file, { shouldValidate: true });
-    setPreview(URL.createObjectURL(file));
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -105,7 +106,6 @@ export function EditCoach({ data }: { data: COACHDATA }) {
         toast.success(result.message || "Coach updated successfully!");
 
         reset();
-        setPreview(null);
         await mutate("/api/coaches");
       } else {
         toast.error(result.message || "Error updating coach.");
@@ -218,7 +218,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
             )}
           </div>
 
-          <div>
+          <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
               className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer"
@@ -251,27 +251,33 @@ export function EditCoach({ data }: { data: COACHDATA }) {
                 />
               </div>
             </div>
+            {errors.image && (
+              <p className="text-sm text-red-500">
+                {errors.image?.message?.toString()}
+              </p>
+            )}
             {preview && (
-              <Image
-                width={96}
-                height={96}
-                src={imagePreview}
-                sizes="96px"
-                alt="Preview"
-                className="w-24 h-24 object-cover rounded-md"
-              />
+              <div className="flex justify-center mt-2">
+                <Image
+                  width={96}
+                  height={96}
+                  src={preview}
+                  alt="Preview"
+                  className="w-24 h-24 object-cover rounded-md"
+                />
+              </div>
             )}
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
-            </Button>
             <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Close
+              <Button type="button" variant="secondary" className="w-full">
+                Cancel
               </Button>
             </DialogClose>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

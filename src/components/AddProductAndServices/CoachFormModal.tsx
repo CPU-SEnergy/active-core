@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,25 +15,21 @@ import { useState } from "react";
 import { createCoach } from "@/app/actions/admin/createCoach";
 import { mutate } from "swr";
 import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 type FormData = z.infer<typeof coachFormSchema>;
 
-interface CoachFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  coach?: Partial<FormData> & { id?: string };
-}
-
-export function CoachForm({
-  isOpen,
-  onClose,
-  onSuccess,
-  coach,
-}: CoachFormProps) {
-  const [preview, setPreview] = useState<string | null>(
-    coach?.image ? String(coach.image) : null
-  );
+export function CoachForm() {
+  const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const {
@@ -43,7 +41,7 @@ export function CoachForm({
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(coachFormSchema),
-    defaultValues: coach || {
+    defaultValues: {
       name: "",
       specialization: "",
       contactInfo: "",
@@ -92,8 +90,6 @@ export function CoachForm({
         reset();
         setPreview(null);
         await mutate("/api/coaches");
-        onSuccess();
-        onClose();
       } else {
         toast.error(result.message || "Error creating a coach.");
       }
@@ -123,14 +119,23 @@ export function CoachForm({
     if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4 text-center">
-          {coach ? "Edit Coach" : "Add Coach"}
-        </h2>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
+          variant={"outline"}
+        >
+          Add Coach
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Coach</DialogTitle>
+          <DialogDescription>
+            Fill in the details for creating new coaches.
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
@@ -293,27 +298,22 @@ export function CoachForm({
               </div>
             )}
           </div>
-
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
             <Button
               type="submit"
               className="bg-black hover:bg-gray-800"
               disabled={isSubmitting}
             >
-              {isSubmitting
-                ? coach
-                  ? "Updating..."
-                  : "Adding..."
-                : coach
-                  ? "Update Coach"
-                  : "Add Coach"}
+              {isSubmitting ? "Creating..." : "Create"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

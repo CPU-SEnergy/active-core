@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,16 +13,21 @@ import Image from "next/image";
 import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
 import { mutate } from "swr";
 import { createApparel } from "@/app/actions/admin/createApparel";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useState } from "react";
 
 type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
 
-interface ApparelFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
+export function ApparelForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -47,16 +53,20 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
         formData.append("image", data.image);
       }
 
-      await createApparel(formData);
+      const result = await createApparel(formData);
+      if (result.status === 201) {
+        toast.success("Apparel updated successfully!");
+        mutate("/api/apparels");
+      } else {
+        toast.error(result.message || "Failed to update apparel.");
+        console.log(result);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An unexpected error occurred.");
+    } finally {
       reset();
-      toast.success("Apparel created successfully!");
       setPreview(null);
-      onSuccess();
-      mutate("/api/apparels");
-      onClose();
-    } catch (error) {
-      console.error("Error creating apparel:", error);
-      toast.error("Error creating apparel. Please try again.");
     }
   };
 
@@ -80,12 +90,23 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
     setPreview(URL.createObjectURL(file));
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto scroll-m-0">
-        <h2 className="text-xl font-semibold mb-4 text-center">Add Apparel</h2>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
+          variant={"outline"}
+        >
+          Add Apparel
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Add Apparel</DialogTitle>
+          <DialogDescription>
+            Fill in the details for creating new apparels.
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
@@ -222,19 +243,23 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
             )}
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-black hover:bg-gray-800"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Creating..." : "Create"}
-            </Button>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary" className="w-full">
+                  Close
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                className="bg-black hover:bg-gray-800"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -45,7 +45,7 @@ interface MembershipPlan {
   status: "active" | "archived";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
-  planDateEnd: Date;
+  planDateEnd?: Date;
 }
 
 interface UserBasicInfo {

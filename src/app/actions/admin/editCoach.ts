@@ -3,7 +3,6 @@
 import { db, Schema } from "@/lib/schema/firestore";
 import { uploadImage } from "../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
-import { revalidatePath } from "next/cache";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 
@@ -61,8 +60,6 @@ export async function editCoach(formData: FormData) {
     };
 
     await db.coaches.update(id, updateData, { as: "server" });
-
-    revalidatePath("/");
 
     return {
       success: true,

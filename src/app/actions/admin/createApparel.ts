@@ -18,14 +18,14 @@ export async function createApparel(formData: FormData) {
 
   if (!formData) {
     console.error("FormData is undefined");
-    return { message: "Form data not received" };
+    return { message: "Form data not received", status: 400 };
   }
 
   console.log("FormData entries:", Array.from(formData.entries()));
 
   const file = formData.get("image");
   if (!(file instanceof File)) {
-    return { message: "Invalid file format" };
+    return { message: "Invalid file format", status: 400 };
   }
 
   const rawData = {
@@ -42,6 +42,7 @@ export async function createApparel(formData: FormData) {
     return {
       message: "Validation failed",
       errors: parse.error.format() as ZodFormattedError<any, string>,
+      status: 422,
     };
   }
 
@@ -53,7 +54,7 @@ export async function createApparel(formData: FormData) {
 
     const file = formData.get("image");
     if (!(file instanceof File)) {
-      return { message: "Invalid file format" };
+      return { message: "Invalid file format", status: 400 };
     }
 
     const fileUrl = await uploadImage(file, ProductAndServicesType.APPARELS);
@@ -61,7 +62,7 @@ export async function createApparel(formData: FormData) {
     if (!fileUrl.success) {
       return {
         message: fileUrl.error ?? "Unknown error",
-        status: fileUrl.status,
+        status: fileUrl.status ?? 500,
       };
     }
 
@@ -69,11 +70,11 @@ export async function createApparel(formData: FormData) {
       name: string;
       type: string;
       price: number;
-      discount?: number;
       description: string;
       imageUrl: string;
       createdAt: Date;
       updatedAt: Date;
+      discount?: number;
     } = {
       name: data.name,
       type: data.type,
@@ -92,12 +93,13 @@ export async function createApparel(formData: FormData) {
 
     revalidatePath("/");
 
-    return { message: "Apparel created successfully!" };
+    return { message: "Apparel created successfully!", status: 201 };
   } catch (error) {
-    console.error("Error updating apparel:", error);
+    console.error("Error creating apparel:", error);
     return {
-      success: false,
+      message: "Internal server error",
       error: error instanceof Error ? error.message : String(error),
+      status: 500,
     };
   }
 }
