@@ -87,10 +87,11 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
       const result = await editApparel(updatedFormData);
       if (result.success) {
         toast.success("Apparel updated successfully!");
-        mutate("/api/apparels", undefined, { revalidate: true });
+        mutate("/api/apparels");
         setOpen(false);
       } else {
-        toast.error(result.error || "Failed to update apparel.");
+        toast.error(result.message || "Failed to update apparel.");
+        console.log(result);
       }
     } catch (err) {
       console.error(err);
@@ -126,9 +127,21 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
             )}
           </div>
 
-          <div>
-            <Label htmlFor="type">Type</Label>
-            <Input id="type" {...register("type")} />
+          <div className="grid gap-2">
+            <Label htmlFor="type">Type of Apparel</Label>
+            <select
+              id="type"
+              {...register("type")}
+              className="bg-gray-50 border rounded-md px-3 py-2"
+            >
+              <option value="">Edit apparel type</option>
+              <option value="gloves">Gloves</option>
+              <option value="t-shirt">T-Shirt</option>
+              <option value="pants">Pants</option>
+              <option value="jersey">Jersey</option>
+              <option value="shorts">Shorts</option>
+              <option value="tracksuits">Tracksuits</option>
+            </select>
             {errors.type && (
               <p className="text-sm text-red-500">{errors.type.message}</p>
             )}

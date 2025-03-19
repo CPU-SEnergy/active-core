@@ -69,29 +69,37 @@ export function CoachForm({
       formData.append("dob", data.dob);
       formData.append("experience", data.experience.toString());
       formData.append("bio", data.bio);
+
       data.certifications.forEach((cert) =>
         formData.append("certifications", cert)
       );
-      if (data.image) {
+
+      if (data.image instanceof File) {
         formData.append("image", data.image);
       }
 
-      if (coach && coach.id) {
-        // await editCoach(coach.id, formData);
-        toast.success("Coach updated successfully!");
-      } else {
-        await createCoach(formData);
-        toast.success("Coach added successfully!");
+      const result = await createCoach(formData);
+      console.log("createCoach result:", result);
+
+      if (!result || !result.status) {
+        toast.error("Unexpected response from server.");
+        return;
       }
 
-      reset();
-      setPreview(null);
-      await mutate("/api/coaches");
-      onSuccess();
-      onClose();
+      if (result.status === 200) {
+        toast.success(result.message || "Coach added successfully!");
+
+        reset();
+        setPreview(null);
+        await mutate("/api/coaches");
+        onSuccess();
+        onClose();
+      } else {
+        toast.error(result.message || "Error creating a coach.");
+      }
     } catch (error) {
-      console.error("Error processing coach:", error);
-      toast.error("Error processing coach. Please try again.");
+      console.error("Error creating a coach:", error);
+      toast.error("Error creating a coach. Please try again.");
     }
   };
 

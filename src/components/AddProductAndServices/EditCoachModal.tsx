@@ -40,6 +40,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
     handleSubmit,
     setValue,
     watch,
+    reset,
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
@@ -100,16 +101,18 @@ export function EditCoach({ data }: { data: COACHDATA }) {
 
     try {
       const result = await editCoach(updatedFormData);
-      if (result.success) {
-        toast.success("Coach updated successfully!");
-        mutate("/api/coaches", undefined, { revalidate: true });
-        setOpen(false);
+      if (result.status === 200) {
+        toast.success(result.message || "Coach updated successfully!");
+
+        reset();
+        setPreview(null);
+        await mutate("/api/coaches");
       } else {
-        toast.error(result.error || "Failed to update coach.");
+        toast.error(result.message || "Error updating coach.");
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("An unexpected error occurred.");
+    } catch (error) {
+      console.error("Error updating coach:", error);
+      toast.error("Error updating coach. Please try again.");
     }
   }
 

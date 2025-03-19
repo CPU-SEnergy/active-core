@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { revalidatePath } from "next/cache";
 import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
 import { db } from "@/lib/schema/firestore";
 import { uploadImage } from "../upload/image";
@@ -12,21 +11,20 @@ import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function createCoach(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
-  if (user?.customClaims?.role !== "admin") {
-    console.log("User is not authorized to create apparel");
-    return { message: "Unauthorized", status: 401 };
+  if (!user || user?.customClaims?.role !== "admin") {
+    return { message: "Unauthorized. You are not an admin", status: 401 };
   }
 
   if (!formData) {
     console.error("FormData is undefined");
-    return { message: "Form data not received" };
+    return { message: "Form data not received", status: 400 };
   }
 
   console.log("FormData entries:", Array.from(formData.entries()));
 
   const file = formData.get("image");
   if (!(file instanceof File)) {
-    return { message: "Invalid file format" };
+    return { message: "Invalid file format", status: 422 };
   }
 
   const rawData = {
@@ -44,6 +42,7 @@ export async function createCoach(formData: FormData) {
   if (!parse.success) {
     return {
       message: "Validation failed",
+      status: 400,
       errors: parse.error.format() as ZodFormattedError<any, string>,
     };
   }
@@ -56,7 +55,7 @@ export async function createCoach(formData: FormData) {
 
     const file = formData.get("image");
     if (!(file instanceof File)) {
-      return { message: "Invalid file format" };
+      return { message: "Invalid file format", status: 422 };
     }
 
     const fileUrl = await uploadImage(file, ProductAndServicesType.COACHES);
@@ -68,18 +67,7 @@ export async function createCoach(formData: FormData) {
       };
     }
 
-    const coachData: {
-      name: string;
-      specialization: string;
-      bio: string;
-      dob: Date;
-      experience: number;
-      imageUrl: string;
-      contactInfo: string;
-      certifications: string[];
-      createdAt: Date;
-      updatedAt: Date;
-    } = {
+    const coachData = {
       name: data.name,
       specialization: data.specialization,
       bio: data.bio,
@@ -94,13 +82,12 @@ export async function createCoach(formData: FormData) {
 
     await db.coaches.add(coachData, { as: "server" });
 
-    revalidatePath("/");
-
-    return { message: "Apparel created successfully!" };
+    return { message: "Coach created successfully!", status: 200 };
   } catch (error) {
     console.error("Error adding coach! :", error);
     return {
-      success: false,
+      message: "Server error",
+      status: 500,
       error: error instanceof Error ? error.message : String(error),
     };
   }

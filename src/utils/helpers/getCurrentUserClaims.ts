@@ -3,7 +3,6 @@
 import { clientConfig, serverConfig } from "@/lib/config";
 import { getFirebaseAuth, getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 const { getUser } = getFirebaseAuth({
   serviceAccount: serverConfig.serviceAccount,
@@ -19,7 +18,7 @@ export async function getCurrentUserCustomClaims() {
   });
 
   if (!tokens) {
-    redirect("/auth/login");
+    return null;
   }
 
   const user = await getUser(tokens.decodedToken.uid);

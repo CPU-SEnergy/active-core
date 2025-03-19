@@ -12,9 +12,8 @@ import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function createApparel(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
-  if (user?.customClaims?.role !== "admin") {
-    console.log("User is not authorized to create apparel");
-    return { message: "Unauthorized", status: 401 };
+  if (!user || user?.customClaims?.role !== "admin") {
+    return { message: "Unauthorized. You are not an admin", status: 401 };
   }
 
   if (!formData) {
