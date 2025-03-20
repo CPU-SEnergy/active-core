@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
-import { db } from "@/lib/schema/firestore";
+import { db, Schema } from "@/lib/schema/firestore";
 import { uploadImage } from "../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
 
-export async function createCoach(formData: FormData) {
+export async function createClass(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
   if (!user || user?.customClaims?.role !== "admin") {
     return { message: "Unauthorized. You are not an admin", status: 401 };
@@ -20,25 +20,21 @@ export async function createCoach(formData: FormData) {
     return { message: "Form data not received", status: 400 };
   }
 
-  console.log("FormData entries:", Array.from(formData.entries()));
-
-  const file = formData.get("image");
-  if (!(file instanceof File)) {
-    return { message: "Invalid file format", status: 422 };
-  }
-
+  const rawCoaches = formData.getAll("coaches");
   const rawData = {
     name: formData.get("name"),
-    specialization: formData.get("specialization"),
-    contactInfo: formData.get("contactInfo"),
-    dob: formData.get("dob"),
-    experience: Number(formData.get("experience")),
-    bio: formData.get("bio"),
-    certifications: formData.getAll("certifications") as string[],
+    schedule: formData.get("schedule"),
+    description: formData.get("description"),
+    coaches: rawCoaches.map((coach) => ({ coachId: coach })),
     image: formData.get("image"),
   };
 
-  const parse = coachFormSchema.safeParse(rawData);
+  console.log("Raw data:", rawData);
+
+  const parse = classFormSchema.safeParse(rawData);
+
+  console.log("Parsed data:", parse);
+
   if (!parse.success) {
     return {
       message: "Validation failed",
@@ -51,14 +47,13 @@ export async function createCoach(formData: FormData) {
 
   try {
     getFirebaseAdminApp();
-    console.log("Parsed data:", data);
 
     const file = formData.get("image");
     if (!(file instanceof File)) {
       return { message: "Invalid file format", status: 422 };
     }
 
-    const fileUrl = await uploadImage(file, ProductAndServicesType.COACHES);
+    const fileUrl = await uploadImage(file, ProductAndServicesType.CLASSES);
 
     if (!fileUrl.success) {
       return {
@@ -67,24 +62,25 @@ export async function createCoach(formData: FormData) {
       };
     }
 
-    const coachData = {
+    const classData = {
       name: data.name,
-      specialization: data.specialization,
-      bio: data.bio,
-      dob: new Date(data.dob!),
-      experience: data.experience,
+      schedule: data.schedule,
+      description: data.description,
+      coachId: data.coaches.map(
+        (coach) => coach.coachId
+      ) as unknown as Schema["coaches"]["Id"][],
       imageUrl: fileUrl.url,
-      contactInfo: data.contactInfo,
-      certifications: data.certifications,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    await db.coaches.add(coachData, { as: "server" });
+    console.log("Class data:", classData);
 
-    return { message: "Coach created successfully!", status: 200 };
+    await db.classes.add(classData, { as: "server" });
+
+    return { message: "Class created successfully!", status: 200 };
   } catch (error) {
-    console.error("Error adding coach! :", error);
+    console.error("Error creating class:", error);
     return {
       message: "Server error",
       status: 500,

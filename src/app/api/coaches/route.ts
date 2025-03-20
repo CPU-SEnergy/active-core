@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
-import { getFirestore } from "firebase-admin/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
-import { ProductType } from "@/lib/types/product";
-
-const db = getFirestore(getFirebaseAdminApp());
+import { db } from "@/lib/schema/firestore";
 
 export async function GET() {
   try {
-    const coachCollection = db.collection(ProductType.COACHES);
+    getFirebaseAdminApp();
 
-    const querySnapshot = await coachCollection.get();
+    const coachCollection = await db.coaches.all();
 
-    const coaches = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
+    const coaches = coachCollection.map((data) => ({
+      id: data.ref.id,
+      ...data.data,
     }));
+
     console.log("coaches api", coaches);
     return NextResponse.json(coaches);
   } catch (error) {

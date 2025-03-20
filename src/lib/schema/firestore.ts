@@ -121,7 +121,6 @@ interface Classes {
   description: string;
   imageUrl?: string;
   schedule: string;
-  types: string[];
   coachId: Schema["coaches"]["Id"][];
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;

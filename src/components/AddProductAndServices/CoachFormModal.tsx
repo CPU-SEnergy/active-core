@@ -64,7 +64,7 @@ export function CoachForm() {
       formData.append("name", data.name);
       formData.append("specialization", data.specialization);
       formData.append("contactInfo", data.contactInfo);
-      formData.append("dob", data.dob);
+      formData.append("dob", data.dob ? data.dob.toString() : "");
       formData.append("experience", data.experience.toString());
       formData.append("bio", data.bio);
 

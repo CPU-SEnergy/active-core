@@ -1,19 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash, Upload, Pencil } from "lucide-react";
+import { Pencil, Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { editCoach } from "@/app/actions/admin/editCoach";
-
+import { editClass } from "@/app/actions/admin/editClass";
 import {
   Dialog,
   DialogTrigger,
@@ -25,12 +24,20 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { mutate } from "swr";
-import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
-import { COACHDATA } from "@/lib/types/product-services";
+import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
+import { CLASSDATA } from "@/lib/types/product-services";
+import { z } from "zod";
 
-type FormData = z.infer<typeof coachFormSchema>;
+type FormData = z.infer<typeof classFormSchema> & {
+  id: string;
+  existingImageUrl: string;
+};
 
-export function EditCoach({ data }: { data: COACHDATA }) {
+interface EditClassModalProps {
+  data: CLASSDATA;
+}
+
+export default function EditClassModal({ data }: EditClassModalProps) {
   const [open, setOpen] = useState(false);
 
   const {
@@ -42,26 +49,23 @@ export function EditCoach({ data }: { data: COACHDATA }) {
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(coachFormSchema),
+    resolver: zodResolver(classFormSchema),
     defaultValues: {
+      id: data.id,
       name: data.name,
-      specialization: data.specialization,
-      contactInfo: data.contactInfo,
-      dob: data.dob ? new Date(data.dob).toISOString().split("T")[0] : "",
-      experience: data.experience,
-      certifications: data.certifications || [""],
-      bio: data.bio,
-      image: data.imageUrl,
+      schedule: data.schedule,
+      description: data.description,
+      coaches: data.coachId.map((coachId: any) => ({ coachId })),
+      image: data.imageUrl as unknown as File,
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "certifications",
+    name: "coaches",
   });
 
   const selectedFile = watch("image");
-
   const preview =
     selectedFile instanceof File
       ? URL.createObjectURL(selectedFile)
@@ -77,41 +81,41 @@ export function EditCoach({ data }: { data: COACHDATA }) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files?.[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
   };
 
   async function onSubmit(formData: FormData) {
     const updatedFormData = new FormData();
     updatedFormData.append("id", data.id);
     updatedFormData.append("name", formData.name);
-    updatedFormData.append("specialization", formData.specialization);
-    updatedFormData.append("contactInfo", formData.contactInfo);
-    updatedFormData.append("dob", formData.dob ? formData.dob.toString() : "");
-    updatedFormData.append("experience", formData.experience.toString());
-    updatedFormData.append("bio", formData.bio);
-
-    formData.certifications.forEach((cert) =>
-      updatedFormData.append("certifications", cert)
+    updatedFormData.append("schedule", formData.schedule);
+    updatedFormData.append("description", formData.description);
+    updatedFormData.append("existingImageUrl", data.imageUrl);
+    formData.coaches.forEach((coach: { coachId: string }) =>
+      updatedFormData.append("coaches", coach.coachId)
     );
 
     updatedFormData.append("existingImageUrl", data.imageUrl);
+
     if (formData.image instanceof File) {
       updatedFormData.append("image", formData.image);
     }
 
     try {
-      const result = await editCoach(updatedFormData);
+      const result = await editClass(updatedFormData);
       if (result.status === 200) {
-        toast.success(result.message || "Coach updated successfully!");
-
+        toast.success(result.message || "Class updated successfully!");
         reset();
-        await mutate("/api/coaches");
+        setOpen(false);
+        await mutate("/api/classes");
       } else {
-        toast.error(result.message || "Error updating coach.");
+        toast.error(result.message || "Error updating class.");
       }
     } catch (error) {
-      console.error("Error updating coach:", error);
-      toast.error("Error updating coach. Please try again.");
+      console.error("Error updating class:", error);
+      toast.error("Error updating class. Please try again.");
     }
   }
 
@@ -128,69 +132,63 @@ export function EditCoach({ data }: { data: COACHDATA }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Coach</DialogTitle>
+          <DialogTitle>Edit Class</DialogTitle>
           <DialogDescription>
-            Update the details of this coach.
+            Update the details of this class.
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Hidden inputs to pass ID and existingImageUrl */}
+          <input type="hidden" {...register("id")} />
+          <input type="hidden" {...register("existingImageUrl")} />
           <div>
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" {...register("name")} />
+            <Label htmlFor="name">Class Name</Label>
+            <Input
+              id="name"
+              placeholder="Enter class name"
+              {...register("name")}
+            />
             {errors.name && (
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
-
           <div>
-            <Label htmlFor="specialization">Specialization</Label>
-            <Input id="specialization" {...register("specialization")} />
-            {errors.specialization && (
-              <p className="text-sm text-red-500">
-                {errors.specialization.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="dob">Date of Birth</Label>
-            <Input id="dob" type="date" {...register("dob")} />
-            {errors.dob && (
-              <p className="text-sm text-red-500">{errors.dob.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="contactInfo">Contact Info</Label>
-            <Input id="contactInfo" {...register("contactInfo")} />
-            {errors.contactInfo && (
-              <p className="text-sm text-red-500">
-                {errors.contactInfo.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="experience">Experience</Label>
+            <Label htmlFor="schedule">Schedule</Label>
             <Input
-              id="experience"
-              type="number"
-              min="0"
-              {...register("experience")}
+              id="schedule"
+              placeholder="Enter class schedule"
+              {...register("schedule")}
             />
-            {errors.experience && (
+            {errors.schedule && (
+              <p className="text-sm text-red-500">{errors.schedule.message}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Enter class description"
+              {...register("description")}
+            />
+            {errors.description && (
               <p className="text-sm text-red-500">
-                {errors.experience.message}
+                {errors.description.message}
               </p>
             )}
           </div>
-
           <div>
-            <Label>Certifications</Label>
+            <Label>Coaches</Label>
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-2">
-                <Input {...register(`certifications.${index}` as const)} />
+                <select
+                  {...register(`coaches.${index}.coachId`, {
+                    required: "Coach is required",
+                  })}
+                  className="bg-gray-50 border rounded-md px-3 py-2 flex-grow"
+                >
+                  <option value="">Select a coach</option>
+                  {/* You can provide coach options here as needed */}
+                </select>
                 <Button
                   type="button"
                   variant="ghost"
@@ -200,23 +198,14 @@ export function EditCoach({ data }: { data: COACHDATA }) {
                 </Button>
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={() => append("")}>
-              + Add Certification
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => append({ coachId: "" })}
+            >
+              + Add Coach
             </Button>
           </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              placeholder="Enter coach bio"
-              {...register("bio")}
-            />
-            {errors.bio && (
-              <p className="text-sm text-red-500">{errors.bio.message}</p>
-            )}
-          </div>
-
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
@@ -267,7 +256,6 @@ export function EditCoach({ data }: { data: COACHDATA }) {
               </div>
             )}
           </div>
-
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="secondary" className="w-full">

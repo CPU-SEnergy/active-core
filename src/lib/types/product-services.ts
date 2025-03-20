@@ -45,3 +45,14 @@ export interface MEMBERSHIPDATA {
   status: "active" | "archived";
   planDateEnd?: Date;
 }
+
+export interface CLASSDATA {
+  id: string;
+  name: string;
+  schedule: string;
+  description: string;
+  imageUrl: string;
+  coachId: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}

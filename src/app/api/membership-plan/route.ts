@@ -1,7 +1,9 @@
 import { db } from "@/lib/schema/firestore";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
+    getFirebaseAdminApp();
     const membershipPlans = await db.membershipPlan.all();
 
     const formattedPlans = membershipPlans.map((plan) => ({
