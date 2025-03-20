@@ -6,9 +6,10 @@ interface Customer {
   firstName: string;
   lastName: string;
   email: string;
-  sex: string;
+  sex: "male" | "female" | "other";
   dob: Date;
   membershipPlan: string;
+  type: "regular" | "student" | "senior";
 }
 
 export async function POST(req: Request) {
@@ -29,12 +30,16 @@ export async function POST(req: Request) {
       createdAt: new Date(),
       updatedAt: new Date(),
       isCustomer: true,
-      
     }
 
-    await db.users.add(newCustomer);
+    await db.users.add(newCustomer, {as: "server"});
+
+    return new Response(JSON.stringify({ message: "Customer added successfully" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    })
   } catch (error) {
-    console.error("Error fetching document: ", error);
+    console.error("Error adding customer: ", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json"},
