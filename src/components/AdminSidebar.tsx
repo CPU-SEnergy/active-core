@@ -91,21 +91,6 @@ const menuItems = [
     href: "/admin/add-products-and-services",
   },
   {
-    title: "View Products",
-    icon: (props: React.ComponentProps<"svg">) => (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
-        <path
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="2"
-          d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 5h6M9 12h6M9 16h6"
-        />
-      </svg>
-    ),
-    href: "/admin/view-products",
-  },
-  {
     title: "Add Cashier",
     icon: Users,
     href: "/admin/cashier",
