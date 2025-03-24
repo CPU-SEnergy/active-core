@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   }
 
   await setCustomUserClaims(tokens.decodedToken.uid, {
-    role: "admine",
+    role: "admin",
   });
 
   const user = await getUser(tokens.decodedToken.uid);

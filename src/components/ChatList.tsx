@@ -108,23 +108,27 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
   }, [database, user.uid, isAdmin, firestore]);
 
   return (
-    <div className="h-screen w-[400px] bg-gray-100 p-4 shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Chats</h2>
-      <div className="overflow-y-auto h-[90%]">
-        {chatUsers.length > 0 ? (
-          chatUsers.map((chatUser) => (
-            <div
-              key={chatUser.id}
-              className="p-3 border-b cursor-pointer hover:bg-gray-200 transition"
-              onClick={() => onSelectChat(chatUser.id)}
-            >
-              <p className="font-medium">{chatUser.name || "Loading..."}</p>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500">No chats available.</p>
-        )}
-      </div>
-    </div>
+    <aside className="w-full lg:w-64 bg-white p-6 border-r">
+      <nav className="space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Chats</h2>
+          <div className="overflow-y-auto h-[90%] space-y-4">
+            {chatUsers.length > 0 ? (
+              chatUsers.map((chatUser) => (
+                <div
+                  key={chatUser.id}
+                  className="p-3 border-b cursor-pointer hover:bg-gray-200 transition"
+                  onClick={() => onSelectChat(chatUser.id)}
+                >
+                  <p className="font-medium">{chatUser.name || "Loading..."}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No chats available.</p>
+            )}
+          </div>
+        </div>
+      </nav>
+    </aside>
   );
 }

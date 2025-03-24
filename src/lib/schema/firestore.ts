@@ -9,6 +9,8 @@ export const db = schema(
     kpis: $.collection<KPIs>().sub({ months: $.collection<MonthKPI>() }),
     customers: $.collection<Customers>(),
     apparels: $.collection<Apparels>(),
+    coaches: $.collection<Coaches>(),
+    classes: $.collection<Classes>(),
   }),
   { server: { preferRest: true } }
 );
@@ -49,6 +51,7 @@ interface MembershipPlan {
 interface UserBasicInfo {
   userId: Schema["users"]["Id"];
   name: string;
+  type: "regular" | "student";
   imageUrl: string;
 }
 
@@ -95,7 +98,31 @@ interface Apparels {
   discount?: number;
   imageUrl: string;
   description: string;
-  type: "t-shirt" | "short" | "glove" | "headgear";
+  type: string;
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Coaches {
+  name: string;
+  specialization: string;
+  bio: string;
+  dob: Date;
+  experience: number;
+  imageUrl: string;
+  description: string;
+  certifications: string[];
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Classes {
+  name: string;
+  description: string;
+  imageUrl?: string;
+  schedule: string;
+  types: string[];
+  coachId: Schema["coaches"]["Id"][];
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
