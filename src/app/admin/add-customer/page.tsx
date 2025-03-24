@@ -63,8 +63,7 @@ const initialCustomers: Customer[] = [
 ];
 
 export default function CustomerManagement() {
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
-
+  let customers = initialCustomers;
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
