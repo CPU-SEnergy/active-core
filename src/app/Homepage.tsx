@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Testimonials from "@/components/Testimonials"
-import StudentAppreciation from "@/components/StudentAppreciation"
+
 
 
 export default function Home() {
