@@ -108,7 +108,7 @@ const menuItems = [
   {
     title: "Add Cashier",
     icon: Users,
-    href: "/admin/add-cashier",
+    href: "/admin/cashier",
   },
 ];
 
