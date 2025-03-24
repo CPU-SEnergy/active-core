@@ -76,7 +76,7 @@ const menuItems = [
     href: "/admin/add-customer",
   },
   {
-    title: "Add Product",
+    title: "Add Products and Services",
     icon: (props: React.ComponentProps<"svg">) => (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
         <path
@@ -88,7 +88,7 @@ const menuItems = [
         />
       </svg>
     ),
-    href: "/admin/add-product",
+    href: "/admin/add-products-and-services",
   },
   {
     title: "View Products",
@@ -118,7 +118,6 @@ export default function AdminSidebar() {
   return (
     <div className="flex">
       <Sidebar className="w-60 border-r bg-white">
-        {/* Sidebar Header */}
         <SidebarHeader className="h-16 border-b px-4">
           <SidebarMenu>
             <SidebarMenuItem>
