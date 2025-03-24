@@ -115,29 +115,7 @@ export default function Navbar() {
 
           {/* Authentication Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <LogoutButton user={user} />
-            ) : (
-              ["Login", "Register"].map((item, index) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + 0.1 * index, duration: 0.5 }}
-                >
-                  <Link
-                    href={`/${item.toLowerCase()}`}
-                    className={`transition duration-300 ${
-                      item === "Register"
-                        ? "bg-red-600 px-4 py-2 rounded-full hover:bg-red-700 text-white"
-                        : "text-white hover:text-red-500"
-                    }`}
-                  >
-                    {item}
-                  </Link>
-                </motion.div>
-              ))
-            )}
+            <LogoutButton user={user} />
           </div>
         </div>
       </div>
