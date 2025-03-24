@@ -8,20 +8,20 @@ const db = getFirestore(getFirebaseAdminApp());
 export async function POST(req: Request) {
   try {
     const body: Product = await req.json();
-    const { name, type, description, picture_link, price, product_type } = body;
+    const { name, type, description, imageUrl, price, product_type } = body;
     console.log(body);
     if (
       !name ||
       !type ||
       !description ||
-      !picture_link ||
+      !imageUrl ||
       !price ||
       !product_type
     ) {
       return NextResponse.json(
         {
           error:
-            "All fields are required: name, type, description, picture_link, price, product_type",
+            "All fields are required: name, type, description, imageUrl, price, product_type",
         },
         { status: 400 }
       );
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       name,
       type,
       description,
-      picture_link,
+      imageUrl,
       price,
       product_type,
       createdAt: FieldValue.serverTimestamp(),

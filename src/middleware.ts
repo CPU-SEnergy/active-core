@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -7,7 +8,7 @@ import {
 } from "next-firebase-auth-edge";
 import { clientConfig, serverConfig } from "@/lib/config";
 
-const PUBLIC_PATHS = ["/register", "/login"];
+const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
 
 export async function middleware(request: NextRequest) {
   return authMiddleware(request, {
@@ -37,13 +38,15 @@ export async function middleware(request: NextRequest) {
         publicPaths: PUBLIC_PATHS,
       });
     },
-    handleError: async (error) => {
-      console.error("Unhandled authentication error", { error });
+    handleError: (error) => {
+      console.log({ cause: (error as any).cause, stack: (error as any).stack });
 
-      return redirectToLogin(request, {
-        path: "/auth/login",
-        publicPaths: PUBLIC_PATHS,
-      });
+      return Promise.resolve(
+        redirectToLogin(request, {
+          path: "/auth/error",
+          publicPaths: PUBLIC_PATHS,
+        })
+      );
     },
   });
 }

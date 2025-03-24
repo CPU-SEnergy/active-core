@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Play, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Testimonials from "@/components/Testimonials"
-import StudentAppreciation from "@/components/StudentAppreciation"
+
 
 
 export default function Home() {
@@ -197,10 +197,6 @@ export default function Home() {
       </motion.section>
 
 
-      <StudentAppreciation />
-
-
-
       {/* Gym Tour Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -311,39 +307,7 @@ export default function Home() {
           </motion.div>
         </div>
       </motion.section>
-      {/* Cafe Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="py-16 bg-black"
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center font-audiowide mb-8 text-shadow-fire"
-          >
-            Café
-          </motion.h2>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative aspect-video max-w-4xl mx-auto"
-          >
-            <Image
-              src="/pictures/cafe picture.jpg"
-              alt="Sports and Fitness Center Cafe"
-              fill
-              className="object-cover rounded-lg"
-            />
-          </motion.div>
-        </div>
-      </motion.section>
-
-
+ 
       <Testimonials />
 
       {/* Footer */}
