@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -63,7 +62,7 @@ const initialCustomers: Customer[] = [
 ];
 
 export default function CustomerManagement() {
-  let customers = initialCustomers;
+  const customers = initialCustomers;
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
