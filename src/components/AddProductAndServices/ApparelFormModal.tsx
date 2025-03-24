@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,29 +10,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
+import { mutate } from "swr";
+import { createApparel } from "@/app/actions/admin/createApparel";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useState } from "react";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  type: z.string().min(1, "Type is required"),
-  price: z.preprocess(
-    (val) => Number(val),
-    z.number().gt(0, "Price must be greater than 0")
-  ),
-  description: z.string().min(1, "Description is required"),
-  image: z.custom<File>((file) => file instanceof File, {
-    message: "Image is required",
-  }),
-});
+type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
 
-type FormData = z.infer<typeof formSchema>;
-
-interface ApparelFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
+export function ApparelForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -41,21 +35,38 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(apparelFormSchema(false)),
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Apparel created successfully!");
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error("Error creating apparel:", error);
-      toast.error("Error creating apparel. Please try again.");
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("type", data.type);
+      formData.append("price", data.price.toString());
+      formData.append("discount", data.discount?.toString() || "");
+      formData.append("description", data.description);
+      if (data.image) {
+        formData.append("image", data.image);
+      }
+
+      const result = await createApparel(formData);
+      if (result.status === 201) {
+        toast.success("Apparel updated successfully!");
+        mutate("/api/apparels");
+      } else {
+        toast.error(result.message || "Failed to update apparel.");
+        console.log(result);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An unexpected error occurred.");
+    } finally {
+      reset();
+      setPreview(null);
     }
   };
 
@@ -79,12 +90,23 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
     setPreview(URL.createObjectURL(file));
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4 text-center">Add Apparel</h2>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
+          variant={"outline"}
+        >
+          Add Apparel
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Add Apparel</DialogTitle>
+          <DialogDescription>
+            Fill in the details for creating new apparels.
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
@@ -99,7 +121,6 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
-
           <div className="grid gap-2">
             <Label htmlFor="type">Type of Apparel</Label>
             <select
@@ -119,20 +140,40 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               <p className="text-sm text-red-500">{errors.type.message}</p>
             )}
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="price">Price</Label>
               <Input
                 id="price"
                 type="number"
-                min="0.01"
+                min="0.00"
+                step="0.01"
                 placeholder="Enter item price"
                 className="bg-gray-50"
                 {...register("price")}
               />
               {errors.price && (
                 <p className="text-sm text-red-500">{errors.price.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="discount">Discount (Optional)</Label>
+              <Input
+                id="discount"
+                type="number"
+                min="0.00"
+                step="0.01"
+                placeholder="Enter discount price"
+                className="bg-gray-50"
+                {...register("discount")}
+              />
+              {errors.discount && (
+                <p className="text-sm text-red-500">
+                  {errors.discount.message}
+                </p>
               )}
             </div>
           </div>
@@ -151,7 +192,6 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
               </p>
             )}
           </div>
-
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
@@ -203,19 +243,23 @@ export function ApparelForm({ isOpen, onClose, onSuccess }: ApparelFormProps) {
             )}
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-black hover:bg-gray-800"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Creating..." : "Create"}
-            </Button>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary" className="w-full">
+                  Close
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                className="bg-black hover:bg-gray-800"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

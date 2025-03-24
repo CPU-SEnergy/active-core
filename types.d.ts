@@ -14,7 +14,7 @@ interface Product {
   product_type: string;
   type: string;
   description: string;
-  picture_link: string;
+  imageUrl: string;
   special_price?: number;
   createdAt?: Date | string;
 }
@@ -31,26 +31,26 @@ interface Coach {
   contact: string;
 }
 interface KPI {
-  title: string
-  value: string | number
-  change: number
-  prefix?: string
+  title: string;
+  value: string | number;
+  change: number;
+  prefix?: string;
 }
 
 interface Customer {
-  id: string
-  name: string
-  avatar?: string
-  status: string
-  membershipType: string
-  availedPlan: string
-  time: string
-  amount: number
+  id: string;
+  name: string;
+  avatar?: string;
+  status: string;
+  membershipType: string;
+  availedPlan: string;
+  time: string;
+  amount: number;
 }
 
 interface TimeFilter {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 interface UserHistoryProps {
