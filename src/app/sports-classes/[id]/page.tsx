@@ -27,6 +27,8 @@ export default async function Page({
 
   console.log(classData, "classes");
 
+  if (classDataLoading) return <div>Loading...</div>
+  if (classError) return <div>Error loading classes</div>
   return (
     <>
     {classData &&  <div
