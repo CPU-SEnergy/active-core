@@ -8,22 +8,17 @@ import useSWR from "swr"
 import fetcher from "@/lib/fetcher"
 import { CLASSDATA } from "@/lib/types/product-services"
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const id = (await params).id;
+export default function Page({ params }: { params: { id: string } }) {
   
   const { data: classData , error: classError, isLoading: classDataLoading } = useSWR<CLASSDATA>(
-    `/api/classes${id}`,
+    `/api/classes/${params.id}`,
     fetcher
   );
 
-  // const { data: coaches , error, isLoading } = useSWR<CLASSDATA>(
-  //   `/api/classes${id}`,
-  //   fetcher
-  // );
+  console.log(classData, "classes");
+  
+  // const { data: coachData , error: coachError, isLoading: coachDataLoading } = useSWR<CLASSDATA>(
+  //   `/api/classes${classData?.coachId}`,
 
   console.log(classData, "classes");
 
@@ -95,10 +90,10 @@ export default async function Page({
         </div>
       </div>
 
-      {/* <div className="w-full p-8 lg:p-12">
+      <div className="w-full p-8 lg:p-12">
         <h2 className="text-3xl font-bold mb-6">Meet Our Coaches</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {coaches && coaches.map((coach, index) => (
             <Card key={index}>
               <CardContent className="p-4">
@@ -114,8 +109,8 @@ export default async function Page({
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div> */}
+        </div> */}
+      </div>
     </div>}
     </>
    
