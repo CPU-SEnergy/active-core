@@ -19,8 +19,6 @@ export default function Page({ params }: { params: { id: string } }) {
   
   // const { data: coachData , error: coachError, isLoading: coachDataLoading } = useSWR<CLASSDATA>(
   //   `/api/classes${classData?.coachId}`,
-  //   fetcher
-  // );
 
   console.log(classData, "classes");
 
