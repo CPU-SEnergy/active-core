@@ -9,15 +9,16 @@ type Params = {
 
 export async function GET(request: Request, context: { params: Params}) {
   try {
-    getFirebaseAdminApp(); 
+    getFirebaseAdminApp();
 
     const { year } = context.params;
 
     const kpiId: YearId = year.toString() as YearId;
     const previouYearId: YearId = (year - 1).toString() as YearId;
 
-    const monthsCollection = await db.kpis(kpiId).months;
-    const previousYearMonthsCollection = await db.kpis(previouYearId).months;
+    const monthsCollection =  db.kpis(kpiId).months;
+    const previousYearMonthsCollection =  db.kpis(previouYearId).months;
+    console.log(previousYearMonthsCollection)
     const toatlCustomersDoc = await db.customers.all({ as: "server" });
     const totalCustomers = toatlCustomersDoc.length > 0 ? toatlCustomersDoc[0] : null
 
