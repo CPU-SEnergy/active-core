@@ -18,21 +18,24 @@ export async function POST(req: Request) {
 
     const data: Customer = await req.json();
 
-    if (!data.uid || !data.firstName || !data.lastName || !data.email || !data.sex || !data.dob || !data.membershipPlan || !data.type) {
+    if (!data.firstName || !data.lastName || !data.email || !data.sex || !data.dob || !data.membershipPlan || !data.type) {
+      console.log("Invalid data: ", data);
       return new Response(JSON.stringify({ error: "Invalid data" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const newCustomer = {
+    const customerRef = await db.users.add({
       ...data,
       createdAt: new Date(),
       updatedAt: new Date(),
       isCustomer: true,
-    }
+    }, {as: "server"});
 
-    await db.users.add(newCustomer, {as: "server"});
+    await db.users.update(customerRef.id, {
+      uid: customerRef.id,
+    }, {as: "server"});
 
     return new Response(JSON.stringify({ message: "Customer added successfully" }), {
       status: 200,
