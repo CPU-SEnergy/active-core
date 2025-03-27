@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     const data: Customer = await req.json();
 
-    if (!data.uid || !data.firstName || !data.lastName || !data.email || !data.sex || !data.dob || !data.membershipPlan) {
+    if (!data.uid || !data.firstName || !data.lastName || !data.email || !data.sex || !data.dob || !data.membershipPlan || !data.type) {
       return new Response(JSON.stringify({ error: "Invalid data" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
