@@ -14,6 +14,17 @@ import {
 } from "date-fns";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface UserDashboardProps {
   uid: string;
@@ -106,10 +117,46 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
               </div>
             </div>
           </div>
-          <Button className="mt-4 md:mt-0 md:ml-4 bg-gray-300 text-black hover:bg-gray-400">
-            <Edit2 className="mr-2" size={16} />
-            Edit Profile
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                className="mt-4 md:mt-0 md:ml-4 bg-gray-300 text-black hover:bg-gray-400"
+                variant="outline"
+              >
+                <Edit2 className="mr-2" size={16} />
+                Edit Profile
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Edit profile</DialogTitle>
+                <DialogDescription>
+                  Update your personal information
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4 mr-8">
+                  <Label htmlFor="name" className="text-right">
+                    Name:
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="John Doe"
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mr-8">
+                  <Label htmlFor="age" className="text-right">
+                    Age:
+                  </Label>
+                  <Input id="age" placeholder="25" className="col-span-3" />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit">Save changes</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
       {/* Membership History Card */}
