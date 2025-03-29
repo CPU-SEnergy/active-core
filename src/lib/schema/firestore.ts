@@ -11,6 +11,7 @@ export const db = schema(
     apparels: $.collection<Apparels>(),
     coaches: $.collection<Coaches>(),
     classes: $.collection<Classes>(),
+    multimedia: $.collection<Multimedia>(),
   }),
   { server: { preferRest: true } }
 );
@@ -122,6 +123,17 @@ interface Classes {
   imageUrl?: string;
   schedule: string;
   coachId: Schema["coaches"]["Id"][];
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Multimedia {
+  id: string;
+  title: string;
+  description: string;
+  mediaType: "video" | "image";
+  isYoutube: boolean;
+  url: string;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
