@@ -1,8 +1,9 @@
-import { NextRequest }
+import { NextRequest } from "next/server";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { db } from "@/lib/schema/firestore";
 
-interface MultimediaPayload {
+type Multimedia = {
+  id: string;
   title: string;
   description: string;
   mediaType: "video" | "image";
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
   try {
     getFirebaseAdminApp();
 
-    const data: MultimediaPayload = await req.json();
+    const data: Multimedia = await req.json();
 
     if (!data.title || !data.description || !data.mediaType || !data.url) {
       return new Response(
@@ -31,14 +32,13 @@ export async function POST(req: NextRequest) {
       ...data,
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    }, { as: "server" });
 
     return new Response(
       JSON.stringify({
         message: "Media added successfully",
-        id: multimediaRef.id,
-        data: { 
-          id: multimediaRef.id,
+        id: (await multimediaRef).id,
+        data: {
           ...data,
         }
 
