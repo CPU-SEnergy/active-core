@@ -8,10 +8,11 @@ import { motion, AnimatePresence } from "framer-motion"
 import Testimonials from "@/components/Testimonials"
 
 
+
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden">
       {" "}
       {/* Add pt-20 for navbar space */}
       {/* Hero Section */}
@@ -30,7 +31,7 @@ export default function Home() {
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-6xl font-family: Audiowide mb-4"
+              className="text-6xl font-audiowide mb-8 text-shadow-fire mb-4"
             >
               GO HARD GET HARD
             </motion.h1>
@@ -40,7 +41,7 @@ export default function Home() {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="space-y-2"
             >
-              <p className="text-3xl">YOUR FITNESS,</p>
+              <p className="text-3xl">YOUR FIGHT,</p>
               <p className="text-3xl">YOUR JOURNEY,</p>
               <p className="text-3xl">OUR MISSION</p>
             </motion.div>
@@ -48,7 +49,7 @@ export default function Home() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="mt-8 bg-red-600 text-white px-12 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 w-64"
+              className="mt-8 bg-red-600 text-white-shadow-glow px-12 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 w-64"
             >
               Start Here
             </motion.button>
@@ -68,7 +69,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-4xl font-bold mb-4"
+            className="text-4xl font-bold mb-4 font-audiowide mb-8 text-shadow-fire"
           >
             Sports and Fitness Center
           </motion.h2>
@@ -108,7 +109,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
+            className="text-3xl font-bold mb-12 text-center font-audiowide mb-8 text-shadow-fire"
           >
             Coach of the Week
           </motion.h2>
@@ -157,7 +158,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
+            className="text-3xl font-bold mb-12 text-center font-audiowide mb-8 text-shadow-fire"
           >
             Move of the Week
           </motion.h2>
@@ -194,6 +195,8 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+
       {/* Gym Tour Section */}
       <motion.section
         initial={{ opacity: 0 }}
@@ -211,7 +214,7 @@ export default function Home() {
             initial={{ y: -30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-8 text-center"
+            className="text-3xl font-bold mb-8 text-center font-audiowide mb-8 text-shadow-fire"
           >
             GYM TOUR
           </motion.h2>
@@ -304,43 +307,8 @@ export default function Home() {
           </motion.div>
         </div>
       </motion.section>
-      {/* Cafe Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="py-16 bg-black"
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
-          >
-            Café
-          </motion.h2>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative aspect-video max-w-4xl mx-auto"
-          >
-            <Image
-              src="/pictures/cafe picture.jpg"
-              alt="Sports and Fitness Center Cafe"
-              fill
-              className="object-cover rounded-lg"
-            />
-          </motion.div>
-        </div>
-      </motion.section>
-
-
+ 
       <Testimonials />
-
-
-
 
       {/* Footer */}
       <footer className="bg-black py-12 border-t border-red-900">

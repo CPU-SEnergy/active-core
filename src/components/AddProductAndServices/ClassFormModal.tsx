@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-"use client"
+"use client";
 
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -13,38 +13,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { COACHDATA } from "@/lib/types/product-services";
+import useSWR, { mutate } from "swr";
+import fetcher from "@/lib/fetcher";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
+import { createClass } from "@/app/actions/admin/createClass";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Class name is required"),
-  schedule: z.string().min(1, "Schedule is required"),
-  coach: z.string().min(1, "Coach is required"),
-  types: z
-    .array(
-      z.object({
-        title: z.string().min(1, "Type is required"),
-        description: z.string().min(1, "Description is required"),
-      })
-    )
-    .min(1, { message: "At least one type is required" }),
-  description: z.string().min(1, "Description is required"),
-  image: z.instanceof(File, { message: "Image is required" }),
-});
+type FormData = z.infer<typeof classFormSchema>;
 
-type FormData = z.infer<typeof formSchema>;
-
-interface ClassesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  coaches: { id: string; name: string }[];
-}
-
-export function ClassesModal({
-  isOpen,
-  onClose,
-  onSuccess,
-  coaches,
-}: ClassesModalProps) {
+export function ClassesModal() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -56,26 +43,65 @@ export function ClassesModal({
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(classFormSchema),
+    defaultValues: {
+      coaches: [{ coachId: "" }],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "types",
+    name: "coaches",
   });
+
+  const {
+    data: coaches,
+    error,
+    isLoading,
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
+    dedupingInterval: 60 * 60 * 24,
+  });
+
+  if (error) {
+    console.error("Error fetching coaches:", error);
+    return <>Error fetching coaches</>;
+  }
+
+  console.log("coaches page", coaches);
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Class created successfully!");
-      reset();
-      setPreview(null);
-      onSuccess();
-      onClose();
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("schedule", data.schedule);
+      formData.append("description", data.description);
+      data.coaches.forEach((coach) =>
+        formData.append("coaches", coach.coachId)
+      );
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      const result = await createClass(formData);
+      console.log("createClass result:", result);
+
+      if (!result || !result.status) {
+        toast.error("Unexpected response from server.");
+        return;
+      }
+
+      if (result.status === 200) {
+        toast.success(result.message || "Class added successfully!");
+        reset();
+        setPreview(null);
+        await mutate("/api/classes");
+      } else {
+        toast.error(result.message || "Error creating a class.");
+      }
     } catch (error) {
-      console.error("Error creating class:", error);
-      toast.error("Error creating class. Please try again.");
+      console.error("Error creating a class:", error);
+      toast.error("Error creating a class. Please try again.");
     }
   };
 
@@ -99,13 +125,23 @@ export function ClassesModal({
     if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4 text-center">Add Class</h2>
-
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
+          variant={"outline"}
+        >
+          Add Class
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Add Apparel</DialogTitle>
+          <DialogDescription>
+            Fill in the details for creating new class.
+          </DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Class Name</Label>
@@ -131,74 +167,49 @@ export function ClassesModal({
             )}
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="coach">Coach</Label>
-            <select
-              id="coach"
-              {...register("coach")}
-              className="bg-gray-50 border rounded-md px-3 py-2"
-            >
-              <option value="">Select a coach</option>
-              {coaches.map((coach) => (
-                <option key={coach.id} value={coach.id}>
-                  {coach.name}
-                </option>
-              ))}
-            </select>
-            {errors.coach && (
-              <p className="text-sm text-red-500">{errors.coach.message}</p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Type of Classes</Label>
+          <Label>Coaches</Label>
+          <div className="border p-2 rounded gap-2 flex flex-col">
             {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="flex flex-col gap-2 border p-2 rounded"
-              >
-                <Input
-                  placeholder="Enter title"
-                  {...register(`types.${index}.title` as const)}
-                />
-                {errors.types &&
-                  errors.types[index] &&
-                  (errors.types[index] as any).title && (
-                    <p className="text-sm text-red-500">
-                      {(errors.types[index] as any).title.message}
-                    </p>
-                  )}
-                <Textarea
-                  placeholder="Enter description"
-                  {...register(`types.${index}.description` as const)}
-                />
-                {errors.types &&
-                  errors.types[index] &&
-                  (errors.types[index] as any).description && (
-                    <p className="text-sm text-red-500">
-                      {(errors.types[index] as any).description.message}
-                    </p>
-                  )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => remove(index)}
-                >
-                  <Trash className="h-4 w-4 text-red-500" />
-                </Button>
+              <div key={field.id} className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <select
+                    {...register(`coaches.${index}.coachId`, {
+                      required: "Coach is required",
+                    })}
+                    className="bg-gray-50 border rounded-md px-3 py-2 flex-grow"
+                  >
+                    <option value="">Select a coach</option>
+                    {isLoading && <option disabled>Loading coaches...</option>}
+                    {coaches?.map((coach) => (
+                      <option key={coach.id} value={coach.id}>
+                        {coach.name} - {coach.specialization}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => remove(index)}
+                  >
+                    <Trash className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+                {errors.coaches?.[index]?.coachId && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.coaches[index].coachId.message}
+                  </p>
+                )}
               </div>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => append({ title: "", description: "" })}
-            >
-              + Add Type
-            </Button>
-            {errors.types && typeof errors.types.message === "string" && (
-              <p className="text-sm text-red-500">{errors.types.message}</p>
-            )}
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => append({ coachId: "" })}
+          >
+            + Add Coach
+          </Button>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
@@ -217,9 +228,7 @@ export function ClassesModal({
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
-                dragActive ? "border-black bg-gray-50" : ""
-              }`}
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -264,10 +273,12 @@ export function ClassesModal({
             )}
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
             <Button
               type="submit"
               className="bg-black hover:bg-gray-800"
@@ -275,9 +286,9 @@ export function ClassesModal({
             >
               {isSubmitting ? "Creating..." : "Create"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

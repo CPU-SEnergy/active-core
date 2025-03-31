@@ -11,6 +11,7 @@ export const db = schema(
     apparels: $.collection<Apparels>(),
     coaches: $.collection<Coaches>(),
     classes: $.collection<Classes>(),
+    multimedia: $.collection<Multimedia>(),
   }),
   { server: { preferRest: true } }
 );
@@ -45,7 +46,7 @@ interface MembershipPlan {
   status: "active" | "archived";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
-  planDateEnd: Date;
+  planDateEnd?: Date;
 }
 
 interface UserBasicInfo {
@@ -92,7 +93,7 @@ interface Customers {
   totalCustomers: number;
 }
 
-interface Apparels {
+export interface Apparels {
   name: string;
   price: number;
   discount?: number;
@@ -110,7 +111,7 @@ interface Coaches {
   dob: Date;
   experience: number;
   imageUrl: string;
-  description: string;
+  contactInfo: string;
   certifications: string[];
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
@@ -121,8 +122,18 @@ interface Classes {
   description: string;
   imageUrl?: string;
   schedule: string;
-  types: string[];
   coachId: Schema["coaches"]["Id"][];
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Multimedia {
+  id: string;
+  title: string;
+  description: string;
+  mediaType: "video" | "image";
+  isYoutube: boolean;
+  url: string;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
