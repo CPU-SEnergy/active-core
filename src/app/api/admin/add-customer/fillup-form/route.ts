@@ -6,9 +6,9 @@ interface Customer {
   firstName: string;
   lastName: string;
   email: string;
-  sex: "male" | "female" | "other";
   dob: Date;
-  membershipPlan: string;
+  sex: string;
+  phone: string;
   type: "regular" | "student" | "senior";
 }
 
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     const data: Customer = await req.json();
 
-    if (!data.firstName || !data.lastName || !data.email || !data.sex || !data.dob || !data.membershipPlan || !data.type) {
+    if (!data.firstName || !data.lastName || !data.email || !data.sex || !data.dob || !data.type) {
       console.log("Invalid data: ", data);
       return new Response(JSON.stringify({ error: "Invalid data" }), {
         status: 400,
@@ -26,14 +26,13 @@ export async function POST(req: Request) {
       });
     }
 
-    const customerRef = await db.users.add({
+    const customerRef = await db.customer.add({
       ...data,
       createdAt: new Date(),
       updatedAt: new Date(),
-      isCustomer: true,
     }, {as: "server"});
 
-    await db.users.update(customerRef.id, {
+    await db.customer.update(customerRef.id, {
       uid: customerRef.id,
     }, {as: "server"});
 
