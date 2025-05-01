@@ -4,11 +4,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, X, MessageSquare } from "lucide-react";
+import { usePathname } from "next/navigation";
+
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [chat, setChat] = useState<string[]>([]);
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -29,13 +36,14 @@ const ChatWidget = () => {
       </div>
     );
   }
+  
 
 
   return (
     <Card className="fixed bottom-5 right-5 w-80 shadow-xl rounded-2xl bg-white border border-gray-300">
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold">Chat Widget</h3>
+          <h3 className="text-lg font-semibold">Chat with us Now!</h3>
           <Button variant="ghost" onClick={() => setIsOpen(false)}>
             <X className="w-4 h-4" />
           </Button>
@@ -54,7 +62,13 @@ const ChatWidget = () => {
         </div>
 
 
-        <div className="flex items-center space-x-2">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }} 
+          className="flex items-center space-x-2"
+        >
           <Input
             type="text"
             placeholder="Type a message..."
@@ -62,10 +76,10 @@ const ChatWidget = () => {
             onChange={(e) => setMessage(e.target.value)}
             className="flex-1"
           />
-          <Button onClick={sendMessage}>
+          <Button type="submit">
             <Send className="w-4 h-4" />
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );
