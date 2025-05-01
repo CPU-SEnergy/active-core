@@ -8,6 +8,7 @@ import { AuthProvider } from "@/auth/AuthProvider";
 import { toUser } from "@/utils/helpers/user";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/toaster";
+import ChatWidget from "../components/ChatWidget";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -54,6 +55,7 @@ export default async function RootLayout({
         <AuthProvider>
           <Navbar />
           {children}
+          <ChatWidget />
           <Toaster />
         </AuthProvider>
       </body>

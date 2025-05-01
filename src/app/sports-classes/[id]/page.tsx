@@ -8,22 +8,12 @@ import useSWR from "swr"
 import fetcher from "@/lib/fetcher"
 import { CLASSDATA } from "@/lib/types/product-services"
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const id = (await params).id;
-  
+export default function Page({ params }: { params: { id: string } }) {
+  console.log(params.id, "params");
   const { data: classData , error: classError, isLoading: classDataLoading } = useSWR<CLASSDATA>(
-    `/api/classes${id}`,
+    `/api/classes${params.id}`,
     fetcher
   );
-
-  // const { data: coaches , error, isLoading } = useSWR<CLASSDATA>(
-  //   `/api/classes${id}`,
-  //   fetcher
-  // );
 
   console.log(classData, "classes");
 
