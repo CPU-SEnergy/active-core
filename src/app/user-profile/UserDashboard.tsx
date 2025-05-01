@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { User, Clock, Calendar, Edit2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { User, Clock, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useGetUserById from "@/utils/helpers/getUserById";
 import { Schema } from "@/lib/schema/firestore";
@@ -14,17 +13,7 @@ import {
 } from "date-fns";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import EditUserProfileModal from "./EditUserProfileModal";
 
 interface UserDashboardProps {
   uid: string;
@@ -57,12 +46,9 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-100 text-black p-8 pt-20">
-      {" "}
-      {/* Changed text color to black */}
       <h1 className="text-4xl font-extrabold mb-8 text-black text-center">
         My Dashboard
       </h1>
-      {/* Profile Card */}
       <Card className="mb-8 bg-white border border-gray-300 shadow-lg">
         <CardContent className="flex flex-col md:flex-row items-center p-6">
           <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
@@ -117,49 +103,9 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
               </div>
             </div>
           </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                className="mt-4 md:mt-0 md:ml-4 bg-gray-300 text-black hover:bg-gray-400"
-                variant="outline"
-              >
-                <Edit2 className="mr-2" size={16} />
-                Edit Profile
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit profile</DialogTitle>
-                <DialogDescription>
-                  Update your personal information
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4 mr-8">
-                  <Label htmlFor="name" className="text-right">
-                    Name:
-                  </Label>
-                  <Input
-                    id="name"
-                    placeholder="John Doe"
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4 mr-8">
-                  <Label htmlFor="age" className="text-right">
-                    Age:
-                  </Label>
-                  <Input id="age" placeholder="25" className="col-span-3" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Save changes</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <EditUserProfileModal userData={user}/>
         </CardContent>
       </Card>
-      {/* Membership History Card */}
       <Card className="bg-white border border-gray-300 shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl text-gray-800 font-bold">

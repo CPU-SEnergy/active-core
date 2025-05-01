@@ -6,7 +6,7 @@ export const serverConfig = {
   ],
   cookieSerializeOptions: {
     path: "/",
-    httpOnly: true,
+    httpOnly: true, 
     secure: process.env.USE_SECURE_COOKIES === "true",
     sameSite: "lax" as const,
     maxAge: 12 * 60 * 60 * 24, // 12 days
