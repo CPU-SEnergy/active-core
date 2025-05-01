@@ -45,7 +45,6 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]));
-  const [customerData] = useRead(db.users.get(roomId as Schema["users"]["Id"]));
   const userDisplayName =
     userData?.data.firstName && userData?.data.lastName
       ? `${userData.data.firstName} ${userData.data.lastName}`
@@ -187,52 +186,65 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 bg-gray-50 pt-10 pb-5">
-        <h2 className="text-lg font-bold">Chat with {customerData?.data.firstName + " " + (customerData?.data.lastName || "")}</h2>
-      </div>
-      <div
-        ref={containerRef}
-        className="flex-grow overflow-y-auto border border-gray-300 p-4 mx-5 rounded bg-gray-50 shadow-sm"
-      >
-        {loadingMore && (
-          <div className="text-center">Loading older messages...</div>
-        )}
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`mb-2 p-2 rounded w-full ${
-              msg.senderId === user.uid ? "text-right" : "self-start text-left"
-            }`}
-          >
-            {msg.senderId !== user.uid && (
-              <span className="font-bold text-blue-black"></span>
-            )}{" "}
-            <span className={`mb-2 p-2 rounded max-w-xs ${
-              msg.senderId === user.uid ? "bg-gray-300 text-right" : "self-start text-left"
-            }`}>{msg.text}</span>
+    userData && (
+      <div className="flex flex-col h-full">
+        <div className="p-4 bg-gray-50 pt-10 pb-5">
+          <h2 className="text-lg font-bold">
+            Chat with{" "}
+            {userData?.data.firstName + " " + userData?.data.lastName || ""}
+          </h2>
+        </div>
+        <div
+          ref={containerRef}
+          className="flex-grow overflow-y-auto border border-gray-300 p-4 mx-5 rounded bg-gray-50 shadow-sm"
+        >
+          {loadingMore && (
+            <div className="text-center">Loading older messages...</div>
+          )}
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`mb-2 p-2 rounded w-full ${
+                msg.senderId === user.uid
+                  ? "text-right"
+                  : "self-start text-left"
+              }`}
+            >
+              {msg.senderId !== user.uid && (
+                <span className="font-bold text-blue-black"></span>
+              )}{" "}
+              <span
+                className={`mb-2 p-2 rounded max-w-xs ${
+                  msg.senderId === user.uid
+                    ? "bg-gray-300 text-right"
+                    : "self-start text-left"
+                }`}
+              >
+                {msg.text}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="p-2 mx-4 border-t border-gray-300 bg-white rounded shadow-sm">
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type a message"
+              className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={sendMessage}
+              className="absolute right-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
+            >
+              <Send className="h-5 w-5" />
+            </button>
           </div>
-        ))}
-      </div>
-      <div className="p-2 mx-4 border-t border-gray-300 bg-white rounded shadow-sm">
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type a message"
-            className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={sendMessage}
-            className="absolute right-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
-          >
-            <Send className="h-5 w-5" />
-          </button>
         </div>
       </div>
-    </div>
+    )
   );
 }
 

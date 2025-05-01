@@ -40,6 +40,7 @@ export default async function RootLayout({
 
   const user = tokens ? toUser(tokens) : null;
 
+  console.log("User in layout: ", user?.uid);
   return (
     <html lang="en">
       <head>
@@ -55,11 +56,11 @@ export default async function RootLayout({
         <AuthProvider>
           <Navbar />
           {children}
-          <ChatWidget />
+          {user && <ChatWidget userId={user.uid} />}
+
           <Toaster />
         </AuthProvider>
       </body>
     </html>
   );
 }
-
