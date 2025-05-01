@@ -85,10 +85,10 @@ export default function Page({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* <div className="w-full p-8 lg:p-12">
+      <div className="w-full p-8 lg:p-12">
         <h2 className="text-3xl font-bold mb-6">Meet Our Coaches</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {coaches && coaches.map((coach, index) => (
             <Card key={index}>
               <CardContent className="p-4">
@@ -104,8 +104,8 @@ export default function Page({ params }: { params: { id: string } }) {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div> */}
+        </div> */}
+      </div>
     </div>}
     </>
    
