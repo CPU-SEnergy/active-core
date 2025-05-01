@@ -9,7 +9,8 @@ interface ChatUser {
   id: string;
   name: string;
   lastMessageTimestamp: number;
-  email?: string;
+  email?: string | undefined; // Email is now optional
+  lastMessageText?: string | undefined; // Added lastMessageText to store the most recent message
 }
 
 type Props = {
@@ -22,6 +23,7 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const database = getDatabase(app);
   const firestore = getFirestore(app);
+  console.log(chatUsers, "CHATtttttttt");
 
   const fetchUserDetail = async (roomId: string) => {
     try {
@@ -65,14 +67,22 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
         const roomIds = Object.keys(data);
 
         roomIds.forEach((roomId) => {
-          const recentMsgRef = ref(
-            database,
-            `systemChats/${roomId}/recentMessage`
-          );
-          const unsubscribe = onValue(recentMsgRef, (snap) => {
+          const messagesRef = ref(database, `systemChats/${roomId}/messages`);
+          const unsubscribe = onValue(messagesRef, (snap) => {
             if (snap.exists()) {
-              const recentMsgData = snap.val();
-              const lastMessageTimestamp = recentMsgData.timestamp;
+              const messages = snap.val();
+              const messageIds = Object.keys(messages);
+
+              // Find the latest message (by timestamp)
+              const latestMessageId = messageIds.reduce((prev, current) => {
+                return messages[prev].timestamp > messages[current].timestamp
+                  ? prev
+                  : current;
+              });
+
+              const latestMessage = messages[latestMessageId];
+              const lastMessageTimestamp = latestMessage.timestamp;
+              const lastMessageText = latestMessage.text;
 
               setChatUsers((prev) => {
                 const otherRooms = prev.filter((room) => room.id !== roomId);
@@ -81,6 +91,8 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
                   id: roomId,
                   name: existingRoom?.name || "",
                   lastMessageTimestamp,
+                  email: existingRoom?.email,
+                  lastMessageText, // Store the last message text
                 };
                 const updatedList = [...otherRooms, updatedRoom];
                 updatedList.sort(
@@ -121,6 +133,11 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
                   onClick={() => onSelectChat(chatUser.id)}
                 >
                   <p className="font-medium">{chatUser.name || "Loading..."}</p>
+                  {chatUser.lastMessageText && (
+                    <p className="text-sm text-gray-500">
+                      {chatUser.lastMessageText}
+                    </p>
+                  )}
                 </div>
               ))
             ) : (
