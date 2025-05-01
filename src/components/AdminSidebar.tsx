@@ -29,16 +29,19 @@ const menuItems = [
       </svg>
     ),
     href: "/admin",
+    roles: ["admin"],
   },
   {
     title: "Sales",
     icon: BarChart2,
     href: "/admin/sales",
+    roles: ["admin"],
   },
   {
     title: "Active Customer",
     icon: Users,
     href: "/admin/active-customer",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Inactive Customer",
@@ -54,11 +57,13 @@ const menuItems = [
       </svg>
     ),
     href: "/admin/inactive-customer",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Messages",
     icon: MessageSquare,
     href: "/admin/messages",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Add Customer",
@@ -74,6 +79,7 @@ const menuItems = [
       </svg>
     ),
     href: "/admin/add-customer",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Add Products and Services",
@@ -89,16 +95,22 @@ const menuItems = [
       </svg>
     ),
     href: "/admin/add-products-and-services",
+    roles: ["admin"],
   },
   {
     title: "Add Cashier",
     icon: Users,
     href: "/admin/cashier",
+    roles: ["admin"],
   },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
   const pathname = usePathname();
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(role)
+  );
 
   return (
     <div className="flex">
@@ -126,7 +138,7 @@ export default function AdminSidebar() {
         </SidebarHeader>
         <SidebarContent className="py-5">
           <SidebarMenu>
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <SidebarMenuItem key={item.title}>

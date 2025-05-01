@@ -18,6 +18,7 @@ import {
 import { app } from "@/lib/firebaseClient";
 import useGetUserById from "@/utils/helpers/getUserById";
 import { Schema } from "@/lib/schema/firestore";
+import { usePathname } from "next/navigation";
 
 interface Message {
   id: string;
@@ -32,12 +33,17 @@ interface ChatWidgetProps {
 }
 
 const ChatWidget = ({ userId }: ChatWidgetProps) => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<Schema["users"]["Data"] | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const roomId = userId;
+
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const {
     user: fetchedUser,
@@ -145,7 +151,7 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     <Card className="fixed bottom-5 right-5 w-80 shadow-xl rounded-2xl bg-white border border-gray-300">
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold">Chat Widget</h3>
+          <h3 className="text-lg font-semibold">Chat with us Now!</h3>
           <Button variant="ghost" onClick={() => setIsOpen(false)}>
             <X className="w-4 h-4" />
           </Button>
