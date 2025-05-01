@@ -9,16 +9,11 @@ import fetcher from "@/lib/fetcher"
 import { CLASSDATA } from "@/lib/types/product-services"
 
 export default function Page({ params }: { params: { id: string } }) {
-  
+  console.log(params.id, "params");
   const { data: classData , error: classError, isLoading: classDataLoading } = useSWR<CLASSDATA>(
-    `/api/classes/${params.id}`,
+    `/api/classes${params.id}`,
     fetcher
   );
-
-  console.log(classData, "classes");
-  
-  // const { data: coachData , error: coachError, isLoading: coachDataLoading } = useSWR<CLASSDATA>(
-  //   `/api/classes${classData?.coachId}`,
 
   console.log(classData, "classes");
 

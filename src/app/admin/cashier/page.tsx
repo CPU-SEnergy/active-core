@@ -46,8 +46,7 @@ export default function CashierManagement() {
             </TableRow>
             <TableRow>
               <TableHead className="w-[300px]">Customer</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -63,8 +62,7 @@ export default function CashierManagement() {
                     <span>{cashier.name}</span>
                   </div>
                 </TableCell>
-                <TableCell>{cashier.time}</TableCell>
-                <TableCell>{cashier.status}</TableCell>
+                <TableCell>{new Date(cashier.time).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <Button variant="destructive" size="sm">
                     Remove
