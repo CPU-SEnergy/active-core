@@ -33,7 +33,7 @@ function CustomTrigger() {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <AdminSidebar role="cashier" />
+      <AdminSidebar role="admin" />
       <main className="w-full h-full">
         <nav className="fixed">
           <CustomTrigger />

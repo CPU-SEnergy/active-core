@@ -41,9 +41,6 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const roomId = userId;
 
-  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
-    return null;
-  }
 
   const {
     user: fetchedUser,
@@ -88,6 +85,10 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
       return () => unsubscribe();
     }
   }, [roomId, user]);
+  
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const sendMessage = async () => {
     if (!input.trim()) return;
