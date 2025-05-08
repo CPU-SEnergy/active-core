@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -9,74 +8,95 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 
-export default function SalesMetrics() {
+interface SalesMetricsProps {
+  data: {
+    earnings: number[];
+    memberships: {
+      regular: number;
+      student: number;
+    };
+  } | null;
+}
+
+export default function SalesMetrics({ data }: SalesMetricsProps) {
   const [period, setPeriod] = useState("monthly");
 
-  const metrics = {
-    weekly: {
-      title: "This Week Sales",
-      arr: { current: "P 75.2k", previous: "P 70.5k" },
-      customers: { current: "89", previous: "85" },
-      activeCustomer: { current: "68.40%", previous: "67.20%" },
-    },
-    monthly: {
-      title: "This Month Sales",
-      arr: { current: "P 300.5k", previous: "P 257.3k" },
-      customers: { current: "357", previous: "328" },
-      activeCustomer: { current: "70.80%", previous: "61.50%" },
-    },
-    annually: {
-      title: "This Year Sales",
-      arr: { current: "P 3.2M", previous: "P 3.8M" },
-      customers: { current: "2,453", previous: "2,201" },
-      activeCustomer: { current: "82.40%", previous: "78.60%" },
-    },
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) {
+      return `₱ ${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `₱ ${(amount / 1000).toFixed(1)}k`;
+    }
+    return `₱ ${amount.toFixed(2)}`;
   };
 
-  const currentMetrics = metrics[period as keyof typeof metrics];
-
-  const calculateGrowth = (current: string, previous: string) => {
-    const currentValue = Number.parseFloat(current.replace(/[^0-9.-]+/g, ""));
-    const previousValue = Number.parseFloat(previous.replace(/[^0-9.-]+/g, ""));
-    const growth = ((currentValue - previousValue) / previousValue) * 100;
-    return growth.toFixed(1);
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat().format(num);
   };
 
-  const renderGrowthIndicator = (current: string, previous: string) => {
-    const growth = calculateGrowth(current, previous);
-    const isPositive = Number.parseFloat(growth) >= 0;
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(2)}%`;
+  };
 
-    return (
-      <div
-        className={`flex items-center gap-1 px-2 py-1 ${isPositive ? "bg-green-100" : "bg-red-100"} rounded-full`}
-      >
-        {isPositive ? (
-          <TrendingUp className="w-3 h-3 text-green-600" />
-        ) : (
-          <TrendingDown className="w-3 h-3 text-red-600" />
-        )}
-        <span
-          className={`text-xs font-medium ${isPositive ? "text-green-600" : "text-red-600"}`}
-        >
-          {Math.abs(Number.parseFloat(growth))}%
+  const calculateGrowth = (current: number, previous: number) => {
+    if (previous === 0) return 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  if (!data || !data.earnings || !data.memberships) {
+    return <div>No data available</div>;
+  }
+
+  let currentEarnings = 0;
+  let previousEarnings = 0;
+  
+  if (period === "monthly") {
+    const currentMonth = new Date().getMonth();
+    currentEarnings = data.earnings[currentMonth] || 0;
+    previousEarnings = currentMonth > 0 ? (data.earnings[currentMonth - 1] || 0) : 0;
+  } else if (period === "annually") {
+    currentEarnings = data.earnings.reduce((sum, val) => sum + val, 0);
+    previousEarnings = 0;
+  }
+
+  const totalCustomers = data.memberships.regular + data.memberships.student;
+
+  function renderGrowthIndicator(currentEarnings: number, previousEarnings: number): import("react").ReactNode {
+    const growth = calculateGrowth(currentEarnings, previousEarnings);
+
+    if (growth > 0) {
+      return (
+        <span className="text-green-500 text-sm font-medium">
+          ▲ {formatPercentage(growth)}
         </span>
-      </div>
-    );
-  };
+      );
+    } else if (growth < 0) {
+      return (
+        <span className="text-red-500 text-sm font-medium">
+          ▼ {formatPercentage(Math.abs(growth))}
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-gray-500 text-sm font-medium">
+          No Change
+        </span>
+      );
+    }
+  }
 
   return (
     <Card>
       <div className="p-6 bg-white rounded-lg shadow-sm max-w-sm">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold mr-10 text-gray-900">
-            {currentMetrics.title}
+            {period === "monthly" ? "This Month Sales" : "This Year Sales"}
           </h2>
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="text-xs font-medium w-20 bg-[#E9EAEC]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="weekly">Week</SelectItem>
               <SelectItem value="monthly">Month</SelectItem>
               <SelectItem value="annually">Year</SelectItem>
             </SelectContent>
@@ -85,41 +105,31 @@ export default function SalesMetrics() {
 
         <div className="space-y-6">
           <div>
-            <div className="text-sm text-gray-500 mb-1">ARR</div>
+            <div className="text-sm text-gray-500 mb-1">Revenue</div>
             <div className="flex justify-between items-center">
               <span className="text-2xl font-semibold">
-                {currentMetrics.arr.current}
+                {formatCurrency(currentEarnings)}
               </span>
-              {renderGrowthIndicator(
-                currentMetrics.arr.current,
-                currentMetrics.arr.previous
-              )}
+              {renderGrowthIndicator(currentEarnings, previousEarnings)}
             </div>
           </div>
 
           <div>
-            <div className="text-sm text-gray-500 mb-1">Customers</div>
+            <div className="text-sm text-gray-500 mb-1">Total Members</div>
             <div className="flex justify-between items-center">
               <span className="text-2xl font-semibold">
-                {currentMetrics.customers.current}
+                {formatNumber(totalCustomers)}
               </span>
-              {renderGrowthIndicator(
-                currentMetrics.customers.current,
-                currentMetrics.customers.previous
-              )}
             </div>
           </div>
 
           <div>
-            <div className="text-sm text-gray-500 mb-1">Active Customer</div>
+            <div className="text-sm text-gray-500 mb-1">Membership Distribution</div>
             <div className="flex justify-between items-center">
-              <span className="text-2xl font-semibold">
-                {currentMetrics.activeCustomer.current}
+              <span className="text-sm">
+                Regular: {formatNumber(data.memberships.regular)} <br />
+                Student: {formatNumber(data.memberships.student)}
               </span>
-              {renderGrowthIndicator(
-                currentMetrics.activeCustomer.current,
-                currentMetrics.activeCustomer.previous
-              )}
             </div>
           </div>
         </div>
