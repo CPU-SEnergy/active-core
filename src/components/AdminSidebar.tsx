@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { BarChart2, MessageSquare, Settings, Users } from "lucide-react";
+import { BarChart2, MessageSquare, Settings, Users, House } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -102,6 +102,11 @@ const menuItems = [
     icon: Users,
     href: "/admin/cashier",
     roles: ["admin"],
+  },
+  {
+    title: "Homepage Editor",
+    icon: House,
+    href: "/admin/homepage-editor",
   },
 ];
 
