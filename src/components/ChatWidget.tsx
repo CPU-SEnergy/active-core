@@ -84,6 +84,10 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
       return () => unsubscribe();
     }
   }, [roomId, user]);
+  
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
+    return null;
+  }
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
     return null;
