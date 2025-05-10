@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-
 async function fetchCoaches() {
   try {
     const res = await fetch("http://localhost:3000/api/coaches/", {
@@ -96,10 +95,10 @@ export default async function CoachDeck() {
             key={coach.id}
             name={coach.name}
             specialization={coach.specialization}
-            image={coach.image}
+            image={coach.imageUrl}
             alt={coach.name}
             imagePosition={index % 2 === 0 ? "left" : "right"}
-            coachId={coach.id.toString()}
+            coachId={coach.id}
           />
         ))}
       </div>
