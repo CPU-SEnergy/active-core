@@ -12,6 +12,7 @@ interface SalesData {
     regular: number;
     student: number;
   };
+  monthlyRevenue?: number;
 }
 
 export default function DashboardPage() {
@@ -23,15 +24,29 @@ export default function DashboardPage() {
     const fetchSalesData = async () => {
       try {
         const currentYear = new Date().getFullYear().toString();
-        const response = await fetch(`/api/admin/sales/${currentYear}`);
-        
-        if (!response.ok) {
+        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
+
+        // Fetch yearly data
+        const yearResponse = await fetch(`/api/admin/sales/${currentYear}`);
+        if (!yearResponse.ok) {
           throw new Error('Failed to fetch sales data');
         }
+        const yearData = await yearResponse.json();
 
-        const data = await response.json();
-        setSalesData(data);
+        // Fetch monthly data
+        const monthResponse = await fetch(`/api/admin/overview/kpi/${currentYear}/${currentMonth}`);
+        if (!monthResponse.ok) {
+          throw new Error('Failed to fetch monthly data');
+        }
+        const monthData = await monthResponse.json();
+        
+        // Map revenue to earnings in the data
+        setSalesData({
+          ...yearData,
+          monthlyEarnings: monthData.monthlyRevenue || 0,
+        });
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);

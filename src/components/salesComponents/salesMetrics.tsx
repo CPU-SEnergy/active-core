@@ -15,6 +15,7 @@ interface SalesMetricsProps {
       regular: number;
       student: number;
     };
+    monthlyEarnings?: number;
   } | null;
 }
 
@@ -43,26 +44,32 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
     return ((current - previous) / previous) * 100;
   };
 
+  const getCurrentValue = () => {
+    if (period === "monthly") {
+      return data?.monthlyEarnings || 0;
+    }
+    // Sum up yearly earnings
+    return data?.earnings.reduce((sum, val) => sum + val, 0) || 0;
+  };
+
+  const getPreviousValue = () => {
+    if (period === "monthly") {
+      const currentMonth = new Date().getMonth();
+      return currentMonth > 0 ? (data?.earnings[currentMonth - 1] || 0) : 0;
+    }
+    return 0; // No previous year data available
+  };
+
   if (!data || !data.earnings || !data.memberships) {
     return <div>No data available</div>;
   }
 
-  let currentEarnings = 0;
-  let previousEarnings = 0;
-  
-  if (period === "monthly") {
-    const currentMonth = new Date().getMonth();
-    currentEarnings = data.earnings[currentMonth] || 0;
-    previousEarnings = currentMonth > 0 ? (data.earnings[currentMonth - 1] || 0) : 0;
-  } else if (period === "annually") {
-    currentEarnings = data.earnings.reduce((sum, val) => sum + val, 0);
-    previousEarnings = 0;
-  }
-
   const totalCustomers = data.memberships.regular + data.memberships.student;
 
-  function renderGrowthIndicator(currentEarnings: number, previousEarnings: number): import("react").ReactNode {
-    const growth = calculateGrowth(currentEarnings, previousEarnings);
+  function renderGrowthIndicator(): React.ReactNode {
+    const current = getCurrentValue();
+    const previous = getPreviousValue();
+    const growth = calculateGrowth(current, previous);
 
     if (growth > 0) {
       return (
@@ -108,9 +115,9 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
             <div className="text-sm text-gray-500 mb-1">Revenue</div>
             <div className="flex justify-between items-center">
               <span className="text-2xl font-semibold">
-                {formatCurrency(currentEarnings)}
+                {formatCurrency(getCurrentValue())}
               </span>
-              {renderGrowthIndicator(currentEarnings, previousEarnings)}
+              {renderGrowthIndicator()}
             </div>
           </div>
 
