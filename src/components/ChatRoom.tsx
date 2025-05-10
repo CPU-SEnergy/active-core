@@ -15,7 +15,7 @@ import {
   onDisconnect,
   getDatabase,
 } from "firebase/database";
-import { app } from "@/lib/firebaseClient";
+import { app, getFirebaseAuth } from "@/lib/firebaseClient";
 import { User } from "firebase/auth";
 import { useRead } from "@typesaurus/react";
 import { db, Schema } from "@/lib/schema/firestore";
@@ -27,6 +27,7 @@ interface Message {
   senderName: string;
   text: string;
   timestamp: number;
+  isAdmin: boolean;
 }
 
 interface ChatRoomProps {
@@ -43,6 +44,23 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const auth = getFirebaseAuth();
+  const [isAdmin, setIsAdmin] = useState<boolean | undefined>(false);
+
+  auth.currentUser?.getIdTokenResult(true).then((idTokenResult) => {
+    const role = idTokenResult.claims.role;
+    console.log("User role:", role);
+
+    if (role === "admin") {
+      setIsAdmin(true);
+    } else if (role === "cashier") setIsAdmin(true);
+    else {
+      setIsAdmin(false);
+    }
+  });
+
+  // put this inside the db
+  // >> isAdmin
 
   const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]));
   const userDisplayName =
@@ -171,6 +189,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       senderId: user.uid,
       senderName: userDisplayName || "Anonymous",
       text: input,
+      isAdmin: isAdmin,
       timestamp: Date.now(),
     });
     setInput("");
@@ -205,17 +224,17 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
             <div
               key={msg.id}
               className={`mb-2 p-2 rounded w-full ${
-                msg.senderId === user.uid
+                msg.isAdmin
                   ? "text-right"
                   : "self-start text-left"
               }`}
             >
-              {msg.senderId !== user.uid && (
+              {!msg.isAdmin && (
                 <span className="font-bold text-blue-black"></span>
               )}{" "}
               <span
                 className={`mb-2 p-2 rounded max-w-xs ${
-                  msg.senderId === user.uid
+                  msg.isAdmin
                     ? "bg-gray-300 text-right"
                     : "self-start text-left"
                 }`}

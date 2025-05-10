@@ -132,6 +132,7 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
                   className="p-3 border-b cursor-pointer hover:bg-gray-200 transition"
                   onClick={() => onSelectChat(chatUser.id)}
                 >
+                  
                   <p className="font-medium">{chatUser.name || "Loading..."}</p>
                   {chatUser.lastMessageText && (
                     <p className="text-sm text-gray-500">
