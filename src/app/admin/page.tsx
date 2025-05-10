@@ -1,12 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { kpis, recentCustomers, timeFilters } from "@/lib/mock_data/overviewMockData"
+import { recentCustomers, timeFilters } from "@/lib/mock_data/overviewMockData"
+
+interface KPI {
+  title: string;
+  value: string | number;
+  change: number;
+  prefix?: string;
+}
+
+interface KPIData {
+  yearly: {
+    totalRevenue: number;
+    totalMonthlyCustomers: number;
+    activeCustomers: string;
+    revenueComparison: string;
+    customerComparison: string;
+    activeCustomersComparison: string;
+  };
+  monthly: {
+    totalRevenue: number;
+    totalMonthlyCustomers: number;
+    activeCustomers: string;
+    monthlyRevenueComparison: string;
+  };
+}
 
 function KPICard({ title, value, change, prefix }: KPI) {
   const isPositive = change >= 0
@@ -32,6 +56,7 @@ function KPICard({ title, value, change, prefix }: KPI) {
     </Card>
   )
 }
+
 
 function CustomerTable({ customers }: { customers: Customer[] }) {
   return (
@@ -68,10 +93,94 @@ function CustomerTable({ customers }: { customers: Customer[] }) {
 export default function Dashboard() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter["value"]>("24h")
   const [searchQuery, setSearchQuery] = useState("")
+  const [kpiData, setKpiData] = useState<KPIData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchKPIData = async () => {
+      try {
+        const currentYear = new Date().getFullYear()
+        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0')
+        console.log('Current Month:', currentMonth)
+  
+        const yearResponse = await fetch(`/api/admin/overview/kpi/${currentYear}`)
+        if (!yearResponse.ok) throw new Error('Failed to fetch yearly data')
+        const yearData = await yearResponse.json()
+        console.log('Year Data:', yearData)
+  
+        const monthResponse = await fetch(`/api/admin/overview/kpi/${currentYear}/${currentMonth}`)
+        if (!monthResponse.ok) throw new Error('Failed to fetch monthly data')
+        const monthData = await monthResponse.json()
+        console.log('Month Data:', monthData)
+  
+        if (!monthData || typeof monthData.monthlyRevenue === 'undefined') {
+          throw new Error('Invalid monthly data structure')
+        }
+  
+        setKpiData({
+          yearly: {
+            totalRevenue: yearData.totalRevenue || 0,
+            totalMonthlyCustomers: yearData.totalMonthlyCustomers || 0,
+            activeCustomers: yearData.activeCustomers || '0',
+            revenueComparison: yearData.revenueComparison ,
+            customerComparison: yearData.customerComparison,
+            activeCustomersComparison: yearData.activeCustomersComparison,
+          },
+          monthly: {
+            totalRevenue: monthData.monthlyRevenue || 0, // Updated to match API response
+            totalMonthlyCustomers: monthData.monthlyCustomers || 0, // Updated to match API response
+            activeCustomers: monthData.monthlyActive?.toString() || '0', // Updated to match API response
+            monthlyRevenueComparison: monthData.monthlyRevenueComparison,
+          }
+        })
+      } catch (err) {
+        console.error('Error fetching KPI data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch KPI data')
+      } finally {
+        setLoading(false)
+      }
+    }
+  
+    fetchKPIData()
+  }, [])
+  
+  const kpis: KPI[] = kpiData ? [
+  {
+    title: "Annual Revenue",
+    value: kpiData.yearly.totalRevenue,
+    change: Number(kpiData.yearly.revenueComparison),
+    prefix: "₱"
+  },
+  {
+    title: "Monthly Revenue",
+    value: kpiData.monthly.totalRevenue,
+    change: Number(kpiData.monthly.monthlyRevenueComparison),
+    prefix: "₱"
+  },
+  {
+    title: "Total Customers",
+    value: kpiData.yearly.totalMonthlyCustomers,
+    change: Number(kpiData.yearly.customerComparison),
+  },
+  {
+    title: "Active Customers",
+    value: `${Number(kpiData.yearly.activeCustomers).toFixed(1)}%`,
+    change: Number(kpiData.yearly.activeCustomersComparison),
+  },
+] : [];
 
   const filteredCustomers = recentCustomers.filter((customer) =>
     customer.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
