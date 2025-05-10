@@ -66,9 +66,9 @@ export async function GET(request: Request, context: { params: Params}) {
     }
 
     const revenueComparison = compareYearlyRevenue(totalRevenue.toString() as Schema["kpis"]["Id"], previousTotalRevenue.toString() as Schema["kpis"]["Id"]);
-      const customerComparison = compareYearlyCustomers(totalMonthlyCustomers.toString() as Schema["kpis"]["Id"], previousTotalMonthlyCustomers.toString() as Schema["kpis"]["Id"])
-      const activeCustomersComparison = compareYearlyActiveCustomers(activeCustomers, previousActiveCustomers)
-
+    const customerComparison = compareYearlyCustomers(totalMonthlyCustomers.toString() as Schema["kpis"]["Id"], previousTotalMonthlyCustomers.toString() as Schema["kpis"]["Id"])
+    const activeCustomersComparison = compareYearlyActiveCustomers(activeCustomers, previousActiveCustomers)
+    console.log(revenueComparison, customerComparison, activeCustomersComparison)
     const result = {
       yearData,
       totalRevenue,
@@ -93,32 +93,48 @@ export async function GET(request: Request, context: { params: Params}) {
   }
 }
 
-function compareYearlyRevenue (year: Schema["kpis"]["Id"], previousYear: Schema["kpis"]["Id"] | null) {
-  if (!year && !previousYear) {
-    return null;
-  } else if (!previousYear) {
-    return 100;
-  } else {
-    return Number((Number(year) / Number(previousYear)) * 100).toFixed(2);
+function compareYearlyRevenue(year: Schema["kpis"]["Id"], previousYear: Schema["kpis"]["Id"] | null) {
+  if (!year || !previousYear) {
+    return "100";
   }
+
+  const currentValue = Number(year);
+  const previousValue = Number(previousYear);
+
+  if (previousValue === 0) {
+    return "100";
+  }
+
+  // Calculate percentage change
+  const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+  return percentageChange.toFixed(2);
 }
 
-function compareYearlyCustomers (year: Schema["kpis"]["Id"], previousYear: Schema["kpis"]["Id"] | null) {
-  if (!year && !previousYear) {
-    return null;
-  } else if (!previousYear) {
-    return 100;
-  } else {
-    return Number((Number(year) / Number(previousYear)) * 100).toFixed(2);
+function compareYearlyCustomers(year: Schema["kpis"]["Id"], previousYear: Schema["kpis"]["Id"] | null) {
+  if (!year || !previousYear) {
+    return "100";
   }
+
+  const currentValue = Number(year);
+  const previousValue = Number(previousYear);
+
+  if (previousValue === 0) {
+    return "100";
+  }
+
+  // Calculate percentage change
+  const percentageChange = ((currentValue - previousValue) / previousValue) * 100;
+  return percentageChange.toFixed(2);
 }
 
-function compareYearlyActiveCustomers (year: Schema["kpis"]["Id"] | null, previousYear: Schema["kpis"]["Id"] | null) {
-  if (!year && !previousYear) {
-    return null;
-  } else if (!previousYear) {
-    return 100;
-  } else {
-    return Number((Number(year) - Number(previousYear))).toFixed(2);
+function compareYearlyActiveCustomers(year: Schema["kpis"]["Id"] | null, previousYear: Schema["kpis"]["Id"] | null) {
+  if (!year || !previousYear) {
+    return "100";
   }
+
+  const currentValue = Number(year);
+  const previousValue = Number(previousYear);
+
+  // For active customers, we want the absolute difference in percentage points
+  return (currentValue - previousValue).toFixed(2);
 }
