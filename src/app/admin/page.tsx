@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -113,7 +112,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch KPI data
         const currentYear = new Date().getFullYear()
         const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0')
         
@@ -167,7 +165,6 @@ export default function Dashboard() {
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch = payment.customerId?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
     
-    // Filter by time
     const paymentDate = new Date(payment.createdAt)
     const now = new Date()
     const hoursDiff = (now.getTime() - paymentDate.getTime()) / (1000 * 60 * 60)
@@ -176,9 +173,9 @@ export default function Dashboard() {
       case "24h":
         return matchesSearch && hoursDiff <= 24
       case "7d":
-        return matchesSearch && hoursDiff <= 168 // 7 * 24
+        return matchesSearch && hoursDiff <= 168
       case "30d":
-        return matchesSearch && hoursDiff <= 720 // 30 * 24
+        return matchesSearch && hoursDiff <= 720
       default:
         return matchesSearch
     }
@@ -210,6 +207,14 @@ export default function Dashboard() {
       change: parseFloat(kpiData.yearly.activeCustomersComparison)
     }
   ] : [];
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
