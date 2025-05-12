@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -66,6 +67,7 @@ function KPICard({ title, value, change, prefix }: KPI) {
     </Card>
   )
 }
+
 
 
 function CustomerTable({ customers }: { customers: Customer[] }) {

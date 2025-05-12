@@ -41,7 +41,6 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const roomId = userId;
 
-
   const {
     user: fetchedUser,
     isLoading,
@@ -86,6 +85,10 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     }
   }, [roomId, user]);
   
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
+    return null;
+  }
+
   if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
     return null;
   }
@@ -166,10 +169,23 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
             <p className="text-gray-500">No messages yet...</p>
           ) : (
             messages.map((msg) => (
-              <div key={msg.id} className="my-2">
-                <p className="rounded-lg p-2 text-sm">
-                  <strong>Me:</strong> {msg.text}
-                </p>
+              <div
+                key={msg.id}
+                className={`mb-2 p-2 rounded w-full ${
+                  msg.senderId === user.uid
+                    ? "text-right text-white"
+                    : "self-start text-left"
+                }`}
+              >
+                <span
+                  className={`mb-2 p-2 rounded max-w-xs ${
+                    msg.senderId === user.uid
+                      ? "bg-black text-right"
+                      : "self-start text-left"
+                  }`}
+                >
+                  {msg.text}
+                </span>
               </div>
             ))
           )}
