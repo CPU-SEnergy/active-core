@@ -1,6 +1,7 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState, useRef } from "react";
+import type React from "react"
+import { useEffect, useState, useRef } from "react"
 import {
   ref,
   query,
@@ -14,257 +15,271 @@ import {
   set,
   onDisconnect,
   getDatabase,
-} from "firebase/database";
-import { app, getFirebaseAuth } from "@/lib/firebaseClient";
-import { User } from "firebase/auth";
-import { useRead } from "@typesaurus/react";
-import { db, Schema } from "@/lib/schema/firestore";
-import { Send } from "lucide-react";
+} from "firebase/database"
+import { app, getFirebaseAuth } from "@/lib/firebaseClient"
+import type { User } from "firebase/auth"
+import { useRead } from "@typesaurus/react"
+import { db, type Schema } from "@/lib/schema/firestore"
+import { Send } from "lucide-react"
 
 interface Message {
-  id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: number;
-  isAdmin: boolean;
+  id: string
+  senderId: string
+  senderName: string
+  text: string
+  timestamp: number
+  isAdmin: boolean
+  userNumber?: number // Added user number field
 }
 
 interface ChatRoomProps {
-  roomId: string;
-  user: User;
+  roomId: string
+  user: User
 }
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 15
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
-  const database = getDatabase(app);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState<string>("");
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const auth = getFirebaseAuth();
-  const [isAdmin, setIsAdmin] = useState<boolean | undefined>(false);
+  const database = getDatabase(app)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState<string>("")
+  const [hasMore, setHasMore] = useState<boolean>(true)
+  const [loadingMore, setLoadingMore] = useState<boolean>(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const auth = getFirebaseAuth()
+  const [isAdmin, setIsAdmin] = useState<boolean | undefined>(false)
 
   auth.currentUser?.getIdTokenResult(true).then((idTokenResult) => {
-    const role = idTokenResult.claims.role;
-    console.log("User role:", role);
+    const role = idTokenResult.claims.role
+    console.log("User role:", role)
 
     if (role === "admin") {
-      setIsAdmin(true);
-    } else if (role === "cashier") setIsAdmin(true);
+      setIsAdmin(true)
+    } else if (role === "cashier") setIsAdmin(true)
     else {
-      setIsAdmin(false);
+      setIsAdmin(false)
     }
-  });
+  })
 
-  // put this inside the db
-  // >> isAdmin
-
-  const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]));
+  const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]))
   const userDisplayName =
     userData?.data.firstName && userData?.data.lastName
       ? `${userData.data.firstName} ${userData.data.lastName}`
-      : "Anonymous";
+      : "Anonymous"
+
+  // Function to format timestamp
+  const formatTimestamp = (timestamp: number): string => {
+    const date = new Date(timestamp)
+
+    // Get hours and minutes with leading zeros
+    const hours = date.getHours().toString().padStart(2, "0")
+    const minutes = date.getMinutes().toString().padStart(2, "0")
+
+    // Get day, month, and year
+    const day = date.getDate().toString().padStart(2, "0")
+    const month = (date.getMonth() + 1).toString().padStart(2, "0") // Months are 0-based
+    const year = date.getFullYear()
+
+    return `${day}/${month}/${year} ${hours}:${minutes}`
+  }
+
+  // Track unique users and assign numbers
+  useEffect(() => {
+    const uniqueUsers = new Set<string>()
+    const userNumbers: Record<string, number> = {}
+
+    messages.forEach((msg) => {
+      if (!uniqueUsers.has(msg.senderId)) {
+        uniqueUsers.add(msg.senderId)
+        userNumbers[msg.senderId] = uniqueUsers.size
+      }
+    })  
+  }, [messages])
 
   const loadInitialMessages = async () => {
-    const messagesRef = ref(database, `systemChats/${roomId}/messages`);
-    const messagesQuery = query(
-      messagesRef,
-      orderByChild("timestamp"),
-      limitToLast(PAGE_SIZE)
-    );
-    const snapshot = await get(messagesQuery);
+    const messagesRef = ref(database, `systemChats/${roomId}/messages`)
+    const messagesQuery = query(messagesRef, orderByChild("timestamp"), limitToLast(PAGE_SIZE))
+    const snapshot = await get(messagesQuery)
     if (snapshot.exists()) {
-      const data = snapshot.val();
-      const messagesList: Message[] = Object.entries(data).map(
-        ([key, value]) => ({
-          ...(value as Message),
-          id: key,
-        })
-      );
-      messagesList.sort((a, b) => a.timestamp - b.timestamp);
-      setMessages(messagesList);
+      const data = snapshot.val()
+      const messagesList: Message[] = Object.entries(data).map(([key, value]) => ({
+        ...(value as Message),
+        id: key,
+      }))
+      messagesList.sort((a, b) => a.timestamp - b.timestamp)
+      setMessages(messagesList)
       if (messagesList.length < PAGE_SIZE) {
-        setHasMore(false);
+        setHasMore(false)
       }
       if (containerRef.current) {
-        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        containerRef.current.scrollTop = containerRef.current.scrollHeight
       }
     } else {
-      setMessages([]);
-      setHasMore(false);
+      setMessages([])
+      setHasMore(false)
     }
-  };
+  }
 
   useEffect(() => {
-    loadInitialMessages();
+    loadInitialMessages()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId])
 
   const loadOlderMessages = async () => {
-    if (messages.length === 0) return;
-    setLoadingMore(true);
-    const oldestTimestamp = messages[0]?.timestamp || 0;
-    const messagesRef = ref(database, `systemChats/${roomId}/messages`);
-    const olderQuery = query(
-      messagesRef,
-      orderByChild("timestamp"),
-      endAt(oldestTimestamp - 1),
-      limitToLast(PAGE_SIZE)
-    );
-    const snapshot = await get(olderQuery);
+    if (messages.length === 0) return
+    setLoadingMore(true)
+    const oldestTimestamp = messages[0]?.timestamp || 0
+    const messagesRef = ref(database, `systemChats/${roomId}/messages`)
+    const olderQuery = query(messagesRef, orderByChild("timestamp"), endAt(oldestTimestamp - 1), limitToLast(PAGE_SIZE))
+    const snapshot = await get(olderQuery)
     if (snapshot.exists()) {
-      const data = snapshot.val();
-      const olderMessages: Message[] = Object.entries(data).map(
-        ([key, value]) => ({
-          ...(value as Message),
-          id: key,
-        })
-      );
-      olderMessages.sort((a, b) => a.timestamp - b.timestamp);
-      setMessages((prev) => [...olderMessages, ...prev]);
+      const data = snapshot.val()
+      const olderMessages: Message[] = Object.entries(data).map(([key, value]) => ({
+        ...(value as Message),
+        id: key,
+      }))
+      olderMessages.sort((a, b) => a.timestamp - b.timestamp)
+      setMessages((prev) => [...olderMessages, ...prev])
       if (olderMessages.length < PAGE_SIZE) {
-        setHasMore(false);
+        setHasMore(false)
       }
     } else {
-      setHasMore(false);
+      setHasMore(false)
     }
-    setLoadingMore(false);
-  };
+    setLoadingMore(false)
+  }
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerRef.current
+    if (!container) return
     const handleScroll = () => {
       if (container.scrollTop === 0 && hasMore && !loadingMore) {
-        loadOlderMessages();
+        loadOlderMessages()
       }
-    };
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
+    }
+    container.addEventListener("scroll", handleScroll)
+    return () => container.removeEventListener("scroll", handleScroll)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMore, loadingMore, messages]);
+  }, [hasMore, loadingMore, messages])
 
   useEffect(() => {
-    const messagesRef = ref(database, `systemChats/${roomId}/messages`);
-    const lastTimestamp =
-      messages.length > 0 ? (messages[messages.length - 1]?.timestamp ?? 0) : 0;
-    const newMessagesQuery = query(
-      messagesRef,
-      orderByChild("timestamp"),
-      startAt(lastTimestamp + 1)
-    );
+    const messagesRef = ref(database, `systemChats/${roomId}/messages`)
+    const lastTimestamp = messages.length > 0 ? (messages[messages.length - 1]?.timestamp ?? 0) : 0
+    const newMessagesQuery = query(messagesRef, orderByChild("timestamp"), startAt(lastTimestamp + 1))
     const unsubscribe = onChildAdded(newMessagesQuery, (snapshot) => {
-      const newMsg = snapshot.val() as Message;
+      const newMsg = snapshot.val() as Message
       setMessages((prev) => {
-        if (prev.find((m) => m.id === snapshot.key)) return prev;
+        if (prev.find((m) => m.id === snapshot.key)) return prev
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, ...rest } = newMsg;
-        return [...prev, { id: snapshot.key || "", ...rest }];
-      });
+        const { id, ...rest } = newMsg
+        return [...prev, { id: snapshot.key || "", ...rest }]
+      })
       if (containerRef.current) {
-        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        containerRef.current.scrollTop = containerRef.current.scrollHeight
       }
-    });
-    return () => unsubscribe();
-  }, [roomId, messages]);
+    })
+    return () => unsubscribe()
+  }, [roomId, messages])
 
   useEffect(() => {
-    if (!userDisplayName) return;
-    const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`);
+    if (!userDisplayName) return
+    const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`)
     set(userRef, {
       name: userDisplayName,
       online: true,
       lastActive: Date.now(),
-    });
-    onDisconnect(userRef).remove();
-  }, [roomId, user, userDisplayName]);
+    })
+    onDisconnect(userRef).remove()
+  }, [roomId, user, userDisplayName])
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    const messageRef = push(ref(database, `systemChats/${roomId}/messages`));
+    if (!input.trim()) return
+    const messageRef = push(ref(database, `systemChats/${roomId}/messages`))
     await set(messageRef, {
       senderId: user.uid,
       senderName: userDisplayName || "Anonymous",
       text: input,
       isAdmin: isAdmin,
       timestamp: Date.now(),
-    });
-    setInput("");
+    })
+    setInput("")
     if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
     }
-  };
-
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      sendMessage();
-    }
-  };
+  }
 
   return (
     userData && (
       <div className="flex flex-col h-full">
         <div className="p-4 bg-gray-50 pt-10 pb-5">
           <h2 className="text-lg font-bold">
-            Chat with{" "}
-            {userData?.data.firstName + " " + userData?.data.lastName || ""}
+            Chat with {userData?.data.firstName + " " + userData?.data.lastName || ""}
           </h2>
         </div>
         <div
           ref={containerRef}
           className="flex-grow overflow-y-auto border border-gray-300 p-4 mx-5 rounded bg-gray-50 shadow-sm"
         >
-          {loadingMore && (
-            <div className="text-center">Loading older messages...</div>
-          )}
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`mb-2 p-2 rounded w-full ${
-                msg.isAdmin
-                  ? "text-right"
-                  : "self-start text-left"
-              }`}
-            >
-              {!msg.isAdmin && (
-                <span className="font-bold text-blue-black"></span>
-              )}{" "}
-              <span
-                className={`mb-2 p-2 rounded max-w-xs ${
-                  msg.isAdmin
-                    ? "bg-gray-300 text-right"
-                    : "self-start text-left"
-                }`}
-              >
-                {msg.text}
-              </span>
-            </div>
-          ))}
+          {loadingMore && <div className="text-center">Loading older messages...</div>}
+          {messages.map((msg) => {
+            const isSenderAdmin = msg.isAdmin;
+            const isCurrentUser = msg.senderId === user.uid;
+
+            return (
+              <div key={msg.id} className={`w-full flex ${isSenderAdmin ? "justify-end" : "justify-start"} mb-3`}>
+                <div className="flex flex-col max-w-[75%]">
+                  <div
+                    className={`px-4 py-2 rounded-3xl break-words ${
+                      isSenderAdmin
+                        ? isCurrentUser
+                          ? "bg-blue-700 text-white rounded-br-none"
+                          : "bg-blue-500/85 text-white rounded-br-none"
+                        : "bg-gray-200 text-black rounded-bl-none"
+                    }`}
+                  >
+                    <div>{msg.text}</div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 px-2">
+                    <span>{formatTimestamp(msg.timestamp)}</span>
+                    {msg.isAdmin ? msg.senderName : ""}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
         <div className="p-2 mx-4 border-t border-gray-300 bg-white rounded shadow-sm">
-          <div className="relative flex items-center">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage();
+            }}
+            className="relative flex items-center"
+          >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
               placeholder="Type a message"
               className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-              onClick={sendMessage}
+              type="submit"
               className="absolute right-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
             >
               <Send className="h-5 w-5" />
             </button>
-          </div>
+          </form>
         </div>
       </div>
     )
-  );
+  )
 }
 
-export default ChatRoom;
+export default ChatRoom

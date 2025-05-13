@@ -120,7 +120,7 @@ export default function UserChatList({ user, isAdmin, onSelectChat }: Props) {
   }, [database, user.uid, isAdmin, firestore]);
 
   return (
-    <aside className="w-full lg:w-64 bg-white p-6 border-r">
+    <aside className="lg:min-w-64 bg-white p-6 border-r overflow-y-auto h-screen">
       <nav className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold mb-4">Chats</h2>
