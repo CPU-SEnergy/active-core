@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db, Schema } from "@/lib/schema/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
-import { getFirestore } from "firebase-admin/firestore";
-import { ProductType } from "@/lib/types/product";
-
-const db = getFirestore(getFirebaseAdminApp());
 
 type Params = {
   id: string;
@@ -11,24 +8,25 @@ type Params = {
 
 export async function GET(req: NextRequest, context: { params: Params }) {
   try {
+    getFirebaseAdminApp();
+
     const { id } = context.params;
-    const numericId = Number(id);
-    const classDoc = db.collection(ProductType.CLASSES);
+    const numericId = id as Schema["classes"]["Ref"]["id"];
 
-    const querySnapshot = await classDoc.where("sports_id", "==", numericId).get();
+    const classData = await db.classes.get(numericId);
 
-    if (querySnapshot.empty) {
+    if (!classData) {
       return NextResponse.json({ error: "Class not found" }, { status: 404 });
     }
 
-    const classes = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const cleanClassData = {
+      id: classData.ref.id,
+      ...classData.data
+    }
 
-    return NextResponse.json(classes);
+    return NextResponse.json(cleanClassData, { status: 200 });
   } catch (error) {
-    console.error("Error fetchin coaches: ", error);
-    return NextResponse.json({ error: "Failed to fetch classes" });
+    console.error("Error fetching classes: ", error);
+    return NextResponse.json({ error: "Failed to fetch classes" }, { status: 500 });
   }
-};
+}

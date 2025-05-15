@@ -29,16 +29,19 @@ const menuItems = [
       </svg>
     ),
     href: "/admin",
+    roles: ["admin"],
   },
   {
     title: "Sales",
     icon: BarChart2,
     href: "/admin/sales",
+    roles: ["admin"],
   },
   {
     title: "Active Customer",
     icon: Users,
     href: "/admin/active-customer",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Inactive Customer",
@@ -54,11 +57,13 @@ const menuItems = [
       </svg>
     ),
     href: "/admin/inactive-customer",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Messages",
     icon: MessageSquare,
     href: "/admin/messages",
+    roles: ["admin", "cashier"],
   },
   {
     title: "Add Customer",
@@ -74,9 +79,10 @@ const menuItems = [
       </svg>
     ),
     href: "/admin/add-customer",
+    roles: ["admin", "cashier"],
   },
   {
-    title: "Add Product",
+    title: "Add Products and Services",
     icon: (props: React.ComponentProps<"svg">) => (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
         <path
@@ -88,37 +94,27 @@ const menuItems = [
         />
       </svg>
     ),
-    href: "/admin/add-product",
-  },
-  {
-    title: "View Products",
-    icon: (props: React.ComponentProps<"svg">) => (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
-        <path
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="2"
-          d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 5h6M9 12h6M9 16h6"
-        />
-      </svg>
-    ),
-    href: "/admin/view-products",
+    href: "/admin/add-products-and-services",
+    roles: ["admin"],
   },
   {
     title: "Add Cashier",
     icon: Users,
-    href: "/admin/add-cashier",
+    href: "/admin/cashier",
+    roles: ["admin"],
   },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
   const pathname = usePathname();
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(role)
+  );
 
   return (
     <div className="flex">
       <Sidebar className="w-60 border-r bg-white">
-        {/* Sidebar Header */}
         <SidebarHeader className="h-16 border-b px-4">
           <SidebarMenu>
             <SidebarMenuItem>
@@ -142,7 +138,7 @@ export default function AdminSidebar() {
         </SidebarHeader>
         <SidebarContent className="py-5">
           <SidebarMenu>
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <SidebarMenuItem key={item.title}>
