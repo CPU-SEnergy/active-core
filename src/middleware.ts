@@ -33,6 +33,7 @@ export async function middleware(request: NextRequest) {
         "/admin/cashier",
       ];
 
+      const redirectPath = "/admin/active-customer";
       const path = request.nextUrl.pathname;
 
       if (PUBLIC_PATHS.includes(path)) {
@@ -45,15 +46,22 @@ export async function middleware(request: NextRequest) {
       const isAdminRoute = path.startsWith("/admin");
 
       if (isAdminRoute) {
+        // Avoid redirect loop
+        if (path === redirectPath) {
+          return NextResponse.next({
+            request: {
+              headers,
+            },
+          });
+        }
+
         if (
           role === "cashier" &&
           adminOnlyRoutes.some(
             (route) => path === route || path.startsWith(`${route}/`)
           )
         ) {
-          return NextResponse.redirect(
-            new URL("/admin/active-customer", request.url)
-          );
+          return NextResponse.redirect(new URL(redirectPath, request.url));
         }
 
         if (role !== "admin" && role !== "cashier") {
