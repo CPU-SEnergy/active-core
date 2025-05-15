@@ -186,10 +186,10 @@ export default function LoginPageClient() {
           </CardContent>
           <div className="relative hidden md:flex bg-zinc-950 w-full md:w-1/2">
             <Image
-              src="/pictures/loginphoto.jpg"
+              src="/pictures/IMAA Official no-bg.png"
               alt="Login Illustration"
-              width={500}
-              height={500}
+              width={700}
+              height={700}
               className="object-cover"
               priority
             />
