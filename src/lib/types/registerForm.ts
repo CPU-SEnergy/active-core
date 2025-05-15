@@ -1,5 +1,5 @@
 export interface RegisterFormProps {
-  phoneNumber?: string;
+  phoneNumber: string;
   email: string;
   password: string;
   confirmation: string;
