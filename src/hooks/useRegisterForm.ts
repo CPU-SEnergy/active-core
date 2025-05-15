@@ -13,6 +13,7 @@ export const useRegisterForm = () => {
     lastName: "",
     dob: "",
     sex: "",
+    phoneNumber: "", // Added missing phoneNumber property
   });
   const [error, setError] = useState("");
 
@@ -22,8 +23,17 @@ export const useRegisterForm = () => {
       setFormState((prev) => ({ ...prev, [field]: e.target.value }));
     };
 
-  const handleNextStep = (event: React.FormEvent) => {
+  const handleNextStep = (
+    event: React.FormEvent,
+    options?: { backAction?: boolean }
+  ) => {
     event.preventDefault();
+
+    if (options?.backAction) {
+      setStep((prevStep) => Math.max(prevStep - 1, 1));
+      return;
+    }
+
     try {
       step1Schema.parse({
         email: formState.email,
