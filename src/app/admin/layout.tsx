@@ -5,7 +5,7 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 function CustomTrigger() {
   const { toggleSidebar } = useSidebar();
   return (
-    <button onClick={toggleSidebar}>
+    <button onClick={toggleSidebar} className="z-10 fixed">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -35,9 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AdminSidebar role="admin" />
       <main className="w-full h-full">
-        <nav className="fixed">
           <CustomTrigger />
-        </nav>
         {children}
       </main>
     </SidebarProvider>

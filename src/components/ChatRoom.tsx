@@ -22,7 +22,7 @@ import type { User } from "firebase/auth"
 import { useRead } from "@typesaurus/react"
 import { db, type Schema } from "@/lib/schema/firestore"
 import { Send, ArrowDown, ArrowUp, MessageSquare } from "lucide-react"
-import { useMediaQuery } from "@/hooks/use-media-query"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface Message {
   id: string
@@ -60,12 +60,12 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
   const shouldScrollToBottomRef = useRef<boolean>(true)
   const isLoadingOlderRef = useRef<boolean>(false)
   const [isAtBottom, setIsAtBottom] = useState(true)
-  const [isNearTop, setIsNearTop] = useState(false)
+  const [, setIsNearTop] = useState(false)
   const firstMessageKeyRef = useRef<string | null>(null)
   const [isTyping, setIsTyping] = useState(false)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const checkScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const isMobile = useMediaQuery("(max-width: 640px)")
+  const isMobile = useIsMobile()
 
   const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]))
   const userDisplayName =
@@ -73,7 +73,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       ? `${userData.data.firstName} ${userData.data.lastName}`
       : "Anonymous"
 
-  // Check user role for admin status
   useEffect(() => {
     const checkAdminStatus = async () => {
       const idTokenResult = await auth.currentUser?.getIdTokenResult(true)
@@ -84,38 +83,32 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     checkAdminStatus()
   }, [auth])
 
-  // Function to format timestamp
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp)
 
-    // Get hours and minutes with leading zeros
     const hours = date.getHours().toString().padStart(2, "0")
     const minutes = date.getMinutes().toString().padStart(2, "0")
 
-    // Get day, month, and year
+
     const day = date.getDate().toString().padStart(2, "0")
-    const month = (date.getMonth() + 1).toString().padStart(2, "0") // Months are 0-based
+    const month = (date.getMonth() + 1).toString().padStart(2, "0")
     const year = date.getFullYear()
 
     return isMobile ? `${hours}:${minutes}` : `${day}/${month}/${year} ${hours}:${minutes}`
   }
 
-  // Scroll to bottom function with multiple approaches for reliability
   const scrollToBottom = (force = false) => {
     if (!shouldScrollToBottomRef.current && !force) {
       return
     }
 
-    // Try multiple approaches to ensure scrolling works
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "auto" })
     }
 
     if (containerRef.current) {
-      // Approach 1: Direct scrollTop setting
       containerRef.current.scrollTop = containerRef.current.scrollHeight
 
-      // Approach 2: Use requestAnimationFrame for next paint frame
       requestAnimationFrame(() => {
         if (containerRef.current) {
           containerRef.current.scrollTop = containerRef.current.scrollHeight
@@ -124,14 +117,12 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   }
 
-  // Use layout effect to ensure scroll happens before browser paint
   useLayoutEffect(() => {
     if (initialLoadCompleteRef.current && messages.length > 0) {
       scrollToBottom(true)
     }
   }, [initialLoadCompleteRef.current, messages.length])
 
-  // Track unique users and assign numbers
   useEffect(() => {
     const uniqueUsers = new Set<string>()
     const newUserNumbers: Record<string, number> = {}
@@ -145,13 +136,11 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
 
     setUserNumbers(newUserNumbers)
 
-    // Update first message key for pagination
-    if (messages.length > 0) {
+    if (messages.length > 0 && messages[0]) {
       firstMessageKeyRef.current = messages[0].id
     }
   }, [messages])
 
-  // Load initial messages
   const loadInitialMessages = async () => {
     try {
       const messagesRef = ref(database, `systemChats/${roomId}/messages`)
@@ -168,8 +157,7 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
         setMessages(messagesList)
         setHasMore(messagesList.length >= PAGE_SIZE)
 
-        // Store the first message key for future queries
-        if (messagesList.length > 0) {
+        if (messagesList.length > 0 && messagesList[0]) {
           firstMessageKeyRef.current = messagesList[0].id
         }
       } else {
@@ -181,7 +169,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       initialLoadCompleteRef.current = true
       shouldScrollToBottomRef.current = true
 
-      // Force scroll to bottom after initial load with multiple attempts
       setTimeout(() => scrollToBottom(true), 0)
       setTimeout(() => scrollToBottom(true), 100)
       setTimeout(() => scrollToBottom(true), 300)
@@ -193,39 +180,33 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   }
 
-  // Load older messages - improved for reliability
   const loadOlderMessages = async () => {
     if (messages.length === 0 || loadingMore || !hasMore || isLoadingOlderRef.current) {
       return
     }
 
-    // Set loading state
     setLoadingMore(true)
     setLoadError(null)
     shouldScrollToBottomRef.current = false
     isLoadingOlderRef.current = true
 
     try {
-      // Save current scroll position BEFORE any DOM changes
       if (containerRef.current) {
         lastScrollHeightRef.current = containerRef.current.scrollHeight
         lastScrollTopRef.current = containerRef.current.scrollTop
       }
 
-      // Try a different approach - use orderByKey instead of orderByChild
       const messagesRef = ref(database, `systemChats/${roomId}/messages`)
 
-      // If we have a first message key, use it to query messages before it
       let olderQuery
       if (firstMessageKeyRef.current) {
         olderQuery = query(
           messagesRef,
           orderByKey(),
           endAt(firstMessageKeyRef.current),
-          limitToLast(PAGE_SIZE + 1), // +1 to account for the duplicate we'll filter out
+          limitToLast(PAGE_SIZE + 1),
         )
       } else {
-        // Fallback to timestamp-based query
         const oldestTimestamp = messages[0]?.timestamp || 0
         olderQuery = query(messagesRef, orderByChild("timestamp"), endAt(oldestTimestamp - 1), limitToLast(PAGE_SIZE))
       }
@@ -240,7 +221,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
           id: key,
         }))
 
-        // If using orderByKey, filter out the duplicate message (our current first message)
         if (firstMessageKeyRef.current) {
           olderMessages = olderMessages.filter((msg) => msg.id !== firstMessageKeyRef.current)
         }
@@ -252,17 +232,13 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
 
         olderMessages.sort((a, b) => a.timestamp - b.timestamp)
 
-        // Update first message key for next query
         if (olderMessages.length > 0 && olderMessages[0]) {
           firstMessageKeyRef.current = olderMessages[0].id
         }
 
-        // Update messages state
         setMessages((prev) => [...olderMessages, ...prev])
         setHasMore(olderMessages.length >= PAGE_SIZE)
 
-        // Restore scroll position after new messages are added
-        // Use multiple attempts with increasing delays for reliability
         const restoreScrollPosition = () => {
           if (containerRef.current) {
             const newScrollHeight = containerRef.current.scrollHeight
@@ -280,26 +256,21 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     } catch (error) {
       console.error("Error loading older messages:", error)
       setLoadError("Failed to load older messages. Please try again.")
-      setHasMore(true) // Keep this true so user can retry
+      setHasMore(true)
     } finally {
       setLoadingMore(false)
 
-      // Reset the loading flag after a delay
       setTimeout(() => {
         isLoadingOlderRef.current = false
       }, 500)
     }
   }
 
-  // Load initial messages when component mounts
   useEffect(() => {
     loadInitialMessages()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId])
 
-  // Set up periodic check for scroll position
   useEffect(() => {
-    // Check scroll position every 500ms to see if we're near the top
     checkScrollIntervalRef.current = setInterval(() => {
       const container = containerRef.current
       if (container) {
@@ -317,27 +288,20 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       }
     }
   }, [hasMore, loadingMore])
-
-  // Handle scroll to load more messages and track scroll position
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
     const handleScroll = () => {
-      // Check if we're near the top to load more messages
-      // Using an EXTREMELY generous threshold (300px) to ensure it triggers reliably
       const isNearTop = container.scrollTop <= 300
 
-      // Update UI indicator
       setIsNearTop(isNearTop)
 
-      // Immediate check without debounce for better responsiveness
       if (isNearTop && hasMore && !loadingMore && !isLoadingOlderRef.current) {
         shouldScrollToBottomRef.current = false
         loadOlderMessages()
       }
 
-      // Check if we're near the bottom to update auto-scroll behavior
       const { scrollTop, scrollHeight, clientHeight } = container
       const atBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 50
 
@@ -347,16 +311,14 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
 
     container.addEventListener("scroll", handleScroll)
 
-    // Initial check when component mounts
+
     handleScroll()
 
     return () => {
       container.removeEventListener("scroll", handleScroll)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, loadingMore])
 
-  // Listen for new messages
   useEffect(() => {
     const messagesRef = ref(database, `systemChats/${roomId}/messages`)
     const lastTimestamp = messages.length > 0 ? (messages[messages.length - 1]?.timestamp ?? 0) : 0
@@ -371,7 +333,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
         return [...prev, { id: snapshot.key || "", ...rest }]
       })
 
-      // Only scroll to bottom for new messages if we're already near the bottom
       if (shouldScrollToBottomRef.current) {
         setTimeout(scrollToBottom, 100)
       }
@@ -380,7 +341,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     return () => unsubscribe()
   }, [roomId, messages, database])
 
-  // Update user presence and typing status
   useEffect(() => {
     if (!userDisplayName) return
     const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`)
@@ -398,7 +358,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     })
 
     return () => {
-      // Update status when component unmounts
       set(userRef, {
         name: userDisplayName,
         online: false,
@@ -408,7 +367,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   }, [roomId, user.uid, userDisplayName, database])
 
-  // Handle typing indicator
   const updateTypingStatus = (isTyping: boolean) => {
     const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`)
     set(userRef, {
@@ -428,12 +386,10 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       updateTypingStatus(true)
     }
 
-    // Clear any existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current)
     }
 
-    // Set a new timeout to clear typing status after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false)
       updateTypingStatus(false)
@@ -444,7 +400,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     if (!input.trim()) return
 
     try {
-      // Clear typing status immediately
       setIsTyping(false)
       updateTypingStatus(false)
       if (typingTimeoutRef.current) {
@@ -469,7 +424,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   }
 
-  // Handle Enter key to send message
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -477,7 +431,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   }
 
-  // Manual trigger for loading previous messages
   const handleLoadPrevious = () => {
     if (!loadingMore && hasMore && !isLoadingOlderRef.current) {
       shouldScrollToBottomRef.current = false
@@ -493,37 +446,47 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             Chat with {userData?.data.firstName + " " + userData?.data.lastName || ""}
           </h2>
 
-          {/* Action buttons in header */}
           <div className="flex items-center gap-2">
-            {/* Load previous button */}
-            {hasMore && !loadingMore && (
+            {isMobile && hasMore && !loadingMore && (
               <button
                 onClick={handleLoadPrevious}
-                className="text-xs bg-blue-500 text-white px-3 py-1.5 rounded-md flex items-center gap-1 hover:bg-blue-600 transition-colors"
+                className="text-xs bg-blue-500 text-white px-2 py-1 rounded-md flex items-center gap-1 hover:bg-blue-600 transition-colors"
               >
                 <ArrowUp className="h-3 w-3" />
-                <span className={isMobile ? "hidden" : "inline"}>Load Previous</span>
+                <span className="hidden sm:inline">Load Previous</span>
               </button>
             )}
 
-            {/* Chat list button */}
-            <button
-              onClick={onOpenChatList}
-              className="text-xs bg-green-500 text-white px-3 py-1.5 rounded-md flex items-center gap-1 hover:bg-green-600 transition-colors"
-            >
-              <MessageSquare className="h-3 w-3" />
-              <span className={isMobile ? "hidden" : "inline"}>Chat List</span>
-            </button>
+            {/* Chat list button - only on mobile */}
+            {isMobile && onOpenChatList && (
+              <button
+                onClick={onOpenChatList}
+                className="text-xs bg-green-500 text-white px-2 py-1 rounded-md flex items-center gap-1 hover:bg-green-600 transition-colors"
+              >
+                <MessageSquare className="h-3 w-3" />
+                <span className="hidden sm:inline">Chat List</span>
+              </button>
+            )}
           </div>
         </div>
+
+        {!isMobile && hasMore && !loadingMore && (
+          <div className="mx-5 mb-2 flex justify-end">
+            <button
+              onClick={handleLoadPrevious}
+              className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full flex items-center gap-1 hover:bg-blue-600"
+            >
+              <ArrowUp className="h-3 w-3" />
+              Load Previous Messages
+            </button>
+          </div>
+        )}
 
         <div
           ref={containerRef}
           className={`flex-grow overflow-y-auto border border-gray-300 ${isMobile ? "p-2 mx-2" : "p-4 mx-5"} rounded bg-gray-50 shadow-sm`}
           aria-live="polite"
-          style={{ height: "calc(100% - 140px)", maxHeight: "600px" }}
         >
-          {/* Loading indicator at the top - only shows when loading */}
           {loadingMore && (
             <div className="flex justify-center items-center py-2 mb-2 sticky top-0 z-10 bg-gray-50/80 backdrop-blur-sm">
               <div
@@ -547,7 +510,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             </div>
           )}
 
-          {/* Error message */}
           {loadError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs flex justify-between items-center w-full mb-3">
               <span>{loadError}</span>
@@ -557,12 +519,10 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             </div>
           )}
 
-          {/* No messages state */}
           {messages.length === 0 && !loadingMore && (
             <div className="text-center py-10 text-gray-500">No messages yet. Start the conversation!</div>
           )}
 
-          {/* End of history message */}
           {!hasMore && messages.length > 0 && (
             <div className="text-center py-2 mb-3 w-full">
               <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
@@ -571,7 +531,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             </div>
           )}
 
-          {/* Messages */}
           {messages.map((msg) => {
             const isSenderAdmin = msg.isAdmin
             const isCurrentUser = msg.senderId === user.uid
@@ -608,7 +567,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             )
           })}
 
-          {/* This invisible div helps with scrolling to the bottom */}
           <div ref={messagesEndRef} />
         </div>
 
