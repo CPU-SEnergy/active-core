@@ -23,7 +23,6 @@ export async function GET() {
             name: p.data.user.name,
             imageUrl: p.data.user.imageUrl,
           },
-          status: p.data.isNewCustomer ? "New Customer" : "Signed up",
           requestNumber: `#${String(p.ref.id).padStart(6, "0")}`,
           timeApproved: p.data.createdAt ? p.data.createdAt.toLocaleString() : "N/A",
           subscription: p.data.availedPlan.name,
