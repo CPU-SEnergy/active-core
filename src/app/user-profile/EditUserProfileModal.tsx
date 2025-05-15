@@ -1,188 +1,237 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog"; 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Schema } from "@/lib/schema/firestore";
-import { Edit2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserProfile } from "@/app/actions/updateUserProfile";
+import type React from "react";
 import { useState, useTransition } from "react";
 import { mutate } from "swr";
 import { toast } from "sonner";
 
-type Props = {
-  userData: Schema["users"]["Data"];
-};
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import type { Schema } from "@/lib/schema/firestore";
+import { Loader2, Edit } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { updateUserProfile } from "@/app/actions/updateUserProfile";
 
-const userProfileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+const formSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters."),
+  lastName: z.string().min(2, "Last name must be at least 2 characters."),
+  phone: z.string().optional(),
   dob: z
-    .union([z.string(), z.date()])
+    .string()
     .optional()
     .refine(
       (date) => !date || !isNaN(new Date(date).getTime()),
-      "Invalid date format. It must be in MM-DD-YYYY"
+      "Invalid date"
     ),
-  sex: z.enum(["male", "female", "other"]),
+  sex: z.enum(["male", "female", "other", "prefer-not-to-say"]).optional(),
 });
 
-type ProfileFormValues = z.infer<typeof userProfileSchema>;
+interface EditUserProfileModalProps {
+  userData: Schema["users"]["Data"];
+  children?: React.ReactNode;
+}
 
-export default function EditUserProfileModal({ userData }: Props) {
+export default function EditUserProfileModal({
+  userData,
+  children,
+}: EditUserProfileModalProps) {
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [isOpen, setIsOpen] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ProfileFormValues>({
-    resolver: zodResolver(userProfileSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      dob: new Date(userData.dob).toISOString().split("T")[0],
-      sex: userData.sex,
+      firstName: userData.firstName || "",
+      lastName: userData.lastName || "",
+      phone: userData.phone || "",
+      dob: userData.dob
+        ? new Date(userData.dob).toISOString().split("T")[0]
+        : "",
+      sex: userData.sex || undefined,
     },
   });
 
-  async function onSubmit(data: ProfileFormValues) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       try {
         const formData = new FormData();
         formData.append("id", userData.uid);
-        formData.append("firstName", data.firstName);
-        formData.append("lastName", data.lastName);
+        formData.append("firstName", values.firstName);
+        formData.append("lastName", values.lastName);
         formData.append(
           "dob",
-          data.dob ? new Date(data.dob).toISOString() : ""
+          values.dob ? new Date(values.dob).toISOString() : ""
         );
-        formData.append("sex", data.sex);
+        formData.append("sex", values.sex || "");
+        formData.append("phone", values.phone || "");
 
         const res = await updateUserProfile(formData);
+
         if (res.status === 200) {
-          toast.success(res.message || "Class updated successfully!");
-          console.log("Profile updated successfully!");
+          toast.success(res.message || "Profile updated successfully!");
           await mutate(`/api/user/${userData.uid}`);
-          setIsOpen(false);
+          setOpen(false);
         } else {
-          toast.error("Error updating class. Please try again.");
-          console.error("Update failed:", res.message);
+          toast.error("Error updating profile. Please try again.");
         }
       } catch (error) {
-        console.error("Error updating profile:", error);
+        console.error("Update failed", error);
+        toast.error("Something went wrong.");
       }
     });
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          className="mt-4 md:mt-0 md:ml-4 bg-gray-300 text-black hover:bg-gray-400"
-          variant="outline"
-        >
-          <Edit2 className="mr-2" size={16} />
+        <Button variant="outline" size="sm" className="flex items-center gap-1">
+          <Edit className="h-3 w-3" />
           Edit Profile
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[350px]">
+        <DialogHeader className="space-y-1">
           <DialogTitle>Edit Profile</DialogTitle>
-          <DialogDescription>
-            Update your personal information
-          </DialogDescription>
+          <DialogDescription>Update your information</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4 mr-8">
-              <Label htmlFor="firstName" className="text-right">
-                First Name:
-              </Label>
-              <Input
-                id="firstName"
-                {...register("firstName")}
-                placeholder="John"
-                className="col-span-3"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.firstName && (
-                <p className="col-span-4 text-sm text-red-500">
-                  {errors.firstName.message}
-                </p>
-              )}
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4 mr-8">
-              <Label htmlFor="lastName" className="text-right">
-                Last Name:
-              </Label>
-              <Input
-                id="lastName"
-                {...register("lastName")}
-                placeholder="Doe"
-                className="col-span-3"
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.lastName && (
-                <p className="col-span-4 text-sm text-red-500">
-                  {errors.lastName.message}
-                </p>
-              )}
             </div>
-            <div className="grid grid-cols-4 items-center gap-4 mr-8">
-              <Label htmlFor="dob" className="text-right">
-                Date of Birth:
-              </Label>
-              <Input
-                id="dob"
-                type="date"
-                required
-                {...register("dob")}
-                className="col-span-3"
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+63 917 123 4567" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.dob && (
-                <p className="col-span-4 text-sm text-red-500">
-                  {errors.dob.message as string}
-                </p>
-              )}
+
+              <FormField
+                control={form.control}
+                name="sex"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sex</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select sex" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">
+                          Prefer not to say
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4 mr-8">
-              <Label htmlFor="sex" className="text-right">
-                Gender:
-              </Label>
-              <select
-                id="sex"
-                {...register("sex")}
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setOpen(false)}
               >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              {errors.sex && (
-                <p className="col-span-4 text-sm text-red-500">
-                  {errors.sex.message}
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save changes"}
-            </Button>
-          </DialogFooter>
-        </form>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
