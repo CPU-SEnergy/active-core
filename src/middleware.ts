@@ -10,6 +10,12 @@ import {
 import { clientConfig, serverConfig } from "@/lib/config";
 
 const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
+const cashierAllowedRoutes = [
+  "/admin/active-customer",
+  "/admin/inactive-customer",
+  "/admin/messages",
+  "/admin/add-customer",
+];
 
 export async function middleware(request: NextRequest) {
   const { getUser } = getFirebaseAuth({
@@ -25,15 +31,8 @@ export async function middleware(request: NextRequest) {
     cookieSignatureKeys: serverConfig.cookieSignatureKeys,
     cookieSerializeOptions: serverConfig.cookieSerializeOptions,
     serviceAccount: serverConfig.serviceAccount,
-    handleValidToken: async ({ token, decodedToken }, headers) => {
-      const adminOnlyRoutes = [
-        "/admin",
-        "/admin/sales",
-        "/admin/add-products-and-services",
-        "/admin/cashier",
-      ];
 
-      const redirectPath = "/admin/active-customer";
+    handleValidToken: async ({ token, decodedToken }, headers) => {
       const path = request.nextUrl.pathname;
 
       if (PUBLIC_PATHS.includes(path)) {
@@ -42,40 +41,38 @@ export async function middleware(request: NextRequest) {
 
       const user = await getUser(decodedToken.uid);
       const role = user?.customClaims?.role;
-
       const isAdminRoute = path.startsWith("/admin");
 
       if (isAdminRoute) {
-        if (path === redirectPath) {
-          return NextResponse.next({
-            request: {
-              headers,
-            },
-          });
+        if (role === "admin") {
+          // ✅ Admins can access all admin routes
+          return NextResponse.next({ request: { headers } });
         }
 
-        if (
-          role === "cashier" &&
-          adminOnlyRoutes.some(
+        if (role === "cashier") {
+          const isAllowed = cashierAllowedRoutes.some(
             (route) => path === route || path.startsWith(`${route}/`)
-          )
-        ) {
-          return NextResponse.redirect(new URL(redirectPath, request.url));
+          );
+
+          if (isAllowed) {
+            return NextResponse.next({ request: { headers } });
+          }
+
+          // 🚫 Not allowed cashier route — redirect
+          return NextResponse.redirect(
+            new URL("/admin/active-customer", request.url)
+          );
         }
 
-        if (role !== "admin" && role !== "cashier") {
-          return new NextResponse("Forbidden: Unauthorized role", {
-            status: 403,
-            headers,
-          });
-        }
+        // 🚫 Not admin or cashier — forbidden
+        return new NextResponse("Forbidden: Unauthorized role", {
+          status: 403,
+          headers,
+        });
       }
 
-      return NextResponse.next({
-        request: {
-          headers,
-        },
-      });
+      // ✅ Allow all other routes
+      return NextResponse.next({ request: { headers } });
     },
 
     handleInvalidToken: async (reason) => {
@@ -86,8 +83,12 @@ export async function middleware(request: NextRequest) {
         publicPaths: PUBLIC_PATHS,
       });
     },
+
     handleError: (error) => {
-      console.log({ cause: (error as any).cause, stack: (error as any).stack });
+      console.error("Middleware error", {
+        cause: (error as any).cause,
+        stack: (error as any).stack,
+      });
 
       return Promise.resolve(
         redirectToLogin(request, {
