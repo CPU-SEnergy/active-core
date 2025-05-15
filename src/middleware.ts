@@ -35,15 +35,15 @@ export async function middleware(request: NextRequest) {
       const user = await getUser(decodedToken.uid);
       const role = user?.customClaims?.role;
 
+      console.log("User role", { role });
+
       const isAdminRoute = path.startsWith("/admin");
-      const isCashierRoute = path.startsWith("/cashier");
 
-      if (isAdminRoute && role !== "admin") {
-        return new NextResponse("Forbidden: Admins only", { status: 403 });
-      }
-
-      if (isCashierRoute && role !== "cashier" && role !== "admin") {
-        return new NextResponse("Forbidden: Cashiers only", { status: 403 });
+      if (isAdminRoute && role !== "cashier" && role !== "admin") {
+        return new NextResponse("Forbidden: Admins only", {
+          status: 403,
+          headers,
+        });
       }
 
       return NextResponse.next({
