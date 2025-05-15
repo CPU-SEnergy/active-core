@@ -425,7 +425,7 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
                     No Membership History
                   </h3>
                   <p className="text-slate-500 dark:text-slate-400">
-                    You don't have any membership records yet.
+                    You don&apos;t have any membership records yet.
                   </p>
                 </div>
               )}
