@@ -26,6 +26,13 @@ export async function middleware(request: NextRequest) {
     cookieSerializeOptions: serverConfig.cookieSerializeOptions,
     serviceAccount: serverConfig.serviceAccount,
     handleValidToken: async ({ token, decodedToken }, headers) => {
+      const adminOnlyRoutes = [
+        "/admin",
+        "/admin/sales",
+        "/admin/add-products-and-services",
+        "/admin/cashier",
+      ];
+
       const path = request.nextUrl.pathname;
 
       if (PUBLIC_PATHS.includes(path)) {
@@ -37,11 +44,24 @@ export async function middleware(request: NextRequest) {
 
       const isAdminRoute = path.startsWith("/admin");
 
-      if (isAdminRoute && role !== "cashier" && role !== "admin") {
-        return new NextResponse("Forbidden: Admins only", {
-          status: 403,
-          headers,
-        });
+      if (isAdminRoute) {
+        if (
+          role === "cashier" &&
+          adminOnlyRoutes.some(
+            (route) => path === route || path.startsWith(`${route}/`)
+          )
+        ) {
+          return NextResponse.redirect(
+            new URL("/admin/active-customer", request.url)
+          );
+        }
+
+        if (role !== "admin" && role !== "cashier") {
+          return new NextResponse("Forbidden: Unauthorized role", {
+            status: 403,
+            headers,
+          });
+        }
       }
 
       return NextResponse.next({
@@ -50,6 +70,7 @@ export async function middleware(request: NextRequest) {
         },
       });
     },
+
     handleInvalidToken: async (reason) => {
       console.info("Missing or malformed credentials", { reason });
 
