@@ -40,7 +40,6 @@ export default async function RootLayout({
 
   const user = tokens ? toUser(tokens) : null;
 
-  console.log("User in layout: ", user?.uid);
   return (
     <html lang="en">
       <head>
