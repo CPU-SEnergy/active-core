@@ -46,7 +46,6 @@ export async function middleware(request: NextRequest) {
       const isAdminRoute = path.startsWith("/admin");
 
       if (isAdminRoute) {
-        // Avoid redirect loop
         if (path === redirectPath) {
           return NextResponse.next({
             request: {
