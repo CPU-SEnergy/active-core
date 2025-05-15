@@ -1,12 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { kpis, recentCustomers, timeFilters } from "@/lib/mock_data/overviewMockData"
+import { timeFilters } from "@/lib/mock_data/overviewMockData"
+
+interface KPI {
+  title: string;
+  value: string | number;
+  change: number;
+  prefix?: string;
+}
+
+interface KPIData {
+  yearly: {
+    totalRevenue: number;
+    totalMonthlyCustomers: number;
+    activeCustomers: string;
+    revenueComparison: string;
+    customerComparison: string;
+    activeCustomersComparison: string;
+  };
+  monthly: {
+    totalRevenue: number;
+    totalMonthlyCustomers: number;
+    activeCustomers: string;
+    monthlyRevenueComparison: string;
+  };
+}
+
+interface Payment {
+  id: string;
+  customerId: string;
+  amount: number;
+  status: string;
+  membershipType: string;
+  planType: string;
+  createdAt: string;
+}
 
 function KPICard({ title, value, change, prefix }: KPI) {
   const isPositive = change >= 0
@@ -32,6 +66,8 @@ function KPICard({ title, value, change, prefix }: KPI) {
     </Card>
   )
 }
+
+
 
 function CustomerTable({ customers }: { customers: Customer[] }) {
   return (
@@ -68,10 +104,117 @@ function CustomerTable({ customers }: { customers: Customer[] }) {
 export default function Dashboard() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter["value"]>("24h")
   const [searchQuery, setSearchQuery] = useState("")
+  const [kpiData, setKpiData] = useState<KPIData | null>(null)
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filteredCustomers = recentCustomers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const currentYear = new Date().getFullYear()
+        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0')
+        
+        const [yearResponse, monthResponse, paymentsResponse] = await Promise.all([
+          fetch(`/api/admin/overview/kpi/${currentYear}`),
+          fetch(`/api/admin/overview/kpi/${currentYear}/${currentMonth}`),
+          fetch('/api/admin/overview/recent-activity')
+        ]);
+
+        if (!yearResponse.ok) throw new Error('Failed to fetch yearly data')
+        if (!monthResponse.ok) throw new Error('Failed to fetch monthly data')
+        if (!paymentsResponse.ok) throw new Error('Failed to fetch payments data')
+
+        const yearData = await yearResponse.json()
+        const monthData = await monthResponse.json()
+        const paymentsData = await paymentsResponse.json()
+
+        if (!monthData || typeof monthData.monthlyRevenue === 'undefined') {
+          throw new Error('Invalid monthly data structure')
+        }
+
+        setKpiData({
+          yearly: {
+            totalRevenue: yearData.totalRevenue || 0,
+            totalMonthlyCustomers: yearData.totalMonthlyCustomers || 0,
+            activeCustomers: yearData.activeCustomers || '0',
+            revenueComparison: yearData.revenueComparison,
+            customerComparison: yearData.customerComparison,
+            activeCustomersComparison: yearData.activeCustomersComparison,
+          },
+          monthly: {
+            totalRevenue: monthData.monthlyRevenue || 0,
+            totalMonthlyCustomers: monthData.monthlyCustomers || 0,
+            activeCustomers: monthData.monthlyActive?.toString() || '0',
+            monthlyRevenueComparison: monthData.monthlyRevenueComparison,
+          }
+        })
+
+        setPayments(paymentsData)
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const filteredPayments = payments.filter((payment) => {
+    const matchesSearch = payment.customerId?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
+    
+    const paymentDate = new Date(payment.createdAt)
+    const now = new Date()
+    const hoursDiff = (now.getTime() - paymentDate.getTime()) / (1000 * 60 * 60)
+    
+    switch (timeFilter) {
+      case "24h":
+        return matchesSearch && hoursDiff <= 24
+      case "7d":
+        return matchesSearch && hoursDiff <= 168
+      case "30d":
+        return matchesSearch && hoursDiff <= 720
+      default:
+        return matchesSearch
+    }
+  })
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  const kpis: KPI[] = kpiData ? [
+    {
+      title: "Total Revenue (Year)",
+      value: kpiData.yearly.totalRevenue,
+      change: parseFloat(kpiData.yearly.revenueComparison),
+      prefix: "₱"
+    },
+    {
+      title: "Monthly Customers",
+      value: kpiData.yearly.totalMonthlyCustomers,
+      change: parseFloat(kpiData.yearly.customerComparison)
+    },
+    {
+      title: "Active Customers",
+      value: kpiData.yearly.activeCustomers,
+      change: parseFloat(kpiData.yearly.activeCustomersComparison)
+    }
+  ] : [];
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
@@ -118,7 +261,15 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
             </div>
-            <CustomerTable customers={filteredCustomers} />
+            <CustomerTable customers={filteredPayments.map(payment => ({
+              id: payment.id,
+              name: payment.customerId,
+              status: payment.status,
+              membershipType: payment.membershipType,
+              availedPlan: payment.planType,
+              time: new Date(payment.createdAt).toLocaleString(),
+              amount: payment.amount
+            }))} />
           </div>
         </div>
       </div>

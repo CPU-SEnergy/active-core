@@ -139,12 +139,17 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
         <SidebarContent className="py-5">
           <SidebarMenu>
             {filteredMenuItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
+
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className={`h-11 gap-3 px-3 hover:bg-gray-100 hover:text-black [&>svg]:h-5 [&>svg]:w-5 ${
+                    className={`relative h-11 gap-3 px-3 hover:bg-gray-100 hover:text-black [&>svg]:h-5 [&>svg]:w-5 ${
                       isActive
                         ? "bg-gray-200 text-black before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-black"
                         : ""

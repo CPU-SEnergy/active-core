@@ -11,7 +11,7 @@ export const db = schema(
     apparels: $.collection<Apparels>(),
     coaches: $.collection<Coaches>(),
     classes: $.collection<Classes>(),
-    multimedia: $.collection<Multimedia>(),
+    customer: $.collection<Customer>(),
   }),
   { server: { preferRest: true } }
 );
@@ -30,6 +30,7 @@ interface User {
   type: "regular" | "student" | "senior";
   isCustomer: boolean;
   planExpiry?: Date;
+  phone?: string;
 }
 
 interface Price {
@@ -127,13 +128,15 @@ interface Classes {
   updatedAt: Typesaurus.ServerDate;
 }
 
-interface Multimedia {
-  id: string;
-  title: string;
-  description: string;
-  mediaType: "video" | "image";
-  isYoutube: boolean;
-  url: string;
+interface Customer {
+  uid: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  dob: Date;
+  sex: string;
+  phone: string;
+  type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
