@@ -59,7 +59,6 @@ interface EditUserProfileModalProps {
 
 export default function EditUserProfileModal({
   userData,
-  children,
 }: EditUserProfileModalProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
