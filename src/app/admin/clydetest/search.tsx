@@ -41,7 +41,16 @@ export default function Search() {
           <DynamicWidgets fallbackComponent={FallbackComponent} />
         </div>
         <div>
-          <SearchBox />
+          <SearchBox
+            classNames={{
+              root: "relative flex items-center w-full max-w-lg mx-auto",
+              form: "w-full",
+              input:
+                "w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-black",
+              reset: "absolute right-4 top-2 text-gray-500 hover:text-gray-700",
+            }}
+            placeholder="Search"
+          />
           <SearchResults />
         </div>
       </div>

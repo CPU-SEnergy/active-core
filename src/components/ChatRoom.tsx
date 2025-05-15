@@ -15,10 +15,11 @@ import {
   onDisconnect,
   getDatabase,
 } from "firebase/database";
-import { app } from "@/lib/firebaseClient";
+import { app, getFirebaseAuth } from "@/lib/firebaseClient";
 import { User } from "firebase/auth";
 import { useRead } from "@typesaurus/react";
 import { db, Schema } from "@/lib/schema/firestore";
+import { Send } from "lucide-react";
 
 interface Message {
   id: string;
@@ -26,6 +27,7 @@ interface Message {
   senderName: string;
   text: string;
   timestamp: number;
+  isAdmin: boolean;
 }
 
 interface ChatRoomProps {
@@ -33,7 +35,7 @@ interface ChatRoomProps {
   user: User;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 export function ChatRoom({ roomId, user }: ChatRoomProps) {
   const database = getDatabase(app);
@@ -42,6 +44,23 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const auth = getFirebaseAuth();
+  const [isAdmin, setIsAdmin] = useState<boolean | undefined>(false);
+
+  auth.currentUser?.getIdTokenResult(true).then((idTokenResult) => {
+    const role = idTokenResult.claims.role;
+    console.log("User role:", role);
+
+    if (role === "admin") {
+      setIsAdmin(true);
+    } else if (role === "cashier") setIsAdmin(true);
+    else {
+      setIsAdmin(false);
+    }
+  });
+
+  // put this inside the db
+  // >> isAdmin
 
   const [userData] = useRead(db.users.get(user.uid as Schema["users"]["Id"]));
   const userDisplayName =
@@ -170,6 +189,7 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
       senderId: user.uid,
       senderName: userDisplayName || "Anonymous",
       text: input,
+      isAdmin: isAdmin,
       timestamp: Date.now(),
     });
     setInput("");
@@ -178,39 +198,72 @@ export function ChatRoom({ roomId, user }: ChatRoomProps) {
     }
   };
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      sendMessage();
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-semibold mb-4">Sports and Fitness Chat</h2>
-      <div
-        ref={containerRef}
-        className="h-80 overflow-y-scroll border border-gray-300 p-4 mb-4 rounded bg-white shadow-sm"
-      >
-        {loadingMore && (
-          <div className="text-center">Loading older messages...</div>
-        )}
-        {messages.map((msg) => (
-          <div key={msg.id} className="mb-2">
-            <span className="font-bold text-blue-600">{msg.senderName}:</span>{" "}
-            <span>{msg.text}</span>
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={sendMessage}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+    userData && (
+      <div className="flex flex-col h-full">
+        <div className="p-4 bg-gray-50 pt-10 pb-5">
+          <h2 className="text-lg font-bold">
+            Chat with{" "}
+            {userData?.data.firstName + " " + userData?.data.lastName || ""}
+          </h2>
+        </div>
+        <div
+          ref={containerRef}
+          className="flex-grow overflow-y-auto border border-gray-300 p-4 mx-5 rounded bg-gray-50 shadow-sm"
         >
-          Send
-        </button>
+          {loadingMore && (
+            <div className="text-center">Loading older messages...</div>
+          )}
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`mb-2 p-2 rounded w-full ${
+                msg.isAdmin
+                  ? "text-right"
+                  : "self-start text-left"
+              }`}
+            >
+              {!msg.isAdmin && (
+                <span className="font-bold text-blue-black"></span>
+              )}{" "}
+              <span
+                className={`mb-2 p-2 rounded max-w-xs ${
+                  msg.isAdmin
+                    ? "bg-gray-300 text-right"
+                    : "self-start text-left"
+                }`}
+              >
+                {msg.text}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="p-2 mx-4 border-t border-gray-300 bg-white rounded shadow-sm">
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type a message"
+              className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={sendMessage}
+              className="absolute right-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    )
   );
 }
 

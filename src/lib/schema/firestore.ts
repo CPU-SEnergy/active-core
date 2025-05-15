@@ -9,6 +9,9 @@ export const db = schema(
     kpis: $.collection<KPIs>().sub({ months: $.collection<MonthKPI>() }),
     customers: $.collection<Customers>(),
     apparels: $.collection<Apparels>(),
+    coaches: $.collection<Coaches>(),
+    classes: $.collection<Classes>(),
+    customer: $.collection<Customer>(),
   }),
   { server: { preferRest: true } }
 );
@@ -43,12 +46,13 @@ interface MembershipPlan {
   status: "active" | "archived";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
-  planDateEnd: Date;
+  planDateEnd?: Date;
 }
 
 interface UserBasicInfo {
   userId: Schema["users"]["Id"];
   name: string;
+  type: "regular" | "student";
   imageUrl: string;
 }
 
@@ -89,13 +93,49 @@ interface Customers {
   totalCustomers: number;
 }
 
-interface Apparels {
+export interface Apparels {
   name: string;
   price: number;
   discount?: number;
   imageUrl: string;
   description: string;
-  type: "t-shirt" | "short" | "glove" | "headgear";
+  type: string;
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Coaches {
+  name: string;
+  specialization: string;
+  bio: string;
+  dob: Date;
+  experience: number;
+  imageUrl: string;
+  contactInfo: string;
+  certifications: string[];
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Classes {
+  name: string;
+  description: string;
+  imageUrl?: string;
+  schedule: string;
+  coachId: Schema["coaches"]["Id"][];
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface Customer {
+  uid: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  dob: Date;
+  sex: string;
+  phone: string;
+  type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }

@@ -109,7 +109,7 @@ export default function ApparelPage({
                           width={250}
                           height={300}
                           className="object-cover w-full h-full rounded-t-sm "
-                          src={apparel.picture_link}
+                          src={apparel.imageUrl}
                           alt={apparel.name}
                         />
                       </div>

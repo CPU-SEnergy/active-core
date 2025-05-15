@@ -1,46 +1,89 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { classes } from "@/lib/mock_data/classes_data";
+"use client"
 
-export default function SportsServices() {
+import fetcher from "@/lib/fetcher"
+import { CLASSDATA } from "@/lib/types/product-services"
+import Image from "next/image"
+import Link from "next/link"
+import useSWR from "swr"
+
+interface FitnessSectionProps {
+  title: string
+  description: string
+  image: string
+  alt: string
+  imagePosition: "left" | "right"
+}
+
+function FitnessSection({
+  title,
+  description,
+  image,
+  alt,
+  imagePosition,
+  sportsId: id,
+}: FitnessSectionProps & { sportsId: string }) {
   return (
-    <div className="container mx-auto py-8 min-h-screen max-w-full bg-gray-100 pt-20">
-      <h1 className="text-5xl font-bold mb-10 mt-5 text-black text-center">Sports Services</h1>
+    <div className={`flex flex-col ${imagePosition === "right" ? "md:flex-row-reverse" : "md:flex-row"} gap-8 items-center`}>
+      <div className="w-full md:w-1/2 h-[300px] md:h-[400px] relative">
+        <Image
+          src={image || "/placeholder.svg"}
+          alt={alt}
+          fill
+          className="object-cover rounded-lg"
+        />
+      </div>
+      <div className="w-full md:w-1/2 space-y-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-red-500">{title}</h2>
+        <p className="text-gray-300">{description}</p>
+        <Link href={`/sports-classes/${id}`}>
+          <button className="bg-red-500 hover:bg-red-600 text-white rounded-md px-6 py-2 font-medium">
+            READ MORE
+          </button>
+        </Link>
+      </div>
+    </div>
+  )
+}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-        {classes.map((cls, index) => (
-          <Card
+export default function Home() {
+    const { data: classes , error, isLoading } = useSWR<CLASSDATA[]>(
+        `/api/classes`,
+        fetcher
+      );
+  console.log(classes, "classes");
+
+  if (isLoading) return <div>Loading...</div>
+    if (error) return <div>Error loading classes</div>
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <div className="w-full h-[50vh] relative flex items-center justify-center">
+        <Image 
+          src="/placeholder.svg?height=800&width=1600" 
+          alt="Gym hero image"
+          fill
+          className="object-cover brightness-50"
+          priority
+        />
+        <div className="relative z-10 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold">FITNESS ELITE</h1>
+          <p className="mt-4 text-xl">Push your limits. Achieve greatness.</p>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-16 space-y-24">
+        {classes && classes.map((cls, index) => (
+          <FitnessSection
             key={index}
-            className="relative bg-white shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg rounded-lg"
-          >
-            <CardContent className="p-0">
-              <a href={`/sports-classes/${cls.sports_id}`} className="block">
-                <div className="aspect-square relative rounded-t-lg overflow-hidden">
-                  <img
-                    src={cls.image}
-                    alt={cls.title}
-                    className="object-cover w-full h-full rounded-t-lg"
-                  />
-                </div>
-                <div className="p-4">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">{cls.title}</h2>
-                  <p className="text-sm text-gray-600 mb-3">{cls.coach}</p>
-                </div>
-              </a>
-              <div className="p-4">
-                <a href={`/sports-classes/${cls.sports_id}`}>
-                  <Button
-                    size="sm"
-                    className="bg-gray-800 hover:bg-gray-700 text-white w-full py-2"
-                  >
-                    Learn More
-                  </Button>
-                </a>
-              </div>
-            </CardContent>
-          </Card>
+            title={cls.name}
+            description={cls.description}
+            image={cls.imageUrl}
+            alt={cls.name}
+            imagePosition={index % 2 === 0 ? "left" : "right"}
+            sportsId={cls.id}
+          />
         ))}
       </div>
     </div>
-  );
+  )
 }
