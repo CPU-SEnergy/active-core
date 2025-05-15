@@ -39,7 +39,7 @@ export default function ChatRoomPage({ params }: ChatRoomPageParams) {
   if (!user)
     return (
       <h2 className="h-screen w-screen text-center flex justify-center items-center">
-        No Chats Selectedgagagaga
+        No Chats Selected
       </h2>
     );
 
