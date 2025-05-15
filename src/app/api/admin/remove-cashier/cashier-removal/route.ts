@@ -11,8 +11,6 @@ const { setCustomUserClaims, getUser } = getFirebaseAuth({
 
 export async function POST(request: NextRequest) {
   try {
-    getFirebaseAdminApp();
-
     const db = getFirebaseAdminApp().firestore();
 
     const tokens = await getTokens(request.cookies, serverConfig);
