@@ -1,21 +1,71 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { CheckCircle, ChevronLeft, ChevronRight, Trophy, Medal, Star } from "lucide-react"
 import Footer from "@/components/Footer"
+import Link from "next/link"
+import { getISOWeek } from 'date-fns';
 
 export default function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
+  const [scrollY, setScrollY] = useState(0)
+
+  const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
+
+  // Coach of the Week data
+  const coaches = [
+    {
+      name: 'Coach Paiton Rey Gaitan',
+      rank: "5th Dan Black Belt",
+      image: "/pictures/payton gaitan.jpg",
+      bio: "With over 20 years of competitive experience and 15 years of coaching, Master Vasquez has produced multiple national and international champions in Brazilian Jiu-Jitsu and MMA.",
+      specialties: "BJJ, MMA, Grappling",
+      classes: "Advanced BJJ, Competition Training",
+    },
+    {
+      name: 'Coach Zoey Jan Alejandra',
+      rank: "4th Dan Black Belt",
+      image: "/pictures/zoey alejandra.jpg",
+      bio: "A former national team member with Olympic experience, Sensei Reyes brings world-class striking techniques and competition strategies to her students.",
+      specialties: "Muay Thai, Boxing, Kickboxing",
+      classes: "Women's Self-Defense, Advanced Striking",
+    },
+    {
+      name: 'Coach Jeffrey Punzalan',
+      rank: "Black Belt",
+      image: "/pictures/jeffrey punzalan.jpg",
+      bio: "Known for his technical precision and innovative training methods, Coach Santos specializes in developing competition-ready athletes with a focus on modern grappling techniques.",
+      specialties: "No-Gi Grappling, Wrestling",
+      classes: "Competition Team, Takedown Specialists",
+    },
+    {
+      name: 'Coach Rho Fajutrao',
+      rank: "6th Dan Black Belt",
+      image: "/placeholder.svg?height=600&width=400&text=Master+Chen",
+      bio: "With over 30 years of traditional martial arts experience, Master Chen combines ancient wisdom with modern training methodologies to develop well-rounded martial artists.",
+      specialties: "Traditional Martial Arts, Kata, Forms",
+      classes: "Youth Program, Traditional Forms",
+    },
+  ]
+
+  // Add useEffect to automatically set coach based on current week of the year
+
+useEffect(() => {
+  const now = new Date();
+  const weekNumber = getISOWeek(now);
+  setCurrentCoachIndex(weekNumber % coaches.length);
+}, []);
+
 
   useEffect(() => {
     const handleScroll = () => {
       // Check if we've scrolled enough to show the content overlay
       setScrolled(window.scrollY > 100)
+      setScrollY(window.scrollY)
     }
 
     window.addEventListener("scroll", handleScroll)
@@ -29,30 +79,41 @@ export default function HomePage() {
         <div className="relative h-full w-full overflow-hidden">
           {/* Video Background */}
           <video autoPlay muted loop className="absolute inset-0 w-full h-full object-cover">
-            <source
-              src="/pictures/sample video.mp4"
-              type="video/mp4"
-            />
+            <source src="/pictures/sample video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center">
+          {/* Parallax Overlay */}
+          <div
+            className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center"
+            style={{
+              transform: `translateY(${scrollY * 0.2}px)`,
+              opacity: Math.max(0.3, 1 - scrollY * 0.001),
+            }}
+          >
             <div className="text-center px-4 max-w-4xl mx-auto">
               <h1
                 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-flying-kick"
-                style={{ textShadow: "0 0 20px rgba(0, 0, 0, 0.7)" }}
+                style={{
+                  textShadow: "0 0 20px rgba(0, 0, 0, 0.7)",
+                  transform: `translateY(${scrollY * -0.3}px)`,
+                }}
               >
                 ILOILO MARTIAL ARTIST ASSOCIATION
               </h1>
-              <p className="text-xl md:text-2xl text-white mb-8 animate-fade-in delay-150">
-                Master your skills. Strengthen your spirit. Join the champions.
+              <p
+                className="text-xl md:text-2xl text-white mb-8 animate-fade-in delay-150"
+                style={{ transform: `translateY(${scrollY * -0.2}px)` }}
+              >
+                A Premier Training Ground for World Class Ilonggo Martial Artist.
               </p>
               <Button
                 size="lg"
-                className="bg-white text-black hover:bg-gray-100 font-bold animate-fade-in delay-300 hover:translate-y-[-12px] hover:shadow-2xl transition-all duration-700"
+                className="bg-white text-black relative overflow-hidden group font-bold animate-fade-in delay-300 transition-all duration-500"
               >
-                START HERE
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">EXPLORE</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
               </Button>
             </div>
           </div>
@@ -63,29 +124,48 @@ export default function HomePage() {
       <div className="h-screen"></div>
 
       {/* Content Container that slides over the main section */}
-      <div ref={contentRef} className="relative z-10 bg-white transition-transform duration-500">
+      <div
+        ref={contentRef}
+        className="relative z-10 bg-white transition-transform duration-500"
+        style={{
+          boxShadow: "0 -40px 80px rgba(0, 0, 0, 0.5)",
+        }}
+      >
         {/* Advertisement Banner */}
         <section className="py-16 bg-gray-50 rounded-t-[40px] shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row items-center">
-              <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8 animate-punch-in">
+              <div
+                className="md:w-1/2 mb-8 md:mb-0 md:pr-8 animate-punch-in"
+                data-aos="fade-right"
+                data-aos-duration="1000"
+              >
                 <PhotoCarousel />
               </div>
-              <div className="md:w-1/2 animate-spin-kick">
+              <div
+                className="md:w-1/2 animate-spin-kick"
+                data-aos="fade-left"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
                 <h2 className="text-3xl font-bold text-black mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                   The Premier Martial Arts Academy in Iloilo
                 </h2>
                 <p className="text-gray-600 mb-6 text-lg">
-                  Established in 2025, IMAA has been the home of champions, nurturing world-class martial artists through our
-                  comprehensive training programs and expert coaching staff.
+                  Established in 2025, IMAA has been the home of champions, nurturing world-class Ilonggo martial
+                  artists through our comprehensive training programs and expert coaching staff.
                 </p>
                 <p className="text-gray-600 mb-8 text-lg">
                   We offer classes in various disciplines including Brazilian Jiu-Jitsu, Muay Thai, Boxing, and Mixed
                   Martial Arts for all skill levels.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Button className="bg-black text-white hover:bg-gray-800 hover:translate-y-[-12px] hover:shadow-2xl hover:scale-110 transition-all duration-700">
-                    <Link href="/sports-classes">Learn Our Classes</Link>
+                  <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
+                    <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                      <Link href="/sports-classes">Explore Classes</Link>
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                    <span className="absolute -inset-[3px] bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
                   </Button>
                 </div>
               </div>
@@ -94,21 +174,39 @@ export default function HomePage() {
         </section>
 
         {/* Meet the Champions! */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+        <section
+          className="py-24 bg-white relative overflow-hidden"
+          style={{
+            backgroundImage: 'url("/pictures/IMAA Official no-bg.png")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for parallax background */}
+          <div className="absolute inset-0 bg-white/90"></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
+              <h2 className="text-5xl font-bold text-black mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 Meet Our Champions!
+                <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-black to-gray-800"></span>
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                These exceptional athletes trained at IMAA and brought home prestigious awards in national and
+                These exceptional athletes trained at IMAA and brought home prestigious awards in local and
                 international competitions.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {champions.map((champion, index) => (
-                <div key={index} className={`animate-fade-in delay-${index * 150}`}>
+                <div
+                  key={index}
+                  className={`animate-fade-in`}
+                  data-aos="fade-in"
+                  data-aos-duration="1000"
+                  data-aos-delay={index * 100}
+                >
                   <ChampionCard
                     name={champion.name}
                     age={champion.age}
@@ -119,33 +217,58 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="text-center mt-12">
+            <div className="text-center mt-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
               <Button
                 variant="outline"
-                className="border-2 border-black text-black font-bold hover:bg-black hover:text-white hover:translate-y-[-8px] transition-all"
+                className="border-2 border-black text-black font-bold relative overflow-hidden group transition-all duration-500"
               >
-                View All Champions
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                  View All Champions
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
               </Button>
             </div>
           </div>
         </section>
 
         {/* Coach of the Week */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
+        <section
+          className="py-16 bg-gray-50 relative"
+          style={{
+            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for background */}
+          <div className="absolute inset-0 bg-gray-50/95"></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
+              <div className="inline-flex items-center justify-center mb-4">
+                <div className="h-[2px] w-12 bg-black"></div>
+                <Medal className="mx-4 text-black h-8 w-8" />
+                <div className="h-[2px] w-12 bg-black"></div>
+              </div>
               <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 Coach of the Week
               </h2>
               <p className="text-xl text-gray-600">Recognizing excellence in our coaching staff</p>
             </div>
 
-            <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto hover:scale-[1.02] hover:rotate-1 transition-all duration-500">
+            <Card
+              className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
+              data-aos="zoom-in"
+              data-aos-duration="1000"
+              data-aos-delay="200"
+            >
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/3 relative overflow-hidden">
                   <Image
-                    src="/placeholder.svg?height=600&width=400"
-                    alt="Coach of the Week"
+                    src={coaches[currentCoachIndex]?.image || "/placeholder.svg"}
+                    alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
                     width={400}
                     height={600}
                     className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
@@ -154,30 +277,31 @@ export default function HomePage() {
                 <div className="md:w-2/3 p-8">
                   <div className="flex items-center mb-4">
                     <h3 className="text-2xl font-bold text-black relative group">
-                      Master Roberto &quot;The Panther&quot; Vasquez
+                      {coaches[currentCoachIndex]?.name || "Unknown Coach"}
                       <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all group-hover:w-full"></span>
                     </h3>
                     <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
-                      5th Dan Black Belt
+                      {coaches[currentCoachIndex]?.rank || "Rank not available"}
                     </span>
                   </div>
-                  <p className="text-gray-600 mb-4">
-                    With over 20 years of competitive experience and 15 years of coaching, Master Vasquez has produced
-                    multiple national and international champions in Brazilian Jiu-Jitsu and MMA.
-                  </p>
+                  <p className="text-gray-600 mb-4">{coaches[currentCoachIndex]?.bio || "Bio not available"}</p>
                   <div className="mb-6">
                     <div className="flex items-center mb-2">
                       <span className="font-bold text-black mr-2">Specialties:</span>
-                      <span className="text-gray-600">BJJ, MMA, Grappling</span>
+                      <span className="text-gray-600">{coaches[currentCoachIndex]?.specialties || "Specialties not available"}</span>
                     </div>
                     <div className="flex items-center">
                       <span className="font-bold text-black mr-2">Classes:</span>
-                      <span className="text-gray-600">Advanced BJJ, Competition Training</span>
+                      <span className="text-gray-600">{coaches[currentCoachIndex]?.classes || "Classes not available"}</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Button className="bg-black text-white hover:bg-gray-800 transition-colors">
-                      <Link href="/coaches">View Coach</Link>
+                    <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
+                      <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                        View Coach
+                      </span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                      <span className="absolute -inset-[3px] bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
                     </Button>
                   </div>
                 </div>
@@ -187,9 +311,25 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+        <section
+          className="py-16 bg-white relative overflow-hidden"
+          style={{
+            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for parallax background */}
+          <div className="absolute inset-0 bg-white/90"></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
+              <div className="inline-flex items-center justify-center mb-4">
+                <div className="h-[2px] w-12 bg-black"></div>
+                <Star className="mx-4 text-black h-8 w-8" />
+                <div className="h-[2px] w-12 bg-black"></div>
+              </div>
               <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 What Our Members Say
               </h2>
@@ -200,7 +340,13 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
-                <div key={index} className={`animate-fade-in delay-${index * 150}`}>
+                <div
+                  key={index}
+                  className={`animate-fade-in`}
+                  data-aos="fade-up"
+                  data-aos-duration="1000"
+                  data-aos-delay={index * 100}
+                >
                   <TestimonialCard
                     name={testimonial.name}
                     role={testimonial.role}
@@ -214,19 +360,21 @@ export default function HomePage() {
         </section>
 
         {/* Headquarters */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
-                Our Headquarters
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Visit our world-class training facility in the heart of Iloilo City
-              </p>
-            </div>
+        <section
+          className="py-16 bg-gray-50 relative"
+          style={{
+            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000&text=Headquarters")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for background */}
+          <div className="absolute inset-0 bg-gray-50/95"></div>
 
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="flex flex-col lg:flex-row gap-8">
-              <div className="lg:w-1/2 animate-punch-in">
+              <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
                 <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
                   <Image
                     src="/placeholder.svg?height=500&width=700"
@@ -237,7 +385,12 @@ export default function HomePage() {
                   />
                 </div>
               </div>
-              <div className="lg:w-1/2 animate-spin-kick">
+              <div
+                className="lg:w-1/2 animate-spin-kick"
+                data-aos="fade-left"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
                 <Card className="p-6 h-full hover:shadow-2xl transition-all duration-700 hover:translate-y-[-15px] hover:rotate-2">
                   <h3 className="text-2xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[3px] after:bottom-[-4px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all hover:after:w-full">
                     IMAA Main Facility
@@ -259,8 +412,7 @@ export default function HomePage() {
 
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Operating Hours</h4>
-                    <p className="text-gray-600">Monday-Friday: 6AM - 10PM</p>
-                    <p className="text-gray-600">Saturday-Sunday: 8AM - 8PM</p>
+                    <p className="text-gray-600">Monday-Saturday: 7AM - 12PM and 3PM to 9PM</p>
                   </div>
 
                   {/* Google Map Embed */}
@@ -300,7 +452,7 @@ export default function HomePage() {
   )
 }
 
-// Photo Carousel Component
+// Photo Carousel 
 function PhotoCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -381,8 +533,6 @@ function PhotoCarousel() {
 }
 
 // Helper Components
-// Removed unused NavLink function to resolve the error
-
 interface ChampionCardProps {
   name: string
   age: number
@@ -393,24 +543,33 @@ interface ChampionCardProps {
 
 function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
   return (
-    <Card className="bg-white rounded-lg overflow-hidden shadow-md hover:translate-y-[-30px] hover:rotate-[8deg] hover:scale-110 hover:shadow-2xl transition-all duration-700">
+    <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-30px] hover:rotate-[8deg] hover:scale-110 hover:shadow-2xl transition-all duration-700">
       <div className="relative h-64 w-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
+          <span className="text-white font-bold text-lg">{achievement}</span>
+        </div>
         <Image
           src={image || "/placeholder.svg"}
           alt={name}
           fill
-          className="object-cover transition-all duration-700 hover:scale-125 hover:rotate-3"
+          className="object-cover transition-all duration-700 group-hover:scale-125 group-hover:rotate-3"
         />
+        <div className="absolute top-3 right-3 z-10">
+          <div className="bg-black text-white p-1 rounded-full">
+            <Trophy className="h-5 w-5" />
+          </div>
+        </div>
       </div>
-      <CardContent className="p-6">
+      <CardContent className="p-6 relative">
+        <div className="absolute -top-6 left-4 bg-black text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+          Age: {age}
+        </div>
         <h3 className="text-xl font-bold text-black mb-2 relative group">
           {name}
           <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
         </h3>
-        <p className="text-gray-600 mb-3">Age: {age}</p>
-        <span className="inline-block px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
-          {achievement}
-        </span>
+        <p className="text-gray-600 mb-3 font-medium">{achievement}</p>
+        <div className="mt-4 flex justify-end"></div>
       </CardContent>
     </Card>
   )
@@ -426,15 +585,20 @@ interface TestimonialCardProps {
 
 function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
   return (
-    <Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[25deg] hover:scale-110 hover:shadow-2xl hover:border-t-black transition-all duration-700">
+    <Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
       <div className="flex items-center mb-6">
-        <Image
-          src={image || "/placeholder.svg"}
-          alt={name}
-          width={48}
-          height={48}
-          className="rounded-full object-cover mr-4 transition-all duration-500 hover:scale-125"
-        />
+        <div className="relative">
+          <Image
+            src={image || "/placeholder.svg"}
+            alt={name}
+            width={48}
+            height={48}
+            className="rounded-full object-cover mr-4 transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
+          />
+          <div className="absolute -bottom-1 -right-1 bg-black rounded-full p-1">
+            <Star className="h-3 w-3 text-white" />
+          </div>
+        </div>
         <div>
           <h4 className="font-bold text-black relative group">
             {name}
@@ -443,8 +607,12 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
           <p className="text-gray-500 text-sm">{role}</p>
         </div>
       </div>
-      <p className="text-gray-600 italic">{quote}</p>
-      <div className="mt-4 flex">
+      <p className="text-gray-600 italic relative">
+        <span className="absolute -top-4 -left-2 text-4xl text-black/20">&quot;</span>
+        {quote}
+        <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
+      </p>
+      <div className="mt-6 flex">
         {[...Array(5)].map((_, i) => (
           <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 24 24">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -485,11 +653,11 @@ const champions = [
 
 const testimonials = [
   {
-    name: "Michael Johnson",
-    role: "Student since 2019",
-    image: "/placeholder.svg?height=100&width=100",
+    name: "Lawrence",
+    role: "Student since 2022",
+    image: "/pictures/Lawrence.jpg",
     quote:
-      "IMAA transformed my life. The coaches are world-class and the community is incredibly supportive. In just two years, I went from complete beginner to competing at national level.",
+      "I've been training under coach Rho since 2022, I trained everyday ever since. Now, I've won multiple competitions such as Kickboxing, Muay Thai and Jiu Jitsu. Martial arts taught me discipline, consistency and confidence. Before martial arts, I was 98 kilos and after a month I went to 88 and 78 in the next month. IMAA helped me propel to victory. Throughout the years, I've won three golds, one silver and four bronze",
   },
   {
     name: "Sarah Lim",
