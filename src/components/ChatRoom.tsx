@@ -21,7 +21,7 @@ import { app, getFirebaseAuth } from "@/lib/firebaseClient"
 import type { User } from "firebase/auth"
 import { useRead } from "@typesaurus/react"
 import { db, type Schema } from "@/lib/schema/firestore"
-import { Send, ArrowDown, ArrowUp, MessageSquare } from "lucide-react"
+import { Send, ArrowDown, ArrowUp, Menu } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 interface Message {
@@ -441,9 +441,10 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
   return (
     userData && (
       <div className="flex flex-col h-full">
-        <div className={`p-3 ${isMobile ? "pt-4" : "pt-10"} pb-3 bg-gray-50 flex items-center justify-between`}>
-          <h2 className="text-lg font-bold truncate">
-            Chat with {userData?.data.firstName + " " + userData?.data.lastName || ""}
+        <div className={`p-4 ${isMobile ? "pt-7" : "pt-10"} pb-1 bg-gray-50 flex items-center justify-between`}>
+          <h2 className="text-lg font-bold">
+            {(userData?.data.firstName ? (userData.data.firstName.charAt(0).toUpperCase() + userData.data.firstName.slice(1)) : "") + 
+             (userData?.data.lastName ? " " + (userData.data.lastName.charAt(0).toUpperCase() + userData.data.lastName.slice(1)) : "") || ""}
           </h2>
 
           <div className="flex items-center gap-2">
@@ -452,18 +453,17 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
                 onClick={handleLoadPrevious}
                 className="text-xs bg-blue-500 text-white px-2 py-1 rounded-md flex items-center gap-1 hover:bg-blue-600 transition-colors"
               >
-                <ArrowUp className="h-3 w-3" />
+                <ArrowUp className="h-5 w-5" />
                 <span className="hidden sm:inline">Load Previous</span>
               </button>
             )}
 
-            {/* Chat list button - only on mobile */}
             {isMobile && onOpenChatList && (
               <button
                 onClick={onOpenChatList}
                 className="text-xs bg-green-500 text-white px-2 py-1 rounded-md flex items-center gap-1 hover:bg-green-600 transition-colors"
               >
-                <MessageSquare className="h-3 w-3" />
+                <Menu className="h-5 w-5" />
                 <span className="hidden sm:inline">Chat List</span>
               </button>
             )}
