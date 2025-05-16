@@ -1,4 +1,3 @@
-
 "use client"
 
 import Image from "next/image"
@@ -62,59 +61,6 @@ export default function HomePage() {
     setCurrentCoachIndex(weekNumber % coaches.length)
   }, [])
 
-import { getISOWeek } from 'date-fns';
-
-export default function HomePage() {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [scrolled, setScrolled] = useState(false)
-  const [scrollY, setScrollY] = useState(0)
-
-  const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
-
-  // Coach of the Week data
-  const coaches = [
-    {
-      name: 'Coach Paiton Rey Gaitan',
-      rank: "5th Dan Black Belt",
-      image: "/pictures/payton gaitan.jpg",
-      bio: "With over 20 years of competitive experience and 15 years of coaching, Master Vasquez has produced multiple national and international champions in Brazilian Jiu-Jitsu and MMA.",
-      specialties: "BJJ, MMA, Grappling",
-      classes: "Advanced BJJ, Competition Training",
-    },
-    {
-      name: 'Coach Zoey Jan Alejandra',
-      rank: "4th Dan Black Belt",
-      image: "/pictures/zoey alejandra.jpg",
-      bio: "A former national team member with Olympic experience, Sensei Reyes brings world-class striking techniques and competition strategies to her students.",
-      specialties: "Muay Thai, Boxing, Kickboxing",
-      classes: "Women's Self-Defense, Advanced Striking",
-    },
-    {
-      name: 'Coach Jeffrey Punzalan',
-      rank: "Black Belt",
-      image: "/pictures/jeffrey punzalan.jpg",
-      bio: "Known for his technical precision and innovative training methods, Coach Santos specializes in developing competition-ready athletes with a focus on modern grappling techniques.",
-      specialties: "No-Gi Grappling, Wrestling",
-      classes: "Competition Team, Takedown Specialists",
-    },
-    {
-      name: 'Coach Rho Fajutrao',
-      rank: "6th Dan Black Belt",
-      image: "/placeholder.svg?height=600&width=400&text=Master+Chen",
-      bio: "With over 30 years of traditional martial arts experience, Master Chen combines ancient wisdom with modern training methodologies to develop well-rounded martial artists.",
-      specialties: "Traditional Martial Arts, Kata, Forms",
-      classes: "Youth Program, Traditional Forms",
-    },
-  ]
-
-  // Add useEffect to automatically set coach based on current week of the year
-
-useEffect(() => {
-  const now = new Date();
-  const weekNumber = getISOWeek(now);
-  setCurrentCoachIndex(weekNumber % coaches.length);
-}, []);
-
   useEffect(() => {
     const handleScroll = () => {
       // Check if we've scrolled enough to show the content overlay
@@ -125,7 +71,6 @@ useEffect(() => {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
 
   // Video player functionality
   useEffect(() => {
@@ -174,12 +119,12 @@ useEffect(() => {
         // Request fullscreen
         if (video.requestFullscreen) {
           video.requestFullscreen()
-        } else if ((video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen) {
+        } else if ("webkitRequestFullscreen" in video) {
           /* Safari */
-          (video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen!()
-        } else if ((video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen) {
+          (video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
+        } else if ("msRequestFullscreen" in video) {
           /* IE11 */
-          (video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen!()
+          (video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
         }
 
         // Ensure controls are visible in fullscreen
@@ -253,16 +198,14 @@ useEffect(() => {
               <Button
                 size="lg"
                 className="bg-white text-black relative overflow-hidden group font-bold animate-fade-in delay-300 transition-all duration-500"
-
                 onClick={() => {
                   const advertisementSection = document.querySelector(".advertisement-section")
                   if (advertisementSection) {
                     advertisementSection.scrollIntoView({ behavior: "smooth" })
                   }
                 }}
-                
               >
-                <span className="relative z-10 group-hover:text-white transition-colors duration-500">EXPLORE</span>
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">LEARN MORE</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
                 <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
               </Button>
@@ -283,11 +226,7 @@ useEffect(() => {
         }}
       >
         {/* Advertisement Banner */}
-
         <section className="py-16 bg-gray-50 rounded-t-[40px] shadow-2xl advertisement-section">
-
-        <section className="py-16 bg-gray-50 rounded-t-[40px] shadow-2xl">
-
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row items-center">
               <div
@@ -345,10 +284,6 @@ useEffect(() => {
             <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
               <h2 className="text-5xl font-bold text-black mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 Meet Our Champions!
-
-
-                <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-black to-gray-800"></span>
-
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 These exceptional athletes trained at IMAA and brought home prestigious awards in local and
@@ -389,7 +324,6 @@ useEffect(() => {
             </div>
           </div>
         </section>
-
 
         {/* Outreach Workshop Section */}
         <section className="py-16 bg-black text-white relative overflow-hidden">
@@ -459,7 +393,6 @@ useEffect(() => {
           </div>
         </section>
 
-
         {/* Coach of the Week */}
         <section
           className="py-16 bg-gray-50 relative"
@@ -516,7 +449,6 @@ useEffect(() => {
                   <div className="mb-6">
                     <div className="flex items-center mb-2">
                       <span className="font-bold text-black mr-2">Specialties:</span>
-
                       <span className="text-gray-600">
                         {coaches[currentCoachIndex]?.specialties || "Specialties not available"}
                       </span>
@@ -526,12 +458,6 @@ useEffect(() => {
                       <span className="text-gray-600">
                         {coaches[currentCoachIndex]?.classes || "Classes not available"}
                       </span>
-
-                      <span className="text-gray-600">{coaches[currentCoachIndex]?.specialties || "Specialties not available"}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="font-bold text-black mr-2">Classes:</span>
-                      <span className="text-gray-600">{coaches[currentCoachIndex]?.classes || "Classes not available"}</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -807,58 +733,7 @@ function PhotoCarousel() {
           </svg>
         </div>
       </div>
-        </div>
-      </div>
-    </main>
-  )
-}
 
-// Photo Carousel 
-function PhotoCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  const photos = [
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 1", alt: "IMAA Training 1" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 2", alt: "IMAA Training 2" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 3", alt: "IMAA Training 3" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 4", alt: "IMAA Training 4" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 5", alt: "IMAA Training 5" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 6", alt: "IMAA Training 6" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 7", alt: "IMAA Training 7" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 8", alt: "IMAA Training 8" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 9", alt: "IMAA Training 9" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 10", alt: "IMAA Training 10" },
-  ]
-
-  const goToPrevious = () => {
-    const isFirstSlide = currentIndex === 0
-    const newIndex = isFirstSlide ? photos.length - 1 : currentIndex - 1
-    setCurrentIndex(newIndex)
-  }
-
-  const goToNext = () => {
-    const isLastSlide = currentIndex === photos.length - 1
-    const newIndex = isLastSlide ? 0 : currentIndex + 1
-    setCurrentIndex(newIndex)
-  }
-
-  return (
-    <div className="relative overflow-hidden rounded-lg shadow-xl group">
-      {/* Main Image */}
-      <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
-        <Image
-          src={photos[currentIndex]?.src || "/placeholder.svg"}
-          alt={photos[currentIndex]?.alt || "Default Alt Text"}
-          fill
-          className="object-cover transition-all duration-700 group-hover:scale-105"
-        />
-
-        {/* Image Counter */}
-        <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-          {currentIndex + 1} / {photos.length}
-        </div>
-      </div>
-      
       {/* Navigation Buttons */}
       <button
         onClick={goToPrevious}
@@ -882,8 +757,6 @@ function PhotoCarousel() {
           <button
             key={index}
             onClick={() => handleDotClick(index)}
-            onClick={() => setCurrentIndex(index)}
-
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === currentIndex ? "bg-white scale-125" : "bg-white/50"
             }`}
@@ -949,22 +822,6 @@ interface ChampionCardProps {
 function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
   return (
     <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
-    </div>
-  )
-}
-
-// Helper Components
-interface ChampionCardProps {
-  name: string
-  age: number
-  image: string
-  achievement: string
-  delay?: number
-}
-
-function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
-  return (
-    <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-30px] hover:rotate-[8deg] hover:scale-110 hover:shadow-2xl transition-all duration-700">
       <div className="relative h-64 w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
           <span className="text-white font-bold text-lg">{achievement}</span>
@@ -1016,9 +873,6 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
             height={48}
             className="rounded-full object-cover mr-4 transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
           />
-          <div className="absolute -bottom-1 -right-1 bg-black rounded-full p-1">
-            <Star className="h-3 w-3 text-white" />
-          </div>
         </div>
         <div>
           <h4 className="font-bold text-black relative group">
@@ -1033,13 +887,6 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
         {quote}
         <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
       </p>
-      <div className="mt-6 flex">
-        {[...Array(5)].map((_, i) => (
-          <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 24 24">
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-          </svg>
-        ))}
-      </div>
     </Card>
   )
 }
