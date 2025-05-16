@@ -9,7 +9,7 @@ import { z, ZodError } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input"; // Ensure this path is correct and the Input component exists
+import { Input } from "@/components/ui/input"; 
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
@@ -186,10 +186,10 @@ export default function LoginPageClient() {
           </CardContent>
           <div className="relative hidden md:flex bg-zinc-950 w-full md:w-1/2">
             <Image
-              src="/pictures/IMMAA official-nobg.png"
+              src="/pictures/IMAA Official no-bg.png"
               alt="Login Illustration"
-              width={500}
-              height={500}
+              width={700}
+              height={700}
               className="object-cover"
               priority
             />
