@@ -5,7 +5,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 export default function CustomTrigger() {
   const { toggleSidebar } = useSidebar();
   return (
-    <button onClick={toggleSidebar}>
+    <button onClick={toggleSidebar} className="z-10 fixed">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
