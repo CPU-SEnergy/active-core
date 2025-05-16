@@ -33,7 +33,11 @@ export default async function Layout({
 
   return (
     <SidebarProvider>
+
+      <AdminSidebar role="cashier" />
+
       <AdminSidebar role={userRole} />
+
       <main className="w-full h-full">
         <nav className="fixed">
           <CustomTrigger />

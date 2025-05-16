@@ -41,31 +41,13 @@ export async function middleware(request: NextRequest) {
 
       const user = await getUser(decodedToken.uid);
       const role = user?.customClaims?.role;
+
+      console.log("User role", { role });
+
       const isAdminRoute = path.startsWith("/admin");
 
-      if (isAdminRoute) {
-        if (role === "admin") {
-          // ✅ Admins can access all admin routes
-          return NextResponse.next({ request: { headers } });
-        }
-
-        if (role === "cashier") {
-          const isAllowed = cashierAllowedRoutes.some(
-            (route) => path === route || path.startsWith(`${route}/`)
-          );
-
-          if (isAllowed) {
-            return NextResponse.next({ request: { headers } });
-          }
-
-          // 🚫 Not allowed cashier route — redirect
-          return NextResponse.redirect(
-            new URL("/admin/active-customer", request.url)
-          );
-        }
-
-        // 🚫 Not admin or cashier — forbidden
-        return new NextResponse("Forbidden: Unauthorized role", {
+      if (isAdminRoute && role !== "cashier" && role !== "admin") {
+        return new NextResponse("Forbidden: Admins only", {
           status: 403,
           headers,
         });
