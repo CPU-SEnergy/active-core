@@ -39,9 +39,7 @@ export default async function Layout({
       <AdminSidebar role={userRole} />
 
       <main className="w-full h-full">
-        <nav className="fixed">
           <CustomTrigger />
-        </nav>
         {children}
       </main>
     </SidebarProvider>
