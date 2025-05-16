@@ -1,4 +1,3 @@
-
 "use client"
 
 import Image from "next/image"
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, ChevronLeft, ChevronRight, Trophy, Medal, Star } from "lucide-react"
 import Footer from "@/components/Footer"
 import Link from "next/link"
-import { getISOWeek } from 'date-fns';
+import { getISOWeek } from "date-fns"
 
 export default function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null)
@@ -16,11 +15,12 @@ export default function HomePage() {
   const [scrollY, setScrollY] = useState(0)
 
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   // Coach of the Week data
   const coaches = [
     {
-      name: 'Coach Paiton Rey Gaitan',
+      name: "Coach Paiton Rey Gaitan",
       rank: "5th Dan Black Belt",
       image: "/pictures/payton gaitan.jpg",
       bio: "With over 20 years of competitive experience and 15 years of coaching, Master Vasquez has produced multiple national and international champions in Brazilian Jiu-Jitsu and MMA.",
@@ -28,7 +28,7 @@ export default function HomePage() {
       classes: "Advanced BJJ, Competition Training",
     },
     {
-      name: 'Coach Zoey Jan Alejandra',
+      name: "Coach Zoey Jan Alejandra",
       rank: "4th Dan Black Belt",
       image: "/pictures/zoey alejandra.jpg",
       bio: "A former national team member with Olympic experience, Sensei Reyes brings world-class striking techniques and competition strategies to her students.",
@@ -36,7 +36,7 @@ export default function HomePage() {
       classes: "Women's Self-Defense, Advanced Striking",
     },
     {
-      name: 'Coach Jeffrey Punzalan',
+      name: "Coach Jeffrey Punzalan",
       rank: "Black Belt",
       image: "/pictures/jeffrey punzalan.jpg",
       bio: "Known for his technical precision and innovative training methods, Coach Santos specializes in developing competition-ready athletes with a focus on modern grappling techniques.",
@@ -44,7 +44,7 @@ export default function HomePage() {
       classes: "Competition Team, Takedown Specialists",
     },
     {
-      name: 'Coach Rho Fajutrao',
+      name: "Coach Rho Fajutrao",
       rank: "6th Dan Black Belt",
       image: "/placeholder.svg?height=600&width=400&text=Master+Chen",
       bio: "With over 30 years of traditional martial arts experience, Master Chen combines ancient wisdom with modern training methodologies to develop well-rounded martial artists.",
@@ -55,12 +55,11 @@ export default function HomePage() {
 
   // Add useEffect to automatically set coach based on current week of the year
 
-useEffect(() => {
-  const now = new Date();
-  const weekNumber = getISOWeek(now);
-  setCurrentCoachIndex(weekNumber % coaches.length);
-}, []);
-
+  useEffect(() => {
+    const now = new Date()
+    const weekNumber = getISOWeek(now)
+    setCurrentCoachIndex(weekNumber % coaches.length)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,6 +70,94 @@ useEffect(() => {
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Video player functionality
+  useEffect(() => {
+    const videoContainer = document.getElementById("workshop-video-container")
+    const video = document.getElementById("workshop-video") as HTMLVideoElement
+    const playButton = document.getElementById("play-workshop-btn")
+    const videoOverlay = document.getElementById("video-overlay")
+
+    if (video && playButton && videoContainer && videoOverlay) {
+      // Auto-play without sound when in view
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              video.play().catch(() => {
+                // Autoplay might be blocked, that's okay
+              })
+            } else {
+              video.pause()
+            }
+          })
+        },
+        { threshold: 0.5 },
+      )
+
+      observer.observe(videoContainer)
+
+      // Handle hover to show controls in normal state
+      videoContainer.addEventListener("mouseenter", () => {
+        video.controls = true
+        videoOverlay.style.opacity = "0.3" // Make overlay more transparent on hover
+      })
+
+      videoContainer.addEventListener("mouseleave", () => {
+        video.controls = false
+        videoOverlay.style.opacity = "1"
+      })
+
+      // Handle play button click to enter fullscreen
+      playButton.addEventListener("click", (e) => {
+        e.stopPropagation()
+
+        // Unmute the video
+        video.muted = false
+
+        // Request fullscreen
+        if (video.requestFullscreen) {
+          video.requestFullscreen()
+        } else if ("webkitRequestFullscreen" in video) {
+          /* Safari */
+          (video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
+        } else if ("msRequestFullscreen" in video) {
+          /* IE11 */
+          (video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
+        }
+
+        // Ensure controls are visible in fullscreen
+        video.controls = true
+
+        // Play the video
+        video.play()
+      })
+
+      // Handle fullscreen change
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          // Exited fullscreen
+          video.muted = true
+        }
+      })
+
+      document.addEventListener("webkitfullscreenchange", () => {
+        if (!(document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement) {
+          // Exited fullscreen in Safari
+          video.muted = true
+        }
+      })
+
+      return () => {
+        observer.disconnect()
+        playButton.removeEventListener("click", () => {})
+        videoContainer.removeEventListener("mouseenter", () => {})
+        videoContainer.removeEventListener("mouseleave", () => {})
+        document.removeEventListener("fullscreenchange", () => {})
+        document.removeEventListener("webkitfullscreenchange", () => {})
+      }
+    }
   }, [])
 
   return (
@@ -111,8 +198,14 @@ useEffect(() => {
               <Button
                 size="lg"
                 className="bg-white text-black relative overflow-hidden group font-bold animate-fade-in delay-300 transition-all duration-500"
+                onClick={() => {
+                  const advertisementSection = document.querySelector(".advertisement-section")
+                  if (advertisementSection) {
+                    advertisementSection.scrollIntoView({ behavior: "smooth" })
+                  }
+                }}
               >
-                <span className="relative z-10 group-hover:text-white transition-colors duration-500">EXPLORE</span>
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">LEARN MORE</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
                 <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
               </Button>
@@ -133,7 +226,7 @@ useEffect(() => {
         }}
       >
         {/* Advertisement Banner */}
-        <section className="py-16 bg-gray-50 rounded-t-[40px] shadow-2xl">
+        <section className="py-16 bg-gray-50 rounded-t-[40px] shadow-2xl advertisement-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row items-center">
               <div
@@ -191,7 +284,6 @@ useEffect(() => {
             <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
               <h2 className="text-5xl font-bold text-black mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 Meet Our Champions!
-                <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-black to-gray-800"></span>
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 These exceptional athletes trained at IMAA and brought home prestigious awards in local and
@@ -229,6 +321,74 @@ useEffect(() => {
                 <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
                 <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Outreach Workshop Section */}
+        <section className="py-16 bg-black text-white relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
+              <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+                Community Outreach
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Bringing martial arts education to communities across the Philippines
+              </p>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-8 items-center">
+              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">
+                <div className="relative rounded-lg overflow-hidden cursor-pointer" id="workshop-video-container">
+                  <video
+                    id="workshop-video"
+                    ref={videoRef}
+                    className="w-full rounded-lg"
+                    poster="/placeholder.svg?height=500&width=800&text=Workshop+Video"
+                    muted
+                    loop
+                    preload="metadata"
+                    controlsList="nodownload"
+                  >
+                    <source src="/videos/semirara workshop.mov" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  <div
+                    className="absolute inset-0 bg-black/50 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none"
+                    id="video-overlay"
+                  >
+                    <button
+                      className="bg-white/20 hover:bg-white/40 rounded-full p-4 backdrop-blur-sm transition-all duration-300 transform group-hover:scale-110 pointer-events-auto"
+                      id="play-workshop-btn"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="white"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/3" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya, Antique</h3>
+                  <p className="text-gray-300">
+                    Our team recently conducted a special martial arts workshop for students in Semirara, Caluya,
+                    Antique. This initiative aims to introduce martial arts disciplines to communities, promoting
+                    physical fitness, discipline, and self-confidence among the youth.
+                  </p>
+                  <div className="flex flex-wrap gap-3 pt-4"></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -289,11 +449,15 @@ useEffect(() => {
                   <div className="mb-6">
                     <div className="flex items-center mb-2">
                       <span className="font-bold text-black mr-2">Specialties:</span>
-                      <span className="text-gray-600">{coaches[currentCoachIndex]?.specialties || "Specialties not available"}</span>
+                      <span className="text-gray-600">
+                        {coaches[currentCoachIndex]?.specialties || "Specialties not available"}
+                      </span>
                     </div>
                     <div className="flex items-center">
                       <span className="font-bold text-black mr-2">Classes:</span>
-                      <span className="text-gray-600">{coaches[currentCoachIndex]?.classes || "Classes not available"}</span>
+                      <span className="text-gray-600">
+                        {coaches[currentCoachIndex]?.classes || "Classes not available"}
+                      </span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -453,39 +617,90 @@ useEffect(() => {
   )
 }
 
-// Photo Carousel 
+// Photo Carousel
 function PhotoCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const photos = [
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 1", alt: "IMAA Training 1" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 2", alt: "IMAA Training 2" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 3", alt: "IMAA Training 3" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 4", alt: "IMAA Training 4" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 5", alt: "IMAA Training 5" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 6", alt: "IMAA Training 6" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 7", alt: "IMAA Training 7" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 8", alt: "IMAA Training 8" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 9", alt: "IMAA Training 9" },
-    { src: "/placeholder.svg?height=500&width=700&text=Photo 10", alt: "IMAA Training 10" },
+    { src: "/pictures/advert pic 7.jpg", alt: "IMAA Training 1" },
+    { src: "/pictures/advert pic 1.jpeg", alt: "IMAA Training 2" },
+    { src: "/pictures/advert pic 2.jpeg", alt: "IMAA Training 3" },
+    { src: "/pictures/advert pic 3.jpeg", alt: "IMAA Training 4" },
+    { src: "/pictures/advert pic 5.jpg", alt: "IMAA Training 5" },
+    { src: "/pictures/advert pic 6.jpg", alt: "IMAA Training 6" },
+    { src: "/pictures/advert pic 4.jpeg", alt: "IMAA Training 7" },
+    { src: "/pictures/advert pic 8.jpg", alt: "IMAA Training 8" },
+    { src: "/pictures/advert pic 9.jpeg", alt: "IMAA Training 9" },
+    { src: "/pictures/advert pic 10.jpg", alt: "IMAA Training 10" },
   ]
 
+  // Auto-rotation effect
+  useEffect(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+    }
+
+    // Don't auto-rotate if paused or if an image is expanded
+    if (!isPaused && !expandedImage) {
+      timerRef.current = setInterval(() => {
+        setCurrentIndex((prevIndex) => (prevIndex === photos.length - 1 ? 0 : prevIndex + 1))
+      }, 3000) // Change photo every 3 seconds
+    }
+
+    // Cleanup function to clear the interval when component unmounts or dependencies change
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
+  }, [currentIndex, isPaused, expandedImage, photos.length])
+
   const goToPrevious = () => {
+    // Temporarily pause auto-rotation when user manually navigates
+    setIsPaused(true)
     const isFirstSlide = currentIndex === 0
     const newIndex = isFirstSlide ? photos.length - 1 : currentIndex - 1
     setCurrentIndex(newIndex)
+
+    // Resume auto-rotation after a short delay
+    setTimeout(() => setIsPaused(false), 5000)
   }
 
   const goToNext = () => {
+    // Temporarily pause auto-rotation when user manually navigates
+    setIsPaused(true)
     const isLastSlide = currentIndex === photos.length - 1
     const newIndex = isLastSlide ? 0 : currentIndex + 1
     setCurrentIndex(newIndex)
+
+    // Resume auto-rotation after a short delay
+    setTimeout(() => setIsPaused(false), 5000)
+  }
+
+  const handleDotClick = (index: number) => {
+    // Temporarily pause auto-rotation when user manually navigates
+    setIsPaused(true)
+    setCurrentIndex(index)
+
+    // Resume auto-rotation after a short delay
+    setTimeout(() => setIsPaused(false), 5000)
   }
 
   return (
-    <div className="relative overflow-hidden rounded-lg shadow-xl group">
+    <div
+      className="relative overflow-hidden rounded-lg shadow-xl group"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Main Image */}
-      <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
+      <div
+        className="relative h-[400px] md:h-[500px] w-full overflow-hidden cursor-pointer"
+        onClick={() => setExpandedImage(photos[currentIndex]?.src ?? null)}
+      >
         <Image
           src={photos[currentIndex]?.src || "/placeholder.svg"}
           alt={photos[currentIndex]?.alt || "Default Alt Text"}
@@ -496,6 +711,26 @@ function PhotoCarousel() {
         {/* Image Counter */}
         <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
           {currentIndex + 1} / {photos.length}
+        </div>
+
+        {/* Expand Icon */}
+        <div className="absolute top-4 right-4 bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
         </div>
       </div>
 
@@ -521,7 +756,7 @@ function PhotoCarousel() {
         {photos.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentIndex(index)}
+            onClick={() => handleDotClick(index)}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === currentIndex ? "bg-white scale-125" : "bg-white/50"
             }`}
@@ -529,6 +764,48 @@ function PhotoCarousel() {
           />
         ))}
       </div>
+
+      {/* Auto-rotation indicator */}
+      <div className="absolute top-4 left-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {isPaused ? "Paused" : "Auto"}
+      </div>
+
+      {/* Expanded Image Modal */}
+      {expandedImage && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] w-full">
+            <Image
+              src={expandedImage || "/placeholder.svg"}
+              alt="Expanded view"
+              width={1200}
+              height={800}
+              className="object-contain w-full h-full"
+            />
+            <button
+              className="absolute top-4 right-4 bg-black/70 text-white p-2 rounded-full hover:bg-white hover:text-black transition-all duration-300"
+              onClick={() => setExpandedImage(null)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -544,7 +821,7 @@ interface ChampionCardProps {
 
 function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
   return (
-    <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-30px] hover:rotate-[8deg] hover:scale-110 hover:shadow-2xl transition-all duration-700">
+    <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
       <div className="relative h-64 w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
           <span className="text-white font-bold text-lg">{achievement}</span>
@@ -596,9 +873,6 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
             height={48}
             className="rounded-full object-cover mr-4 transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
           />
-          <div className="absolute -bottom-1 -right-1 bg-black rounded-full p-1">
-            <Star className="h-3 w-3 text-white" />
-          </div>
         </div>
         <div>
           <h4 className="font-bold text-black relative group">
@@ -613,13 +887,6 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
         {quote}
         <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
       </p>
-      <div className="mt-6 flex">
-        {[...Array(5)].map((_, i) => (
-          <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 24 24">
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-          </svg>
-        ))}
-      </div>
     </Card>
   )
 }
