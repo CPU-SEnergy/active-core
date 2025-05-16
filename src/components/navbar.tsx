@@ -71,7 +71,7 @@ export default function Navbar() {
           >
             <Link href="/" className="flex items-center group transition-transform hover:scale-110">
               <Image 
-                src="/pictures/IMMAA official-nobg.png" 
+                src="/pictures/IMAA Official no-bg.png" 
                 alt="Iloilo Martial Arts Association" 
                 width={60} 
                 height={60} 
