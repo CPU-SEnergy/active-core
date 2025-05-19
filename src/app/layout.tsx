@@ -9,7 +9,7 @@ import { toUser } from "@/utils/helpers/user";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/toaster";
 import ChatWidget from "../components/ChatWidget";
-import Footer from "@/components/Footer";
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -57,9 +57,7 @@ export default async function RootLayout({
           <Navbar />
           {children}
           {user && <ChatWidget userId={user.uid} />}
-
           <Toaster />
-          <Footer/>
         </AuthProvider>
       </body>
     </html>

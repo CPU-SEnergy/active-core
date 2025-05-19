@@ -8,6 +8,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { formatEnumText } from "@/utils/helpers/formatEnumText";
+import Footer from "@/components/Footer";
 
 function FetchApparels(
   c: string | string[] | undefined,
@@ -136,6 +137,7 @@ export default function ApparelPage({
           </div>
         </div>
       </div>
+      <Footer/>
     </main>
   );
 }

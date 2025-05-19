@@ -7,9 +7,9 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
-import Footer from "@/components/Footer"
 import Link from "next/link"
 import { getISOWeek } from "date-fns"
+import Footer from "@/components/Footer"
 
 // Custom animations
 const smokeRevealKeyframes = `
@@ -854,6 +854,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+<Footer/>
+
       </div>
       <div
         className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`}
@@ -868,7 +871,6 @@ export default function HomePage() {
     </main>
   )
 }
-;<Footer />
 
 // Photo Carousel
 function PhotoCarousel() {
@@ -1203,3 +1205,4 @@ const facilities = [
   "Locker rooms",
   "Pro shop",
 ]
+

@@ -1,5 +1,6 @@
 "use client"
 
+import Footer from "@/components/Footer"
 import fetcher from "@/lib/fetcher"
 import { CLASSDATA } from "@/lib/types/product-services"
 import Image from "next/image"
@@ -84,6 +85,7 @@ export default function Home() {
           />
         ))}
       </div>
+      <Footer/>
     </div>
   )
 }

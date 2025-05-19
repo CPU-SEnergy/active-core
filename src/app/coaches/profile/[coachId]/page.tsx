@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image"; 
 import { coaches } from "@/lib/mock_data/coachesMockData";
+import Footer from "@/components/Footer";
 
 export default function CoachTest({ params }: { params: { coachId: number } }) {
   const coach = coaches[params.coachId];
@@ -58,6 +59,7 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
     </div>
   );
 }
+
 
 // async function fetchCoaches(id: string) {
 //   try {

@@ -18,6 +18,7 @@ import type { Schema } from "@/lib/schema/firestore";
 import { differenceInYears, parseISO, format, isAfter } from "date-fns";
 import useSWR from "swr";
 import EditUserProfileModal from "./EditUserProfileModal";
+import Footer from "@/components/Footer";
 
 interface UserDashboardProps {
   uid: string;
@@ -513,5 +514,8 @@ function DashboardSkeleton() {
         </div>
       </div>
     </div>
+
   );
 }
+
+<Footer/>

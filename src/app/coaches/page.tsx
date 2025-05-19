@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import Footer from "@/components/Footer";
 
 async function fetchCoaches() {
   try {
@@ -102,6 +103,9 @@ export default async function CoachDeck() {
           />
         ))}
       </div>
+
+    <Footer/>
+
     </div>
   );
 }
