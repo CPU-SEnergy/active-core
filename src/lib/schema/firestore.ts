@@ -5,13 +5,13 @@ export const db = schema(
     users: $.collection<User>(),
     membershipPlan: $.collection<MembershipPlan>(),
     payments: $.collection<Payment>(),
-    membershipHistory: $.collection<MembershipHistory>(),
     kpis: $.collection<KPIs>().sub({ months: $.collection<MonthKPI>() }),
     customers: $.collection<Customers>(),
     apparels: $.collection<Apparels>(),
     coaches: $.collection<Coaches>(),
     classes: $.collection<Classes>(),
     customer: $.collection<Customer>(),
+    walkInCustomers: $.collection<WalkInCustomer>(),
   }),
   { server: { preferRest: true } }
 );
@@ -33,28 +33,15 @@ interface User {
   phone?: string;
 }
 
-interface Price {
-  regular: number;
-  student: number;
-  discount: number;
-}
-
 interface MembershipPlan {
   name: string;
   description: string;
   duration: number;
-  price: Price;
+  price: number;
   status: "active" | "archived";
+  planType: "individual" | "package" | "walk-in";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
-  planDateEnd?: Date;
-}
-
-interface UserBasicInfo {
-  userId: Schema["users"]["Id"];
-  name: string;
-  type: "regular" | "student";
-  imageUrl: string;
 }
 
 interface AvailedPlan {
@@ -72,13 +59,9 @@ interface Payment {
   status: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  user: UserBasicInfo;
+  customerId: string;
+  customerType: "user" | "walk-in";
   availedPlan: AvailedPlan;
-}
-
-interface MembershipHistory {
-  userId: Schema["users"]["Id"];
-  paymentId: Schema["payments"]["Id"];
 }
 
 interface KPIs {
@@ -129,7 +112,7 @@ interface Classes {
 }
 
 interface Customer {
-  uid: string;
+  userId: Schema["users"]["Id"];
   firstName: string;
   lastName: string;
   email: string;
@@ -139,4 +122,13 @@ interface Customer {
   type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
+}
+
+interface WalkInCustomer {
+  firstName: string;
+  lastName: string;
+  email: string;
+  type: "regular" | "student" | "senior";
+  createdAt: Typesaurus.ServerDate;
+  linkedUserId?: Schema["users"]["Id"];
 }

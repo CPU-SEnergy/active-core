@@ -44,7 +44,6 @@ export function EditMembershipPlanModal({
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(membershipPlanSchema),
@@ -54,13 +53,9 @@ export function EditMembershipPlanModal({
       price: data.price,
       duration: data.duration,
       status: data.status,
-      planDateEnd: data.planDateEnd
-        ? new Date(data.planDateEnd).toISOString().split("T")[0]
-        : "",
+      planType: data.planType,
     },
   });
-
-  const discountPrice = watch("price.discount");
 
   async function onSubmit(formData: FormData) {
     try {
@@ -71,13 +66,7 @@ export function EditMembershipPlanModal({
       updatedFormData.append("price", JSON.stringify(formData.price));
       updatedFormData.append("duration", formData.duration.toString());
       updatedFormData.append("status", formData.status);
-
-      if (formData.planDateEnd) {
-        updatedFormData.append(
-          "planDateEnd",
-          new Date(formData.planDateEnd).toISOString()
-        );
-      }
+      updatedFormData.append("planType", formData.planType);
 
       const result = await editMembershipPlan(updatedFormData);
 
@@ -128,25 +117,16 @@ export function EditMembershipPlanModal({
             )}
           </div>
 
-          {(["regular", "student", "discount"] as const).map((type) => (
-            <div key={type}>
-              <Label
-                htmlFor={type}
-              >{`${type.charAt(0).toUpperCase() + type.slice(1)} Price`}</Label>
-              <Input
-                id={type}
-                type="number"
-                min="0"
-                {...register(`price.${type}`)}
-              />
-              {errors.price?.[type] && (
-                <p className="text-sm text-red-500">
-                  {errors.price[type]?.message}
-                </p>
-              )}
-            </div>
-          ))}
-
+          <div>
+            <Label htmlFor="description">Price</Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              step="0.01"
+              {...register("price", { valueAsNumber: true })}
+            />
+          </div>
           <div>
             <Label htmlFor="duration">Duration (days)</Label>
             <Input
@@ -157,6 +137,29 @@ export function EditMembershipPlanModal({
             />
             {errors.duration && (
               <p className="text-sm text-red-500">{errors.duration.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="planType">Plan Type</Label>
+            <Controller
+              control={control}
+              name="planType"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select plan type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="individual">Individual</SelectItem>
+                    <SelectItem value="package">Package</SelectItem>
+                    <SelectItem value="walk-in">Walk-in</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.planType && (
+              <p className="text-sm text-red-500">{errors.planType.message}</p>
             )}
           </div>
 
@@ -181,24 +184,6 @@ export function EditMembershipPlanModal({
               <p className="text-sm text-red-500">{errors.status.message}</p>
             )}
           </div>
-
-          {discountPrice > 0 && (
-            <div>
-              <Label htmlFor="planDateEnd">
-                Plan End Date (for Special Price Promo)
-              </Label>
-              <Input
-                id="planDateEnd"
-                type="date"
-                {...register("planDateEnd")}
-              />
-              {errors.planDateEnd && (
-                <p className="text-sm text-red-500">
-                  {errors.planDateEnd.message}
-                </p>
-              )}
-            </div>
-          )}
 
           <DialogFooter>
             <DialogClose asChild>

@@ -1,10 +1,12 @@
 "use client"
 
+import type React from "react"
+
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, ChevronLeft, ChevronRight, Trophy, Medal, Star } from "lucide-react"
+import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
 import Footer from "@/components/Footer"
 import Link from "next/link"
 import { getISOWeek } from "date-fns"
@@ -76,13 +78,87 @@ const smokeOverlayKeyframes = `
   }
 `
 
+// Add new animation for champions background
+const championsBackgroundKeyframes = `
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes floatingParticles {
+    0% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-100px) translateX(100px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulseGlow {
+    0% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  @keyframes subtleWave {
+    0% {
+      transform: translateX(-50%) translateY(0) rotate(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(15px) rotate(1deg);
+    }
+    100% {
+      transform: translateX(-50%) translateY(0) rotate(0);
+    }
+  }
+`
+
 export default function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [particles, setParticles] = useState<
+    Array<{ id: number; size: number; delay: number; duration: number; left: string }>
+  >([])
 
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  // Generate particles for the champions section
+  useEffect(() => {
+    const newParticles = []
+    for (let i = 0; i < 20; i++) {
+      newParticles.push({
+        id: i,
+        size: Math.floor(Math.random() * 6) + 2, // 2-7px
+        delay: Math.random() * 5, // 0-5s delay
+        duration: Math.random() * 10 + 10, // 10-20s duration
+        left: `${Math.random() * 100}%`,
+      })
+    }
+    setParticles(newParticles)
+  }, [])
 
   // Coach of the Week data
   const coaches = [
@@ -238,6 +314,7 @@ export default function HomePage() {
     ${comingSoonKeyframes}
     ${glowButtonKeyframes}
     ${smokeOverlayKeyframes}
+    ${championsBackgroundKeyframes}
     
     .animate-smoke-reveal {
       animation: smokeReveal 2s forwards;
@@ -249,6 +326,23 @@ export default function HomePage() {
     
     .glow-button {
       animation: glowPulse 2s infinite;
+    }
+    
+    .animate-gradient-shift {
+      animation: gradientShift 15s ease infinite;
+    }
+    
+    .animate-floating-particle {
+      animation: floatingParticles var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    
+    .animate-pulse-glow {
+      animation: pulseGlow 4s ease-in-out infinite;
+    }
+    
+    .animate-subtle-wave {
+      animation: subtleWave 8s ease-in-out infinite;
     }
   `
 
@@ -333,7 +427,7 @@ export default function HomePage() {
                   animation: "comingSoon 2s forwards",
                 }}
               >
-                A premier training ground for a world class Ilonggo martial artist.
+                A premier training ground for world-class Ilonggo martial artists.
               </p>
               <Button
                 size="lg"
@@ -409,17 +503,54 @@ export default function HomePage() {
         </section>
 
         {/* Meet the Champions! */}
-        <section
-          className="py-24 bg-white relative overflow-hidden"
-          style={{
-            backgroundImage: 'url("/pictures/IMAA Official no-bg.png")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-          }}
-        >
-          {/* Overlay for parallax background */}
-          <div className="absolute inset-0 bg-white/90"></div>
+        <section className="py-24 bg-white relative overflow-hidden">
+          {/* Animated Background */}
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"
+            style={{ backgroundSize: "400% 400%" }}
+          ></div>
+
+          {/* Geometric Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute left-1/2 top-1/4 w-[800px] h-[800px] border border-gray-400 rounded-full animate-subtle-wave"></div>
+            <div
+              className="absolute left-1/2 top-1/4 w-[600px] h-[600px] border border-gray-500 rounded-full animate-subtle-wave"
+              style={{ animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute left-1/2 top-1/4 w-[400px] h-[400px] border border-gray-600 rounded-full animate-subtle-wave"
+              style={{ animationDelay: "2s" }}
+            ></div>
+          </div>
+
+          {/* Floating Particles */}
+          {particles.map((particle) => (
+            <div
+              key={particle.id}
+              className="absolute bottom-0 rounded-full bg-gray-500 animate-floating-particle"
+              style={
+                {
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
+                  left: particle.left,
+                  opacity: 0,
+                  "--delay": `${particle.delay}s`,
+                  "--duration": `${particle.duration}s`,
+                } as React.CSSProperties
+              }
+            ></div>
+          ))}
+
+          {/* Glowing Orbs */}
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow"></div>
+          <div
+            className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow"
+            style={{ animationDelay: "2s" }}
+          ></div>
+          <div
+            className="absolute top-3/4 left-2/3 w-24 h-24 rounded-full bg-white/5 blur-xl animate-pulse-glow"
+            style={{ animationDelay: "1s" }}
+          ></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
@@ -441,12 +572,7 @@ export default function HomePage() {
                   data-aos-duration="1000"
                   data-aos-delay={index * 100}
                 >
-                  <ChampionCard
-                    name={champion.name}
-                    age={champion.age}
-                    image={champion.image}
-                    achievement={champion.achievement}
-                  />
+                  <ChampionCard name={champion.name} image={champion.image} achievement={champion.achievement} />
                 </div>
               ))}
             </div>
@@ -549,11 +675,6 @@ export default function HomePage() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
-              <div className="inline-flex items-center justify-center mb-4">
-                <div className="h-[2px] w-12 bg-black"></div>
-                <Medal className="mx-4 text-black h-8 w-8" />
-                <div className="h-[2px] w-12 bg-black"></div>
-              </div>
               <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 Coach of the Week
               </h2>
@@ -631,11 +752,6 @@ export default function HomePage() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
-              <div className="inline-flex items-center justify-center mb-4">
-                <div className="h-[2px] w-12 bg-black"></div>
-                <Star className="mx-4 text-black h-8 w-8" />
-                <div className="h-[2px] w-12 bg-black"></div>
-              </div>
               <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 What Our Members Say
               </h2>
@@ -950,16 +1066,19 @@ function PhotoCarousel() {
 // Helper Components
 interface ChampionCardProps {
   name: string
-  age: number
+  age?: number // Make age optional
   image: string
   achievement: string
   delay?: number
 }
 
-function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
+function ChampionCard({ name, image, achievement }: ChampionCardProps) {
   return (
-    <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
-      <div className="relative h-64 w-full overflow-hidden">
+    <Card className="relative bg-white/10 backdrop-blur-md rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 transition-all duration-700 border border-white/20">
+      {/* Change to monochromatic gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>
+
+      <div className="relative h-64 w-full overflow-hidden z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
           <span className="text-white font-bold text-lg">{achievement}</span>
         </div>
@@ -975,10 +1094,7 @@ function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
           </div>
         </div>
       </div>
-      <CardContent className="p-6 relative">
-        <div className="absolute -top-6 left-4 bg-black text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-          Age: {age}
-        </div>
+      <CardContent className="p-6 relative z-10">
         <h3 className="text-xl font-bold text-black mb-2 relative group">
           {name}
           <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
@@ -986,6 +1102,9 @@ function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
         <p className="text-gray-600 mb-3 font-medium">{achievement}</p>
         <div className="mt-4 flex justify-end"></div>
       </CardContent>
+
+      {/* Change to monochromatic glow */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-600 to-white rounded-lg blur opacity-0 group-hover:opacity-70 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
     </Card>
   )
 }
@@ -1032,25 +1151,21 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
 const champions = [
   {
     name: "Juan Dela Cruz",
-    age: 24,
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 1.jpeg",
     achievement: "Gold Medalist - SEA Games 2023",
   },
   {
     name: "Maria Santos",
-    age: 22,
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 2.jpeg",
     achievement: "Silver Medalist - Asian Championships 2023",
   },
   {
     name: "Carlos Reyes",
-    age: 26,
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 3.jpeg",
     achievement: "National Champion 2022",
   },
   {
     name: "Andrea Gomez",
-    age: 19,
     image: "/placeholder.svg?height=500&width=400",
     achievement: "Gold Medalist - Youth World Championships 2023",
   },

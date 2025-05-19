@@ -3,6 +3,7 @@
 import { db, Schema } from "@/lib/schema/firestore";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
+import { MEMBERSHIPDATA } from "@/lib/types/product-services";
 
 export async function editMembershipPlan(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
@@ -23,12 +24,18 @@ export async function editMembershipPlan(formData: FormData) {
     };
   }
 
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const price = JSON.parse(formData.get("price") as string);
-  const duration = parseInt(formData.get("duration") as string, 10);
-  const status = formData.get("status") as "active" | "archived";
-  const planDateEndRaw = formData.get("planDateEnd");
+  const name = formData.get("name") as MEMBERSHIPDATA["name"];
+  const description = formData.get(
+    "description"
+  ) as MEMBERSHIPDATA["description"];
+  const price = JSON.parse(
+    formData.get("price") as string
+  ) as MEMBERSHIPDATA["price"];
+  const duration = parseInt(
+    formData.get("duration") as string
+  ) as MEMBERSHIPDATA["duration"];
+  const status = formData.get("status") as MEMBERSHIPDATA["status"];
+  const planType = formData.get("planType") as MEMBERSHIPDATA["planType"];
 
   const updateData = {
     name,
@@ -36,10 +43,8 @@ export async function editMembershipPlan(formData: FormData) {
     price,
     duration,
     status,
+    planType,
     updatedAt: new Date(),
-    ...(planDateEndRaw
-      ? { planDateEnd: new Date(planDateEndRaw as string) }
-      : {}),
   };
 
   try {

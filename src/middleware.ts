@@ -11,6 +11,7 @@ import { clientConfig, serverConfig } from "@/lib/config";
 
 const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
 const cashierAllowedRoutes = [
+  "/admin",
   "/admin/active-customer",
   "/admin/inactive-customer",
   "/admin/messages",
@@ -41,19 +42,33 @@ export async function middleware(request: NextRequest) {
 
       const user = await getUser(decodedToken.uid);
       const role = user?.customClaims?.role;
-
-      console.log("User role", { role });
-
       const isAdminRoute = path.startsWith("/admin");
 
-      if (isAdminRoute && role !== "cashier" && role !== "admin") {
-        return new NextResponse("Forbidden: Admins only", {
+      if (isAdminRoute) {
+        if (role === "admin") {
+          return NextResponse.next({ request: { headers } });
+        }
+
+        if (role === "cashier") {
+          const isAllowed = cashierAllowedRoutes.some(
+            (route) => path === route || path.startsWith(`${route}/`)
+          );
+
+          if (isAllowed) {
+            return NextResponse.next({ request: { headers } });
+          }
+
+          return NextResponse.redirect(
+            new URL("/admin/active-customer", request.url)
+          );
+        }
+
+        return new NextResponse("Forbidden: Unauthorized role", {
           status: 403,
           headers,
         });
       }
 
-      // ✅ Allow all other routes
       return NextResponse.next({ request: { headers } });
     },
 
@@ -83,11 +98,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/user-profile",
-    "/admin/:path*",
-    "/cashier/:path*",
-    "/api/login",
-    "/api/logout",
-  ],
+  matcher: ["/user-profile", "/admin/:path*", "/api/login", "/api/logout"],
 };
