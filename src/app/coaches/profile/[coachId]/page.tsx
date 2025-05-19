@@ -1,9 +1,32 @@
-import Link from "next/link";
-import Image from "next/image"; 
-import { coaches } from "@/lib/mock_data/coachesMockData";
+"use client";
 
-export default function CoachTest({ params }: { params: { coachId: number } }) {
-  const coach = coaches[params.coachId];
+import Link from "next/link";
+import Image from "next/image";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
+
+export default function CoachTest({ params }: { params: { coachId: string } }) {
+  const {
+    data: coach,
+    isLoading,
+    error,
+  } = useSWR<Coach>(`/api/coaches/${params.coachId}`, fetcher);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-xl">Loading coach...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-xl text-red-500">Failed to load coach.</p>
+      </div>
+    );
+  }
 
   if (!coach) {
     return <p className="text-center">Coach not found!</p>;
@@ -19,7 +42,7 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <div className="flex flex-col items-center space-y-4">
           <Image
-            src={coach.image}
+            src={coach.imageUrl}
             alt={coach.name}
             width={192}
             height={192}
@@ -47,7 +70,9 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
             <p className="text-lg font-semibold text-gray-800">
               Certifications:
             </p>
-            <p className="text-gray-700">{coach.certifications.join(", ")}</p>
+            <p className="text-gray-700">
+              {coach.certifications.join(", ")}
+            </p>
           </div>
           <div>
             <p className="text-lg font-semibold text-gray-800">Contact:</p>
@@ -58,27 +83,3 @@ export default function CoachTest({ params }: { params: { coachId: number } }) {
     </div>
   );
 }
-
-// async function fetchCoaches(id: string) {
-//   try {
-//     const res = await fetch(`http://localhost:3000/api/coaches/${id}`, {
-//       next: { revalidate: 60000 },
-//     });
-//     if (!res.ok) {
-//       throw new Error("Failed to fetch coaches");
-//     }
-//     return await res.json();
-//   } catch (error) {
-//     console.error(error);
-//     return [];
-//   }
-// }
-
-// export default async function CoachTest({
-//   params,
-// }: {
-//   params: Promise<{ id: string }>;
-// }) {
-//   const coach: Coach = await fetchCoaches((await params).id);
-//   console.log(coaches, "coaches");
-// }
