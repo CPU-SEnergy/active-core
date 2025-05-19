@@ -59,6 +59,10 @@ export default function ClassesPage() {
   if (isLoading) {
     return <ClassesSkeleton />;
   }
+
+  if (isLoading) {
+    return <ClassesSkeleton />;
+  }
   console.log("coaches page", classes);
 
   return (
