@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         discount: result.data.discount,
         description: result.data.description,
         imageUrl: result.data.imageUrl,
+        isActive: result.data.isActive,
         type: result.data.type,
       };
     });

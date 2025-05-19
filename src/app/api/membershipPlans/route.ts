@@ -4,8 +4,8 @@ import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 export async function GET() {
   try {
     getFirebaseAdminApp();
-    const membershipPlans = await db.membershipPlan.query(($) =>
-      $.field("status").eq("active")
+    const membershipPlans = await db.membershipPlans.query(($) =>
+      $.field("isActive").eq(true)
     );
 
     const formattedPlans = membershipPlans.map((plan) => ({

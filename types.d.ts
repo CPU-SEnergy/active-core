@@ -62,3 +62,9 @@ interface UserHistoryProps {
   expiryDate: Date;
   amount: number;
 }
+
+type AllowedCollections =
+  | "membershipPlans"
+  | "apparels"
+  | "coaches"
+  | "classes";

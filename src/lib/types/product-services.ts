@@ -13,6 +13,7 @@ export interface APPARELDATA {
   price: number;
   description: string;
   imageUrl: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,17 +28,18 @@ export interface COACHDATA {
   experience: number;
   certifications: string[];
   bio: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface MEMBERSHIPDATA {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
   duration: number;
-  status: "active" | "archived";
+  isActive: boolean;
   planType: "individual" | "package" | "walk-in";
   createdAt: Date;
 }
@@ -49,6 +51,7 @@ export interface CLASSDATA {
   description: string;
   imageUrl: string;
   coachId: string[];
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -18,12 +18,11 @@ export async function GET() {
 
         return {
           id: p.ref.id,
-          customer: {
-            name: p.data.user.name,
-            imageUrl: p.data.user.imageUrl,
-          },
+          customerId: p.data.customer.customerId,
           requestNumber: `#${String(p.ref.id).padStart(6, "0")}`,
-          timeApproved: p.data.createdAt ? p.data.createdAt.toLocaleString() : "N/A",
+          timeApproved: p.data.createdAt
+            ? p.data.createdAt.toLocaleString()
+            : "N/A",
           subscription: p.data.availedPlan.name,
           remainingTime:
             daysRemaining > 30
@@ -36,7 +35,6 @@ export async function GET() {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     console.error("Error fetching document:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {

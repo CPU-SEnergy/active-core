@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/lib/firebaseClient";
 import { User } from "@/auth/AuthProvider";
+import LoginButton from "./LoginButton";
 
 export default function LogoutButton({ user }: { user: User | null }) {
   const router = useRouter();
@@ -29,13 +30,7 @@ export default function LogoutButton({ user }: { user: User | null }) {
           Logout
         </Button>
       ) : (
-        <Button
-          variant={"default"}
-          onClick={() => router.push("/auth/login")}
-          className="text-gray-300 bg-green-600 px-5 hover:bg-green-700 text-lg md:text-base"
-        >
-          Login
-        </Button>
+        <LoginButton />
       )}
     </>
   );

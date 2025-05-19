@@ -12,7 +12,7 @@ import { Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
-import { createCoach } from "@/app/actions/admin/createCoach";
+import { createCoach } from "@/app/actions/admin/products-services/createCoach";
 import { mutate } from "swr";
 import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
 import {

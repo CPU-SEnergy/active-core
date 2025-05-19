@@ -28,7 +28,7 @@ import {
 import { toast } from "sonner";
 import { mutate } from "swr";
 import membershipPlanSchema from "@/lib/zod/schemas/membershipPlanFormSchema";
-import { editMembershipPlan } from "@/app/actions/admin/editMembershipPlan";
+import { editMembershipPlan } from "@/app/actions/admin/products-services/editMembershipPlan";
 import { Pencil } from "lucide-react";
 
 type FormData = z.infer<typeof membershipPlanSchema>;
@@ -52,7 +52,6 @@ export function EditMembershipPlanModal({
       description: data.description,
       price: data.price,
       duration: data.duration,
-      status: data.status,
       planType: data.planType,
     },
   });
@@ -65,7 +64,6 @@ export function EditMembershipPlanModal({
       updatedFormData.append("description", formData.description);
       updatedFormData.append("price", JSON.stringify(formData.price));
       updatedFormData.append("duration", formData.duration.toString());
-      updatedFormData.append("status", formData.status);
       updatedFormData.append("planType", formData.planType);
 
       const result = await editMembershipPlan(updatedFormData);
@@ -86,9 +84,13 @@ export function EditMembershipPlanModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <span className="cursor-pointer">
-          <Pencil size={20} />
-        </span>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Pencil size={24} />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
         <DialogHeader>
@@ -160,28 +162,6 @@ export function EditMembershipPlanModal({
             />
             {errors.planType && (
               <p className="text-sm text-red-500">{errors.planType.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.status && (
-              <p className="text-sm text-red-500">{errors.status.message}</p>
             )}
           </div>
 
