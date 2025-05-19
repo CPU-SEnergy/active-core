@@ -11,12 +11,15 @@ import { createFirebaseUser } from "@/utils/firebase/firebaseAuthOperations"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function RegisterPageClient() {
   const { toast } = useToast()
   const [loading, setLoading] = React.useState(false)
   const router = useRouter()
   const { step, formState, error, handleChange, handleNextStep, handleSignUp } = useRegisterForm()
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
 
   // Simplified back button handler
   const handleBackStep = (e: React.MouseEvent) => {
@@ -105,23 +108,50 @@ export default function RegisterPageClient() {
                 </div>
 
                 <div className="space-y-2 mb-6">
-                  <InputText
-                    id="password"
-                    label="Password"
-                    type="password"
-                    value={formState.password}
-                    onChange={handleChange("password")}
-                  />
+                  <div className="relative">
+                    <InputText
+                      id="password"
+                      label="Password"
+                      type={showPassword ? "text" : "password"}
+                      value={formState.password}
+                      onChange={handleChange("password")}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-[38px] -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )
+                      }
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2 mb-6">
-                  <InputText
-                    id="confirmation"
-                    label="Confirm Password"
-                    type="password"
-                    value={formState.confirmation}
-                    onChange={handleChange("confirmation")}
-                  />
+                  <div className="relative">
+                    <InputText
+                      id="confirmation"
+                      label="Confirm Password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formState.confirmation}
+                      onChange={handleChange("confirmation")}
+                    />
+                    <button 
+                      type="button"
+                      className="absolute right-3 top-[38px] -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {error && <p className="text-sm text-red-500">{error}</p>}
