@@ -1,7 +1,8 @@
 "use client";
 
 import type * as React from "react";
-import { BarChart2, MessageSquare, Settings, Users } from "lucide-react";
+import { useState } from "react";
+import { BarChart2, MessageSquare, Users, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -12,7 +13,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import LogoutButton from "./LogoutButton";
+import { useAuth } from "@/auth/AuthProvider";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const menuItems = [
   {
@@ -106,11 +118,38 @@ const menuItems = [
 ];
 
 export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
+  const { user } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const filteredMenuItems = menuItems.filter((item) =>
     item.roles.includes(role)
   );
+
+  const LogoutButtonWrapper = () => {
+    return (
+      <div className="hidden">
+        <LogoutButton user={user} />
+      </div>
+    );
+  };
+
+  const handleLogout = () => {
+    const logoutBtn = document.querySelector('button[class*="bg-red-600"]');
+    if (logoutBtn && user) {
+      (logoutBtn as HTMLButtonElement).click();
+    }
+    setShowLogoutModal(false);
+  };
+
+  const handleLoginOrLogout = () => {
+    if (user) {
+      setShowLogoutModal(true);
+    } else {
+      router.push("/auth/login");
+    }
+  };
 
   return (
     <div className="flex">
@@ -168,22 +207,42 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
         <div className="mt-auto px-2 pb-4">
           <SidebarMenu>
             <SidebarMenuItem>
+              {/* Keep the original LogoutButton for functionality but hidden */}
+              <LogoutButtonWrapper />
+
+              {/* Create a visually consistent logout button */}
               <SidebarMenuButton
-                asChild
-                className={`h-10 gap-3 px-3 hover:bg-gray-100 hover:text-black [&>svg]:h-5 [&>svg]:w-5 ${
-                  pathname === "/admin/settings" ? "bg-gray-200 text-black" : ""
-                }`}
+                className="relative h-11 gap-3 px-3 hover:bg-gray-100 hover:text-black [&>svg]:h-5 [&>svg]:w-5"
+                onClick={handleLoginOrLogout}
               >
-                <Link href="/admin/settings">
-                  <Settings />
-                  <span>Settings</span>
-                </Link>
+                <LogOut />
+                <span>{user ? "Logout" : "Login"}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </div>
       </Sidebar>
       <div className="flex-1"></div>
+
+      {/* Logout Confirmation Modal */}
+      <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to log out of your account?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleLogout}>
+              Logout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

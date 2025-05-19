@@ -20,11 +20,11 @@ interface Product {
 }
 
 interface Coach {
-  id: number;
+  id: string;
   name: string;
   specialization: string;
   bio: string;
-  image: string;
+  imageUrl: string;
   age: number;
   experience: string;
   certifications: string[];
