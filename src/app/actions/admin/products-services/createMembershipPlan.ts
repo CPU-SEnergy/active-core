@@ -33,7 +33,6 @@ export async function createMembershipPlan(formData: FormData) {
     description: formData.get("description"),
     duration: Number(formData.get("duration")),
     price: parsedPrice,
-    status: formData.get("status"),
     planType: formData.get("planType"),
   };
 
@@ -57,13 +56,13 @@ export async function createMembershipPlan(formData: FormData) {
       description: data.description,
       duration: data.duration,
       price: data.price,
-      status: data.status,
+      isActive: true,
       planType: data.planType,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    await db.membershipPlan.add(membershipPlanData, {
+    await db.membershipPlans.add(membershipPlanData, {
       as: "server",
     });
 

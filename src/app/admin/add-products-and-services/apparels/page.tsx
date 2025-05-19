@@ -8,13 +8,12 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { APPARELDATA } from "@/lib/types/product-services";
 import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
+import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 
 export default function ApparelsPage() {
   const { data, error, isLoading } = useSWR<APPARELDATA[]>(
     "/api/apparels",
-    fetcher,
-
-    { dedupingInterval: 60 * 60 * 24 }
+    fetcher
   );
 
   if (error) {
@@ -37,18 +36,41 @@ export default function ApparelsPage() {
             data.length > 0 &&
             data.map((apparel) => (
               <Card key={apparel.id} className="relative group">
-                <div className="relative aspect-square">
+                <div className="relative aspect-square rounded-t-lg overflow-hidden">
                   <Image
                     src={apparel.imageUrl || "/placeholder.svg"}
                     alt={apparel.name}
                     fill
                     sizes="300px"
                     priority
-                    className="object-cover rounded-t-lg"
+                    className="object-cover"
                   />
-                  <EditApparel data={apparel} />
                 </div>
-                <div className="p-4">
+
+                <div
+                  className={`flex justify-end items-center gap-4 mb-4 p-1 rounded transition-colors ${
+                    apparel.isActive ? "bg-white" : "bg-red-100"
+                  }`}
+                >
+                  <span
+                    className={`font-semibold ${
+                      apparel.isActive ? "text-green-600" : "text-gray-500"
+                    }`}
+                  >
+                    {apparel.isActive ? "Active" : "Archived"}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <ProductAndServicesSwitch
+                      collectionName={"apparels"}
+                      id={apparel.id}
+                      isActive={apparel.isActive}
+                    />
+                    <EditApparel data={apparel} />
+                  </div>
+                </div>
+
+                <div className="p-4 pt-2">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-medium">{apparel.name}</h3>
                   </div>

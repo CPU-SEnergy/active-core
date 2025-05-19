@@ -27,7 +27,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
-import { createClass } from "@/app/actions/admin/createClass";
+import { createClass } from "@/app/actions/admin/products-services/createClass";
 
 type FormData = z.infer<typeof classFormSchema>;
 

@@ -34,7 +34,6 @@ export async function editMembershipPlan(formData: FormData) {
   const duration = parseInt(
     formData.get("duration") as string
   ) as MEMBERSHIPDATA["duration"];
-  const status = formData.get("status") as MEMBERSHIPDATA["status"];
   const planType = formData.get("planType") as MEMBERSHIPDATA["planType"];
 
   const updateData = {
@@ -42,7 +41,6 @@ export async function editMembershipPlan(formData: FormData) {
     description,
     price,
     duration,
-    status,
     planType,
     updatedAt: new Date(),
   };
