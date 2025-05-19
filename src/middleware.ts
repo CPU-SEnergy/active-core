@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 import {
   authMiddleware,
@@ -9,7 +11,6 @@ import { clientConfig, serverConfig } from "@/lib/config";
 
 const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
 const cashierAllowedRoutes = [
-  "/admin/",
   "/admin/active-customer",
   "/admin/inactive-customer",
   "/admin/messages",
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
     cookieSerializeOptions: serverConfig.cookieSerializeOptions,
     serviceAccount: serverConfig.serviceAccount,
 
-    handleValidToken: async ({ decodedToken }, headers) => {
+    handleValidToken: async ({ token, decodedToken }, headers) => {
       const path = request.nextUrl.pathname;
 
       if (PUBLIC_PATHS.includes(path)) {
@@ -41,8 +42,6 @@ export async function middleware(request: NextRequest) {
       const user = await getUser(decodedToken.uid);
       const role = user?.customClaims?.role;
       const isAdminRoute = path.startsWith("/admin");
-
-      console.log("User role", { role });
 
       if (isAdminRoute) {
         if (role === "admin") {
@@ -81,9 +80,10 @@ export async function middleware(request: NextRequest) {
       });
     },
 
-    handleError: (error: unknown) => {
+    handleError: (error) => {
       console.error("Middleware error", {
-        error,
+        cause: (error as any).cause,
+        stack: (error as any).stack,
       });
 
       return Promise.resolve(
@@ -97,11 +97,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/user-profile",
-    "/admin/:path*",
-    "/cashier/:path*",
-    "/api/login",
-    "/api/logout",
-  ],
+  matcher: ["/user-profile", "/admin/:path*", "/api/login", "/api/logout"],
 };
