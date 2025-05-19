@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { Button } from './ui/button'
+import React from "react";
+import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/lib/firebaseClient";
-import { User } from '@/auth/AuthProvider';
+import { User } from "@/auth/AuthProvider";
 
 export default function LogoutButton({ user }: { user: User | null }) {
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function LogoutButton({ user }: { user: User | null }) {
 
     await fetch("/api/logout");
 
-    router.push("/auth/login");
+    router.push("/");
   }
 
   return (
@@ -38,5 +38,5 @@ export default function LogoutButton({ user }: { user: User | null }) {
         </Button>
       )}
     </>
-  )
+  );
 }
