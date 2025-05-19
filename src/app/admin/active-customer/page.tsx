@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -10,6 +11,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import UserSearch from "@/components/UserSearch";
+
+function CustomerTableSkeleton() {
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-72" />
+      </div>
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+              <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+              <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+              <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+              <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+              <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(5)].map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </TableCell>
+                <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
 
 interface ActiveCustomer {
   id: string;
@@ -49,11 +92,15 @@ export default function CustomerTable() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <CustomerTableSkeleton />
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+    <div className="p-6 text-center">
+      <div className="text-red-500 font-medium">Error: {error}</div>
+    </div>
+    )
   }
 
   return (

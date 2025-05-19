@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { revalidatePath } from "next/cache";
-import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
+import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
 import { db } from "@/lib/schema/firestore";
-import { uploadImage } from "../upload/image";
+import { uploadImage } from "../../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
-export async function createApparel(formData: FormData) {
+export async function createCoach(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
   if (!user || user?.customClaims?.role !== "admin") {
     return { message: "Unauthorized. You are not an admin", status: 401 };
@@ -25,24 +24,26 @@ export async function createApparel(formData: FormData) {
 
   const file = formData.get("image");
   if (!(file instanceof File)) {
-    return { message: "Invalid file format", status: 400 };
+    return { message: "Invalid file format", status: 422 };
   }
 
   const rawData = {
     name: formData.get("name"),
-    type: formData.get("type"),
-    discount: Number(formData.get("discount")),
-    price: Number(formData.get("price")),
-    description: formData.get("description"),
+    specialization: formData.get("specialization"),
+    contactInfo: formData.get("contactInfo"),
+    dob: formData.get("dob"),
+    experience: Number(formData.get("experience")),
+    bio: formData.get("bio"),
+    certifications: formData.getAll("certifications") as string[],
     image: formData.get("image"),
   };
 
-  const parse = apparelFormSchema(false).safeParse(rawData);
+  const parse = coachFormSchema.safeParse(rawData);
   if (!parse.success) {
     return {
       message: "Validation failed",
+      status: 400,
       errors: parse.error.format() as ZodFormattedError<any, string>,
-      status: 422,
     };
   }
 
@@ -54,52 +55,41 @@ export async function createApparel(formData: FormData) {
 
     const file = formData.get("image");
     if (!(file instanceof File)) {
-      return { message: "Invalid file format", status: 400 };
+      return { message: "Invalid file format", status: 422 };
     }
 
-    const fileUrl = await uploadImage(file, ProductAndServicesType.APPARELS);
+    const fileUrl = await uploadImage(file, ProductAndServicesType.COACHES);
 
     if (!fileUrl.success) {
       return {
         message: fileUrl.error ?? "Unknown error",
-        status: fileUrl.status ?? 500,
+        status: fileUrl.status,
       };
     }
 
-    const apparelData: {
-      name: string;
-      type: string;
-      price: number;
-      description: string;
-      imageUrl: string;
-      createdAt: Date;
-      updatedAt: Date;
-      discount?: number;
-    } = {
+    const coachData = {
       name: data.name,
-      type: data.type,
-      price: data.price,
-      description: data.description,
+      specialization: data.specialization,
+      bio: data.bio,
+      dob: new Date(data.dob!),
+      experience: data.experience,
       imageUrl: fileUrl.url,
+      contactInfo: data.contactInfo,
+      certifications: data.certifications,
+      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    if (data.discount !== undefined) {
-      apparelData.discount = data.discount;
-    }
+    await db.coaches.add(coachData, { as: "server" });
 
-    await db.apparels.add(apparelData, { as: "server" });
-
-    revalidatePath("/");
-
-    return { message: "Apparel created successfully!", status: 201 };
+    return { message: "Coach created successfully!", status: 200 };
   } catch (error) {
-    console.error("Error creating apparel:", error);
+    console.error("Error adding coach! :", error);
     return {
-      message: "Internal server error",
-      error: error instanceof Error ? error.message : String(error),
+      message: "Server error",
       status: 500,
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

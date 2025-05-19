@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
 import { mutate } from "swr";
-import { createApparel } from "@/app/actions/admin/createApparel";
+import { createApparel } from "@/app/actions/admin/products-services/createApparel";
 import {
   Dialog,
   DialogClose,

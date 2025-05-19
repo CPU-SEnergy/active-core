@@ -8,6 +8,7 @@ const apparelFormSchema = (isEdit: boolean) =>
       (val) => Number(val),
       z.number().gte(0, "Price must be greater than 0")
     ),
+
     description: z.string().min(1, "Description is required"),
     image: isEdit
       ? z.custom<File | undefined>(

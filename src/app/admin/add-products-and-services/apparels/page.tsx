@@ -8,18 +8,52 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { APPARELDATA } from "@/lib/types/product-services";
 import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
+import { Skeleton } from "@/components/ui/skeleton";
+import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
+
+function ApparelsSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-8">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Skeleton className="h-10 w-32 mb-8" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <Card key={index} className="relative">
+              <div className="relative aspect-square">
+                <Skeleton className="absolute inset-0 rounded-t-lg" />
+              </div>
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <Skeleton className="h-5 w-32" />
+                </div>
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ApparelsPage() {
   const { data, error, isLoading } = useSWR<APPARELDATA[]>(
     "/api/apparels",
-    fetcher,
-
-    { dedupingInterval: 60 * 60 * 24 }
+    fetcher
   );
 
   if (error) {
     console.error("Error fetching apparels:", error);
     return <>Error fetching apparels</>;
+  }
+
+  if (isLoading) {
+    return <ApparelsSkeleton />;
   }
 
   return (
@@ -37,18 +71,41 @@ export default function ApparelsPage() {
             data.length > 0 &&
             data.map((apparel) => (
               <Card key={apparel.id} className="relative group">
-                <div className="relative aspect-square">
+                <div className="relative aspect-square rounded-t-lg overflow-hidden">
                   <Image
                     src={apparel.imageUrl || "/placeholder.svg"}
                     alt={apparel.name}
                     fill
                     sizes="300px"
                     priority
-                    className="object-cover rounded-t-lg"
+                    className="object-cover"
                   />
-                  <EditApparel data={apparel} />
                 </div>
-                <div className="p-4">
+
+                <div
+                  className={`flex justify-end items-center gap-4 mb-4 p-1 rounded transition-colors ${
+                    apparel.isActive ? "bg-white" : "bg-red-100"
+                  }`}
+                >
+                  <span
+                    className={`font-semibold ${
+                      apparel.isActive ? "text-green-600" : "text-gray-500"
+                    }`}
+                  >
+                    {apparel.isActive ? "Active" : "Archived"}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <ProductAndServicesSwitch
+                      collectionName={"apparels"}
+                      id={apparel.id}
+                      isActive={apparel.isActive}
+                    />
+                    <EditApparel data={apparel} />
+                  </div>
+                </div>
+
+                <div className="p-4 pt-2">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-medium">{apparel.name}</h3>
                   </div>

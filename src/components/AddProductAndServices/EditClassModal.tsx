@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { editClass } from "@/app/actions/admin/editClass";
+import { editClass } from "@/app/actions/admin/products-services/editClass";
 import {
   Dialog,
   DialogTrigger,
@@ -122,11 +122,7 @@ export default function EditClassModal({ data }: EditClassModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
+        <Button size="icon" variant="ghost" className="">
           <Pencil size={24} />
         </Button>
       </DialogTrigger>
