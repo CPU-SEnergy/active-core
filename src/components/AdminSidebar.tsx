@@ -118,7 +118,7 @@ const menuItems = [
 ];
 
 export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
