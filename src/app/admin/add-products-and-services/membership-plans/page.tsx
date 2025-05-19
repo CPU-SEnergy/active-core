@@ -7,7 +7,45 @@ import useSWR from "swr";
 import { MEMBERSHIPDATA } from "@/lib/types/product-services";
 import fetcher from "@/lib/fetcher";
 import { EditMembershipPlanModal } from "@/components/AddProductAndServices/EditMemberShipPlanModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
+
+function MembershipPlanSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-8">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Skeleton className="h-10 w-32 mb-8" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <Card key={index} className="relative">
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-4">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function MembershipPlansPage() {
   const {
@@ -23,13 +61,15 @@ export default function MembershipPlansPage() {
     return <>Error fetching membership</>;
   }
 
+  if (isLoading) {
+    return <MembershipPlanSkeleton />;
+  }
+
   console.log("membership page", membershipPlans);
 
   return (
     <>
-      {isLoading && <p>Loading membership plans...</p>}
-      {Array.isArray(membershipPlans) && (
-        <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white">
           <div className="p-6">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-2xl font-semibold">Membership Plans</h1>
@@ -39,12 +79,12 @@ export default function MembershipPlansPage() {
             <MembershipPlanForm />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {membershipPlans.length === 0 ? (
+              {membershipPlans?.length === 0 ? (
                 <div className="col-span-3 text-center">
                   <p className="text-gray-500">No membership plans available</p>
                 </div>
               ) : (
-                membershipPlans.map((plan) => (
+                membershipPlans?.map((plan) => (
                   <Card key={plan.id} className="relative group">
                     <div className="p-4">
                       <div className="absolute top-2 right-2 flex gap-2 z-10">
@@ -83,7 +123,6 @@ export default function MembershipPlansPage() {
             </div>
           </div>
         </div>
-      )}
     </>
   );
 }

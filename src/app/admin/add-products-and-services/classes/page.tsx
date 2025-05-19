@@ -8,7 +8,40 @@ import fetcher from "@/lib/fetcher";
 import useSWR from "swr";
 import { CLASSDATA } from "@/lib/types/product-services";
 import EditClassModal from "@/components/AddProductAndServices/EditClassModal";
-import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch"; // import switch
+import { Skeleton } from "@/components/ui/skeleton";
+import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
+
+function ClassesSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-8">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Skeleton className="h-10 w-32 mb-8" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <Card key={index} className="relative">
+              <div className="relative aspect-square">
+                <Skeleton className="absolute inset-0 rounded-t-lg" />
+              </div>
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <Skeleton className="h-5 w-32" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ClassesPage() {
   const {
@@ -23,7 +56,15 @@ export default function ClassesPage() {
     console.error("Error fetching classes:", error);
     return <>Error fetching classes</>;
   }
-  console.log("classes page", classes);
+
+  if (isLoading) {
+    return <ClassesSkeleton />;
+  }
+
+  if (isLoading) {
+    return <ClassesSkeleton />;
+  }
+  console.log("coaches page", classes);
 
   return (
     <>

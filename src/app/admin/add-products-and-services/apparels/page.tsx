@@ -8,7 +8,38 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { APPARELDATA } from "@/lib/types/product-services";
 import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
+
+function ApparelsSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-8">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Skeleton className="h-10 w-32 mb-8" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <Card key={index} className="relative">
+              <div className="relative aspect-square">
+                <Skeleton className="absolute inset-0 rounded-t-lg" />
+              </div>
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <Skeleton className="h-5 w-32" />
+                </div>
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ApparelsPage() {
   const { data, error, isLoading } = useSWR<APPARELDATA[]>(
@@ -19,6 +50,10 @@ export default function ApparelsPage() {
   if (error) {
     console.error("Error fetching apparels:", error);
     return <>Error fetching apparels</>;
+  }
+
+  if (isLoading) {
+    return <ApparelsSkeleton />;
   }
 
   return (
