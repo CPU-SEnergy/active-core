@@ -8,6 +8,7 @@ import fetcher from "@/lib/fetcher";
 import useSWR from "swr";
 import { CLASSDATA } from "@/lib/types/product-services";
 import EditClassModal from "@/components/AddProductAndServices/EditClassModal";
+import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch"; // import switch
 
 export default function ClassesPage() {
   const {
@@ -44,7 +45,7 @@ export default function ClassesPage() {
               ) : (
                 classes.map((cls) => (
                   <Card key={cls.id} className="relative group">
-                    <div className="relative aspect-square">
+                    <div className="relative aspect-square rounded-t-lg overflow-hidden">
                       <Image
                         src={cls.imageUrl || "/placeholder.svg"}
                         alt={cls.name}
@@ -53,9 +54,28 @@ export default function ClassesPage() {
                         priority
                         className="object-cover rounded-t-lg"
                       />
-                      <EditClassModal data={cls} />
                     </div>
                     <div className="p-4">
+                      <div
+                        className={`flex justify-end items-center gap-4 mb-4 p-1 rounded transition-colors ${
+                          cls.isActive ? "bg-white" : "bg-red-100"
+                        }`}
+                      >
+                        <span
+                          className={`font-semibold ${
+                            cls.isActive ? "text-green-600" : "text-gray-500"
+                          }`}
+                        >
+                          {cls.isActive ? "Active" : "Archived"}
+                        </span>
+                        <ProductAndServicesSwitch
+                          collectionName="classes"
+                          id={cls.id}
+                          isActive={cls.isActive}
+                        />
+                        <EditClassModal data={cls} />
+                      </div>
+
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium">{cls.name}</h3>
                       </div>
