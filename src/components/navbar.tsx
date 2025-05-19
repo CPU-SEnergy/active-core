@@ -50,6 +50,7 @@ export default function Navbar() {
   };
 
   const isActive = (href: string) => pathname === href;
+  const isAdmin = user?.customClaims?.role === "admin" || user?.customClaims?.role === "cashier";
 
   return (
     <motion.nav
@@ -104,6 +105,14 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
           >
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-black hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
+              >
+                Admin Page
+              </Link>
+            )}
             <LogoutButton user={user} />
           </motion.div>
 
