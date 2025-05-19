@@ -43,14 +43,13 @@ export interface MEMBERSHIPDATA {
   planType: "individual" | "package" | "walk-in";
   createdAt: Date;
 }
-
 export interface CLASSDATA {
   id: string;
   name: string;
   schedule: string;
   description: string;
   imageUrl: string;
-  coachId: string[];
+  coaches: string[];
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

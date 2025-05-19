@@ -2,6 +2,7 @@
 
 "use client";
 
+import type React from "react";
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,10 +24,11 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
+import fetcher from "@/lib/fetcher";
 import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
-import { CLASSDATA } from "@/lib/types/product-services";
-import { z } from "zod";
+import type { CLASSDATA, COACHDATA } from "@/lib/types/product-services";
+import type { z } from "zod";
 
 type FormData = z.infer<typeof classFormSchema> & {
   id: string;
@@ -39,6 +41,14 @@ interface EditClassModalProps {
 
 export default function EditClassModal({ data }: EditClassModalProps) {
   const [open, setOpen] = useState(false);
+
+  const {
+    data: coaches,
+    error: coachesError,
+    isLoading: coachesLoading,
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
+    dedupingInterval: 60 * 60 * 24,
+  });
 
   const {
     register,
@@ -55,7 +65,10 @@ export default function EditClassModal({ data }: EditClassModalProps) {
       name: data.name,
       schedule: data.schedule,
       description: data.description,
-      coaches: data.coachId.map((coachId: any) => ({ coachId })),
+      // Fix: Check if coachId exists and is an array before mapping
+      coaches: Array.isArray(data.coaches)
+        ? data.coaches.map((coachId: any) => ({ coachId }))
+        : [{ coachId: "" }], // Default to empty coach if no coaches exist
       image: data.imageUrl as unknown as File,
     },
   });
@@ -92,12 +105,13 @@ export default function EditClassModal({ data }: EditClassModalProps) {
     updatedFormData.append("name", formData.name);
     updatedFormData.append("schedule", formData.schedule);
     updatedFormData.append("description", formData.description);
-    updatedFormData.append("existingImageUrl", data.imageUrl);
-    formData.coaches.forEach((coach: { coachId: string }) =>
-      updatedFormData.append("coaches", coach.coachId)
-    );
+    updatedFormData.append("existingImageUrl", data.imageUrl || "");
 
-    updatedFormData.append("existingImageUrl", data.imageUrl);
+    formData.coaches.forEach((coach: { coachId: string }) => {
+      if (coach.coachId) {
+        updatedFormData.append("coaches", coach.coachId);
+      }
+    });
 
     if (formData.image instanceof File) {
       updatedFormData.append("image", formData.image);
@@ -117,6 +131,12 @@ export default function EditClassModal({ data }: EditClassModalProps) {
       console.error("Error updating class:", error);
       toast.error("Error updating class. Please try again.");
     }
+  }
+
+  // Handle coach data loading error
+  if (coachesError && open) {
+    console.error("Error loading coaches:", coachesError);
+    toast.error("Failed to load coaches. Please try again.");
   }
 
   return (
@@ -148,6 +168,7 @@ export default function EditClassModal({ data }: EditClassModalProps) {
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
+
           <div>
             <Label htmlFor="schedule">Schedule</Label>
             <Input
@@ -175,7 +196,7 @@ export default function EditClassModal({ data }: EditClassModalProps) {
           <div>
             <Label>Coaches</Label>
             {fields.map((field, index) => (
-              <div key={field.id} className="flex items-center gap-2">
+              <div key={field.id} className="flex items-center gap-2 mb-2">
                 <select
                   {...register(`coaches.${index}.coachId`, {
                     required: "Coach is required",
@@ -183,17 +204,36 @@ export default function EditClassModal({ data }: EditClassModalProps) {
                   className="bg-gray-50 border rounded-md px-3 py-2 flex-grow"
                 >
                   <option value="">Select a coach</option>
-                  {/* You can provide coach options here as needed */}
+                  {coachesLoading && (
+                    <option disabled>Loading coaches...</option>
+                  )}
+                  {coaches?.map((coach) => (
+                    <option key={coach.id} value={coach.id}>
+                      {coach.name}{" "}
+                      {coach.specialization ? `- ${coach.specialization}` : ""}
+                    </option>
+                  ))}
                 </select>
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => remove(index)}
+                  onClick={() => {
+                    if (fields.length === 1) {
+                      setValue(`coaches.0.coachId`, "");
+                    } else {
+                      remove(index);
+                    }
+                  }}
                 >
                   <Trash className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
             ))}
+            {errors.coaches && (
+              <p className="text-sm text-red-500">
+                At least one coach is required
+              </p>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -245,7 +285,7 @@ export default function EditClassModal({ data }: EditClassModalProps) {
                 <Image
                   width={96}
                   height={96}
-                  src={preview}
+                  src={preview || "/placeholder.svg"}
                   alt="Preview"
                   className="w-24 h-24 object-cover rounded-md"
                 />

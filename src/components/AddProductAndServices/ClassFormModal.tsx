@@ -2,10 +2,11 @@
 
 "use client";
 
+import type React from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import type * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { COACHDATA } from "@/lib/types/product-services";
+import type { COACHDATA } from "@/lib/types/product-services";
 import useSWR, { mutate } from "swr";
 import fetcher from "@/lib/fetcher";
 import {
@@ -21,13 +22,13 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
 import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
 import { createClass } from "@/app/actions/admin/products-services/createClass";
+import { DialogFooter } from "@/components/ui/dialog";
 
 type FormData = z.infer<typeof classFormSchema>;
 
@@ -135,159 +136,184 @@ export function ClassesModal() {
           Add Class
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Add Apparel</DialogTitle>
-          <DialogDescription>
-            Fill in the details for creating new class.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Class Name</Label>
-            <Input
-              id="name"
-              placeholder="Enter class name"
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name.message}</p>
-            )}
-          </div>
+      <DialogContent className="sm:max-w-md w-full max-h-[90vh] overflow-hidden">
+        <div className="flex flex-col h-full max-h-[90vh]">
+          <DialogHeader className="px-1 pt-1">
+            <DialogTitle>Add Class</DialogTitle>
+            <DialogDescription>
+              Fill in the details for creating new class.
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="grid gap-2">
-            <Label htmlFor="schedule">Schedule</Label>
-            <Input
-              id="schedule"
-              placeholder="Enter class schedule"
-              {...register("schedule")}
-            />
-            {errors.schedule && (
-              <p className="text-sm text-red-500">{errors.schedule.message}</p>
-            )}
-          </div>
+          <div className="px-1 overflow-y-auto flex-1 pb-1 pt-6">
+            <form
+              id="class-form"
+              onSubmit={handleSubmit(onSubmit)}
+              className="grid gap-4 w-full"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="name">Class Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter class name"
+                  {...register("name")}
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-500">{errors.name.message}</p>
+                )}
+              </div>
 
-          <Label>Coaches</Label>
-          <div className="border p-2 rounded gap-2 flex flex-col">
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <select
-                    {...register(`coaches.${index}.coachId`, {
-                      required: "Coach is required",
-                    })}
-                    className="bg-gray-50 border rounded-md px-3 py-2 flex-grow"
-                  >
-                    <option value="">Select a coach</option>
-                    {isLoading && <option disabled>Loading coaches...</option>}
-                    {coaches?.map((coach) => (
-                      <option key={coach.id} value={coach.id}>
-                        {coach.name} - {coach.specialization}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-                {errors.coaches?.[index]?.coachId && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.coaches[index].coachId.message}
+              <div className="grid gap-2">
+                <Label htmlFor="schedule">Schedule</Label>
+                <Input
+                  id="schedule"
+                  placeholder="Enter class schedule"
+                  {...register("schedule")}
+                />
+                {errors.schedule && (
+                  <p className="text-sm text-red-500">
+                    {errors.schedule.message}
                   </p>
                 )}
               </div>
-            ))}
-          </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => append({ coachId: "" })}
-          >
-            + Add Coach
-          </Button>
-
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Enter class description"
-              {...register("description")}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-500">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Upload Image</Label>
-            <div
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <div className="flex flex-col items-center gap-2">
-                <Upload className="h-8 w-8 text-gray-400" />
-                <p className="text-sm text-gray-500">
-                  Drop files here or click to browse
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() =>
-                    document.getElementById("file-upload")?.click()
-                  }
-                >
-                  Browse Files
-                </Button>
-                <input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  accept=".png,.jpg,.jpeg"
-                  onChange={(e) =>
-                    e.target.files?.[0] && handleFile(e.target.files[0])
-                  }
-                />
+              <Label>Coaches</Label>
+              <div className="border p-2 rounded gap-2 flex flex-col w-full">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex flex-col gap-2 w-full">
+                    <div className="flex items-center gap-2 w-full">
+                      <select
+                        {...register(`coaches.${index}.coachId`, {
+                          required: "Coach is required",
+                        })}
+                        className="bg-gray-50 border rounded-md px-3 py-2 flex-grow w-full"
+                      >
+                        <option value="">Select a coach</option>
+                        {isLoading && (
+                          <option disabled>Loading coaches...</option>
+                        )}
+                        {coaches?.map((coach) => (
+                          <option key={coach.id} value={coach.id}>
+                            {coach.name} - {coach.specialization}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          if (fields.length === 1) {
+                            // If it's the last field, reset its value instead of removing
+                            setValue(`coaches.0.coachId`, "");
+                          } else {
+                            // Otherwise remove the field as normal
+                            remove(index);
+                          }
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        <Trash className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                    {errors.coaches?.[index]?.coachId && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.coaches[index].coachId.message}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-            </div>
-            {preview && (
-              <div className="flex justify-center mt-2">
-                <Image
-                  width={96}
-                  height={96}
-                  src={preview}
-                  alt="Preview"
-                  className="w-24 h-24 object-cover rounded-md"
-                />
-              </div>
-            )}
-          </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Close
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => append({ coachId: "" })}
+              >
+                + Add Coach
               </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              className="bg-black hover:bg-gray-800"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Creating..." : "Create"}
-            </Button>
-          </DialogFooter>
-        </form>
+
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Enter class description"
+                  {...register("description")}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Upload Image</Label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="h-8 w-8 text-gray-400" />
+                    <p className="text-sm text-gray-500">
+                      Drop files here or click to browse
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-2"
+                      onClick={() =>
+                        document.getElementById("file-upload")?.click()
+                      }
+                    >
+                      Browse Files
+                    </Button>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      accept=".png,.jpg,.jpeg"
+                      onChange={(e) =>
+                        e.target.files?.[0] && handleFile(e.target.files[0])
+                      }
+                    />
+                  </div>
+                </div>
+                {preview && (
+                  <div className="flex justify-center mt-2">
+                    <Image
+                      width={96}
+                      height={96}
+                      src={preview || "/placeholder.svg"}
+                      alt="Preview"
+                      className="w-24 h-24 object-cover rounded-md"
+                    />
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
+
+          <div className="border-t p-4 mt-auto">
+            <DialogFooter className="gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Close
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                form="class-form"
+                className="bg-black hover:bg-gray-800"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
