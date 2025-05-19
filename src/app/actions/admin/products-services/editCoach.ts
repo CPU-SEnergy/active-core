@@ -1,7 +1,7 @@
 "use server";
 
 import { db, Schema } from "@/lib/schema/firestore";
-import { uploadImage } from "../upload/image";
+import { uploadImage } from "../../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";

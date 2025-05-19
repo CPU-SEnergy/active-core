@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash, Upload, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { editCoach } from "@/app/actions/admin/editCoach";
+import { editCoach } from "@/app/actions/admin/products-services/editCoach";
 
 import {
   Dialog,
@@ -118,11 +118,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
+        <Button size="icon" variant="ghost" className="">
           <Pencil size={24} />
         </Button>
       </DialogTrigger>

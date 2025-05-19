@@ -7,6 +7,83 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { timeFilters } from "@/lib/mock_data/overviewMockData"
+import { Skeleton } from "@/components/ui/skeleton"
+
+function DashboardSkeleton() {
+  return (
+    <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
+      {/* Sidebar with KPI Cards */}
+      <aside className="w-full lg:w-64 bg-white p-6 border-r">
+        <nav className="space-y-6">
+          <div>
+            <Skeleton className="h-8 w-32 mb-4" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-4">
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-8 w-32" />
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        <div className="max-w-4xl">
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Skeleton className="h-10 w-full" />
+          </div>
+
+          {/* Recent Activity Table */}
+          <div className="bg-white rounded-lg border">
+            <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b">
+              <Skeleton className="h-6 w-32 mb-4 lg:mb-0" />
+              <Skeleton className="h-10 w-[100px]" />
+            </div>
+            
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                  <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                  <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+                  <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                  <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                  <TableHead><Skeleton className="h-4 w-20" /></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 interface KPI {
   title: string;
@@ -182,7 +259,7 @@ export default function Dashboard() {
   })
 
   if (loading) {
-    return <div>Loading...</div>
+    return <DashboardSkeleton />
   }
 
   if (error) {

@@ -1,20 +1,14 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { MembershipPlanForm } from "@/components/AddProductAndServices/MembershipPlanModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 import useSWR from "swr";
 import { MEMBERSHIPDATA } from "@/lib/types/product-services";
 import fetcher from "@/lib/fetcher";
 import { EditMembershipPlanModal } from "@/components/AddProductAndServices/EditMemberShipPlanModal";
-// import {
-//   isPast,
-//   differenceInDays,
-//   differenceInHours,
-//   differenceInMinutes,
-// } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 
 function MembershipPlanSkeleton() {
   return (
@@ -58,7 +52,7 @@ export default function MembershipPlansPage() {
     data: membershipPlans,
     error,
     isLoading,
-  } = useSWR<MEMBERSHIPDATA[]>("/api/membership-plan", fetcher, {
+  } = useSWR<MEMBERSHIPDATA[]>("/api/membershipPlans", fetcher, {
     dedupingInterval: 60 * 60 * 24,
   });
 
@@ -93,33 +87,35 @@ export default function MembershipPlansPage() {
                 membershipPlans?.map((plan) => (
                   <Card key={plan.id} className="relative group">
                     <div className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium">{plan.name}</h3>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <EditMembershipPlanModal
-                            data={{ ...plan, id: plan.id.toString() }}
-                          />
-                        </Button>
+                      <div className="absolute top-2 right-2 flex gap-2 z-10">
+                        <ProductAndServicesSwitch
+                          collectionName="membershipPlans"
+                          id={plan.id}
+                          isActive={plan.isActive}
+                        />
+                        <EditMembershipPlanModal
+                          data={{ ...plan, id: plan.id.toString() }}
+                        />
                       </div>
-                      <p className="text-sm text-gray-500 mb-2">
-                        Type: {plan.planType}
-                      </p>
-                      <p className="text-sm mb-2">{plan.description}</p>
-                      <p className="text-sm">Price: P {plan.price}</p>
-                      <p className="text-sm">Duration: {plan.duration} days</p>
-                      <p
-                        className={`text-sm font-semibold ${
-                          plan.status === "active"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        Status: {plan.status}
-                      </p>
+
+                      <div className="pr-20">
+                        <h3 className="font-medium mb-2">{plan.name}</h3>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Type: {plan.planType}
+                        </p>
+                        <p className="text-sm mb-2">{plan.description}</p>
+                        <p className="text-sm">Price: P {plan.price}</p>
+                        <p className="text-sm">
+                          Duration: {plan.duration} days
+                        </p>
+                        <p
+                          className={`text-sm font-semibold ${
+                            plan.isActive ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          Status: {plan.isActive ? "Active" : "Archived"}
+                        </p>
+                      </div>
                     </div>
                   </Card>
                 ))
