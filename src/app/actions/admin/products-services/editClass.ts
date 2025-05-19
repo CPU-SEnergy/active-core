@@ -2,14 +2,14 @@
 "use server";
 
 import { db, Schema } from "@/lib/schema/firestore";
-import { uploadImage } from "../upload/image";
+import { uploadImage } from "../../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
 
-export async function createClass(formData: FormData) {
+export async function editClass(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
   if (!user || user?.customClaims?.role !== "admin") {
     return { message: "Unauthorized. You are not an admin", status: 401 };
@@ -20,19 +20,24 @@ export async function createClass(formData: FormData) {
     return { message: "Form data not received", status: 400 };
   }
 
-  const rawCoaches = formData.getAll("coaches");
+  const id = formData.get("id") as Schema["classes"]["Id"];
+  console.log("Class ID:", id);
+  if (!id || typeof id !== "string") {
+    return { message: "Invalid class ID", status: 400 };
+  }
+
   const rawData = {
     name: formData.get("name"),
     schedule: formData.get("schedule"),
     description: formData.get("description"),
-    coaches: rawCoaches.map((coach) => ({ coachId: coach })),
+    coaches: formData.getAll("coaches").map((coach) => ({ coachId: coach })),
     image: formData.get("image"),
+    existingImageUrl: formData.get("existingImageUrl"),
   };
 
-  console.log("Raw data:", rawData);
+  console.log("Raw data for update:", rawData);
 
   const parse = classFormSchema.safeParse(rawData);
-
   console.log("Parsed data:", parse);
 
   if (!parse.success) {
@@ -48,39 +53,38 @@ export async function createClass(formData: FormData) {
   try {
     getFirebaseAdminApp();
 
-    const file = formData.get("image");
-    if (!(file instanceof File)) {
-      return { message: "Invalid file format", status: 422 };
+    const file = formData.get("image") as File | null;
+    let imageUrl: string = (rawData.existingImageUrl as string) || "";
+    if (file && file.size > 0) {
+      const uploadResult = await uploadImage(
+        file,
+        ProductAndServicesType.CLASSES
+      );
+      if (uploadResult.success) {
+        imageUrl = uploadResult.url;
+      } else {
+        return { message: "Image upload failed", status: 500 };
+      }
     }
 
-    const fileUrl = await uploadImage(file, ProductAndServicesType.CLASSES);
-
-    if (!fileUrl.success) {
-      return {
-        message: fileUrl.error ?? "Unknown error",
-        status: fileUrl.status,
-      };
-    }
-
-    const classData = {
+    const updatedClassData = {
       name: data.name,
       schedule: data.schedule,
       description: data.description,
-      coachId: data.coaches.map(
+      coaches: data.coaches.map(
         (coach) => coach.coachId
       ) as unknown as Schema["coaches"]["Id"][],
-      imageUrl: fileUrl.url,
-      createdAt: new Date(),
+      imageUrl,
       updatedAt: new Date(),
     };
 
-    console.log("Class data:", classData);
+    console.log("Updated class data:", updatedClassData);
 
-    await db.classes.add(classData, { as: "server" });
+    await db.classes.update(id, updatedClassData, { as: "server" });
 
-    return { message: "Class created successfully!", status: 200 };
+    return { message: "Class updated successfully!", status: 200 };
   } catch (error) {
-    console.error("Error creating class:", error);
+    console.error("Error updating class:", error);
     return {
       message: "Server error",
       status: 500,
