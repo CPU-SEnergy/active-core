@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 import {
   authMiddleware,
@@ -11,6 +9,7 @@ import { clientConfig, serverConfig } from "@/lib/config";
 
 const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
 const cashierAllowedRoutes = [
+  "/admin/",
   "/admin/active-customer",
   "/admin/inactive-customer",
   "/admin/messages",
@@ -32,7 +31,7 @@ export async function middleware(request: NextRequest) {
     cookieSerializeOptions: serverConfig.cookieSerializeOptions,
     serviceAccount: serverConfig.serviceAccount,
 
-    handleValidToken: async ({ token, decodedToken }, headers) => {
+    handleValidToken: async ({ decodedToken }, headers) => {
       const path = request.nextUrl.pathname;
 
       if (PUBLIC_PATHS.includes(path)) {
@@ -41,19 +40,35 @@ export async function middleware(request: NextRequest) {
 
       const user = await getUser(decodedToken.uid);
       const role = user?.customClaims?.role;
+      const isAdminRoute = path.startsWith("/admin");
 
       console.log("User role", { role });
 
-      const isAdminRoute = path.startsWith("/admin");
+      if (isAdminRoute) {
+        if (role === "admin") {
+          return NextResponse.next({ request: { headers } });
+        }
 
-      if (isAdminRoute && role !== "cashier" && role !== "admin") {
-        return new NextResponse("Forbidden: Admins only", {
+        if (role === "cashier") {
+          const isAllowed = cashierAllowedRoutes.some(
+            (route) => path === route || path.startsWith(`${route}/`)
+          );
+
+          if (isAllowed) {
+            return NextResponse.next({ request: { headers } });
+          }
+
+          return NextResponse.redirect(
+            new URL("/admin/active-customer", request.url)
+          );
+        }
+
+        return new NextResponse("Forbidden: Unauthorized role", {
           status: 403,
           headers,
         });
       }
 
-      // ✅ Allow all other routes
       return NextResponse.next({ request: { headers } });
     },
 
@@ -66,10 +81,9 @@ export async function middleware(request: NextRequest) {
       });
     },
 
-    handleError: (error) => {
+    handleError: (error: unknown) => {
       console.error("Middleware error", {
-        cause: (error as any).cause,
-        stack: (error as any).stack,
+        error,
       });
 
       return Promise.resolve(
