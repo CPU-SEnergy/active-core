@@ -124,13 +124,13 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
               >
                 <Link href="/admin" className="flex items-center gap-2">
                   <Image
-                    src="/sports-fitness-logo.svg"
-                    alt="Sports and Fitness Logo"
+                    src="/pictures/IMAA Official no-bg.png"
+                    alt="IMAA Logo"
                     className="h-8 w-8"
-                    width={32}
-                    height={32}
+                    width={50}
+                    height={50}
                   />
-                  <span className="font-semibold">Sports and Fitness</span>
+                  <span className="font-bold">IMAA</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

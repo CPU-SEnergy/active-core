@@ -167,7 +167,7 @@ export default function HomePage() {
         <div className="relative h-full w-full overflow-hidden">
           {/* Video Background */}
           <video autoPlay muted loop className="absolute inset-0 w-full h-full object-cover">
-            <source src="/pictures/sample video.mp4" type="video/mp4" />
+            <source src="/videos/official imaa.MOV" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -193,7 +193,7 @@ export default function HomePage() {
                 className="text-xl md:text-2xl text-white mb-8 animate-fade-in delay-150"
                 style={{ transform: `translateY(${scrollY * -0.2}px)` }}
               >
-                A Premier Training Ground for World Class Ilonggo Martial Artist.
+                A premier training ground for a world class Ilonggo martial artist.
               </p>
               <Button
                 size="lg"
@@ -597,9 +597,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <Footer />
       </div>
 
       {/* Scroll indicator */}
@@ -616,6 +613,8 @@ export default function HomePage() {
     </main>
   )
 }
+
+ <Footer/>
 
 // Photo Carousel
 function PhotoCarousel() {
