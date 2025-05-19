@@ -15,7 +15,7 @@ export async function editMembershipPlan(formData: FormData) {
     };
   }
 
-  const id = formData.get("id") as Schema["membershipPlan"]["Id"];
+  const id = formData.get("id") as Schema["membershipPlans"]["Id"];
   if (!id) {
     return {
       success: false,
@@ -46,7 +46,7 @@ export async function editMembershipPlan(formData: FormData) {
   };
 
   try {
-    await db.membershipPlan.update(id, updateData, { as: "server" });
+    await db.membershipPlans.update(id, updateData, { as: "server" });
 
     revalidatePath("/");
 

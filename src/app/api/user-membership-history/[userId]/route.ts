@@ -28,7 +28,7 @@ export async function GET(
     const userId = db.users.id(params.userId);
 
     const payments = await db.payments.query(($) => [
-      $.field("customerId").eq(userId),
+      $.field("customer", "customerId").eq(userId),
     ]);
 
     if (payments.length === 0) {

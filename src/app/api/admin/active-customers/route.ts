@@ -18,7 +18,7 @@ export async function GET() {
 
         return {
           id: p.ref.id,
-          customerId: p.data.customerId,
+          customerId: p.data.customer.customerId,
           requestNumber: `#${String(p.ref.id).padStart(6, "0")}`,
           timeApproved: p.data.createdAt
             ? p.data.createdAt.toLocaleString()

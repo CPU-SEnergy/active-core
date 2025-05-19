@@ -56,12 +56,20 @@ interface AvailedPlan {
 interface Payment {
   id: string;
   paymentMethod: string;
-  status: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  customerId: string;
-  customerType: "user" | "walk-in";
+  isWalkIn: "user" | "walk-in";
+  customer: CustomerBasicInfo;
   availedPlan: AvailedPlan;
+}
+
+interface CustomerBasicInfo {
+  customerId:
+    | Schema["walkInCustomers"]["Data"]["userId"]
+    | Schema["customer"]["Data"]["userId"];
+  firstName: string;
+  lastName: string;
+  type: "regular" | "student";
 }
 
 interface KPIs {
@@ -133,5 +141,5 @@ interface WalkInCustomer {
   email: string;
   type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
-  linkedUserId?: Schema["users"]["Id"];
+  userId?: Schema["users"]["Id"];
 }
