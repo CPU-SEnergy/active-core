@@ -126,7 +126,7 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
                   <Image
                     src="/pictures/IMAA Official no-bg.png"
                     alt="IMAA Logo"
-                    className="h-8 w-8"
+                    className="h-10 w-10"
                     width={50}
                     height={50}
                   />
@@ -136,7 +136,7 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-        <SidebarContent className="py-5">
+        <SidebarContent className="py-8">
           <SidebarMenu>
             {filteredMenuItems.map((item) => {
               const isActive =

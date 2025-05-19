@@ -51,7 +51,7 @@
     "swr": "^2.3.0",
     "tailwind-merge": "^2.5.4",
     "typesaurus": "^10.7.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",

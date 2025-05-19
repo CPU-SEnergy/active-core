@@ -9,6 +9,73 @@ import Footer from "@/components/Footer"
 import Link from "next/link"
 import { getISOWeek } from "date-fns"
 
+// Custom animations
+const smokeRevealKeyframes = `
+  @keyframes smokeReveal {
+    0% {
+      opacity: 0;
+      filter: blur(15px);
+      transform: translateX(-50px);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateX(0);
+    }
+  }
+`
+
+const comingSoonKeyframes = `
+  @keyframes comingSoon {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    85% {
+      opacity: 1;
+      transform: scale(1.1);
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`
+
+const glowButtonKeyframes = `
+  @keyframes glowPulse {
+    0% {
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+  }
+`
+
+const smokeOverlayKeyframes = `
+  @keyframes smokeOverlay {
+    0% {
+      opacity: 1;
+      background-position: left center;
+      backdrop-filter: blur(10px);
+    }
+    100% {
+      opacity: 0;
+      background-position: right center;
+      backdrop-filter: blur(0);
+    }
+  }
+`
+
 export default function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
@@ -121,10 +188,10 @@ export default function HomePage() {
           video.requestFullscreen()
         } else if ("webkitRequestFullscreen" in video) {
           /* Safari */
-          (video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
+          ;(video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
         } else if ("msRequestFullscreen" in video) {
           /* IE11 */
-          (video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
+          ;(video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
         }
 
         // Ensure controls are visible in fullscreen
@@ -160,6 +227,61 @@ export default function HomePage() {
     }
   }, [])
 
+  // Inject custom animations
+  useEffect(() => {
+    // Create style element
+    const style = document.createElement("style")
+
+    // Add keyframes
+    style.textContent = `
+    ${smokeRevealKeyframes}
+    ${comingSoonKeyframes}
+    ${glowButtonKeyframes}
+    ${smokeOverlayKeyframes}
+    
+    .animate-smoke-reveal {
+      animation: smokeReveal 2s forwards;
+    }
+    
+    .animate-coming-soon {
+      animation: comingSoon 3.5s forwards;
+    }
+    
+    .glow-button {
+      animation: glowPulse 2s infinite;
+    }
+  `
+
+    // Append to head
+    document.head.appendChild(style)
+
+    // Clean up
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Only run in browser environment
+    if (typeof window !== "undefined") {
+      try {
+        // Preload smoke image with error handling
+        const smokeImage = new window.Image(1, 1)
+        smokeImage.crossOrigin = "anonymous"
+        smokeImage.onload = () => {
+          console.log("Smoke texture loaded successfully")
+        }
+        smokeImage.onerror = () => {
+          console.warn("Could not load smoke texture, using fallback")
+        }
+        smokeImage.src =
+          "https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748"
+      } catch (error) {
+        console.error("Error in smoke image preloading:", error)
+      }
+    }
+  }, [])
+
   return (
     <main className="bg-white text-gray-900 overflow-x-hidden">
       {/* Main Section with Promotional Video - Fixed */}
@@ -171,33 +293,52 @@ export default function HomePage() {
             Your browser does not support the video tag.
           </video>
 
+          {/* Smoke Overlay - Full page transition */}
+          <div
+            className="absolute inset-0 z-30 pointer-events-none"
+            style={{
+              backgroundImage:
+                'url("https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748")',
+              backgroundSize: "200% 100%",
+              animation: "smokeOverlay 3s forwards",
+              backgroundRepeat: "no-repeat",
+              backgroundColor: "rgba(0,0,0,0.85)", // Darker fallback if image fails to load
+              mixBlendMode: "multiply",
+            }}
+          ></div>
+
           {/* Parallax Overlay */}
           <div
-            className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center"
+            className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center z-20"
             style={{
               transform: `translateY(${scrollY * 0.2}px)`,
               opacity: Math.max(0.3, 1 - scrollY * 0.001),
             }}
           >
-            <div className="text-center px-4 max-w-4xl mx-auto">
+            <div className="text-center px-4 max-w-4xl mx-auto relative z-40">
               <h1
-                className="text-5xl md:text-7xl font-bold text-white mb-6 animate-flying-kick"
+                className="text-5xl md:text-7xl font-bold text-white mb-6 animate-smoke-reveal"
                 style={{
                   textShadow: "0 0 20px rgba(0, 0, 0, 0.7)",
                   transform: `translateY(${scrollY * -0.3}px)`,
+                  animation: "smokeReveal 2s forwards",
                 }}
               >
                 ILOILO MARTIAL ARTIST ASSOCIATION
               </h1>
               <p
-                className="text-xl md:text-2xl text-white mb-8 animate-fade-in delay-150"
-                style={{ transform: `translateY(${scrollY * -0.2}px)` }}
+                className="text-xl md:text-2xl text-white mb-8"
+                style={{
+                  transform: `translateY(${scrollY * -0.2}px)`,
+                  animation: "comingSoon 2s forwards",
+                }}
               >
                 A premier training ground for a world class Ilonggo martial artist.
               </p>
               <Button
                 size="lg"
-                className="bg-white text-black relative overflow-hidden group font-bold animate-fade-in delay-300 transition-all duration-500"
+                className="bg-white text-black relative overflow-hidden group font-bold transition-all duration-500"
+                style={{ animation: "glowPulse 2s infinite" }}
                 onClick={() => {
                   const advertisementSection = document.querySelector(".advertisement-section")
                   if (advertisementSection) {
@@ -258,8 +399,8 @@ export default function HomePage() {
                     <span className="relative z-10 group-hover:text-white transition-colors duration-500">
                       <Link href="/sports-classes">Explore Classes</Link>
                     </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                    <span className="absolute -inset-[3px] bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                    <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
                   </Button>
                 </div>
               </div>
@@ -380,9 +521,9 @@ export default function HomePage() {
               </div>
               <div className="lg:w-1/3" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya, Antique</h3>
+                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya Antique</h3>
                   <p className="text-gray-300">
-                    Our team recently conducted a special martial arts workshop for students in Semirara, Caluya,
+                    Our team recently conducted a special martial arts workshop for students in Semirara, Caluya
                     Antique. This initiative aims to introduce martial arts disciplines to communities, promoting
                     physical fitness, discipline, and self-confidence among the youth.
                   </p>
@@ -465,8 +606,8 @@ export default function HomePage() {
                       <span className="relative z-10 group-hover:text-white transition-colors duration-500">
                         View Coach
                       </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                      <span className="absolute -inset-[3px] bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                      <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
                     </Button>
                   </div>
                 </div>
@@ -598,8 +739,6 @@ export default function HomePage() {
           </div>
         </section>
       </div>
-
-      {/* Scroll indicator */}
       <div
         className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`}
       >
@@ -613,8 +752,7 @@ export default function HomePage() {
     </main>
   )
 }
-
- <Footer/>
+;<Footer />
 
 // Photo Carousel
 function PhotoCarousel() {
