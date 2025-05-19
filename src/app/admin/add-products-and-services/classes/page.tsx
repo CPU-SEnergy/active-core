@@ -49,11 +49,8 @@ export default function ClassesPage() {
     data: classes,
     error,
     isLoading,
-  } = useSWR<CLASSDATA[]>(`/api/classes`, fetcher, {
-    revalidateOnFocus: true,
-    revalidateOnMount: true,
-    dedupingInterval: 0,
-  });
+  } = useSWR<CLASSDATA[]>(`/api/classes`, fetcher);
+
   if (error) {
     console.error("Error fetching classes:", error);
     return <>Error fetching classes</>;

@@ -116,7 +116,7 @@ interface Classes {
   description: string;
   imageUrl?: string;
   schedule: string;
-  coachId: Schema["coaches"]["Id"][];
+  coaches: Schema["coaches"]["Id"][];
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;

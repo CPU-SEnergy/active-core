@@ -2,8 +2,7 @@
 
 "use client";
 
-import type React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type * as z from "zod";
@@ -19,20 +18,22 @@ import useSWR, { mutate } from "swr";
 import fetcher from "@/lib/fetcher";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+  DialogClose,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
 import { createClass } from "@/app/actions/admin/products-services/createClass";
-import { DialogFooter } from "@/components/ui/dialog";
 
 type FormData = z.infer<typeof classFormSchema>;
 
 export function ClassesModal() {
+  // control dialog open state
+  const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -65,10 +66,8 @@ export function ClassesModal() {
 
   if (error) {
     console.error("Error fetching coaches:", error);
-    return <>Error fetching coaches</>;
+    return <div>Error fetching coaches</div>;
   }
-
-  console.log("coaches page", coaches);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -76,10 +75,7 @@ export function ClassesModal() {
       formData.append("name", data.name);
       formData.append("schedule", data.schedule);
       formData.append("description", data.description);
-      data.coaches.forEach((coach) =>
-        formData.append("coaches", coach.coachId)
-      );
-
+      data.coaches.forEach((c) => formData.append("coaches", c.coachId));
       if (data.image instanceof File) {
         formData.append("image", data.image);
       }
@@ -97,11 +93,12 @@ export function ClassesModal() {
         reset();
         setPreview(null);
         await mutate("/api/classes");
+        setOpen(false);
       } else {
         toast.error(result.message || "Error creating a class.");
       }
-    } catch (error) {
-      console.error("Error creating a class:", error);
+    } catch (err) {
+      console.error("Error creating a class:", err);
       toast.error("Error creating a class. Please try again.");
     }
   };
@@ -127,15 +124,16 @@ export function ClassesModal() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
-          variant={"outline"}
+          variant="outline"
         >
           Add Class
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-md w-full max-h-[90vh] overflow-hidden">
         <div className="flex flex-col h-full max-h-[90vh]">
           <DialogHeader className="px-1 pt-1">
@@ -203,10 +201,8 @@ export function ClassesModal() {
                         variant="ghost"
                         onClick={() => {
                           if (fields.length === 1) {
-                            // If it's the last field, reset its value instead of removing
                             setValue(`coaches.0.coachId`, "");
                           } else {
-                            // Otherwise remove the field as normal
                             remove(index);
                           }
                         }}
@@ -281,12 +277,13 @@ export function ClassesModal() {
                     />
                   </div>
                 </div>
+
                 {preview && (
                   <div className="flex justify-center mt-2">
                     <Image
                       width={96}
                       height={96}
-                      src={preview || "/placeholder.svg"}
+                      src={preview}
                       alt="Preview"
                       className="w-24 h-24 object-cover rounded-md"
                     />
@@ -296,23 +293,21 @@ export function ClassesModal() {
             </form>
           </div>
 
-          <div className="border-t p-4 mt-auto">
-            <DialogFooter className="gap-2">
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Close
-                </Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                form="class-form"
-                className="bg-black hover:bg-gray-800"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Creating..." : "Create"}
+          <DialogFooter className="border-t py-6 mt-auto gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
               </Button>
-            </DialogFooter>
-          </div>
+            </DialogClose>
+            <Button
+              type="submit"
+              form="class-form"
+              className="bg-black hover:bg-gray-800"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
