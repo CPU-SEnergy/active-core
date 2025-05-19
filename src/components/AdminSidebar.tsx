@@ -41,7 +41,7 @@ const menuItems = [
       </svg>
     ),
     href: "/admin",
-    roles: ["admin"],
+    roles: ["admin", "cashier"],
   },
   {
     title: "Sales",
