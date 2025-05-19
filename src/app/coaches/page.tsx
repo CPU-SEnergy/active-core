@@ -1,20 +1,16 @@
+"use client";
+
+import fetcher from "@/lib/fetcher";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import useSWR from "swr";
 
-async function fetchCoaches() {
-  try {
-    const res = await fetch("http://localhost:3000/api/coaches/", {
-      next: { revalidate: 60000 },
-    });
-    if (!res.ok) {
-      throw new Error("Failed to fetch coaches");
-    }
-    return await res.json();
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
+interface Coach {
+  id: string;
+  name: string;
+  specialization: string;
+  imageUrl: string;
 }
 
 interface CoachSectionProps {
@@ -66,8 +62,28 @@ function CoachSection({
   );
 }
 
-export default async function CoachDeck() {
-  const coaches: Coach[] = await fetchCoaches();
+export default function CoachDeck() {
+  const {
+    data: coaches,
+    isLoading,
+    error,
+  } = useSWR<Coach[]>("/api/coaches", fetcher);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-xl">Loading coaches...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-xl text-red-500">Failed to load coaches.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -90,7 +106,7 @@ export default async function CoachDeck() {
       </div>
 
       <div className="container mx-auto px-4 py-16 space-y-24">
-        {coaches.map((coach, index) => (
+        {coaches?.map((coach, index) => (
           <CoachSection
             key={coach.id}
             name={coach.name}
