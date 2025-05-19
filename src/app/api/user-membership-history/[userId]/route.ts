@@ -1,6 +1,15 @@
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
-import { db, Schema } from "@/lib/schema/firestore";
+import { db } from "@/lib/schema/firestore";
 import { NextResponse } from "next/server";
+
+interface UserHistoryProps {
+  id: string;
+  name: string;
+  duration: number;
+  startDate: Date;
+  expiryDate: Date;
+  amount: number;
+}
 
 export async function GET(
   request: Request,
@@ -18,54 +27,27 @@ export async function GET(
 
     const userId = db.users.id(params.userId);
 
-    const membershipHistory = await db.membershipHistory.query(($) =>
-      $.field("userId").eq(userId)
-    );
+    const payments = await db.payments.query(($) => [
+      $.field("customerId").eq(userId),
+    ]);
 
-    if (membershipHistory.length === 0) {
+    if (payments.length === 0) {
       return NextResponse.json(
         { error: "No membership history found for the provided user ID." },
         { status: 404 }
       );
     }
 
-    const paymentResults = await Promise.all(
-      membershipHistory.map(async (history) => {
-        const paymentId = history?.data.paymentId;
-
-        if (!paymentId) {
-          console.warn(
-            `Missing paymentId for history entry: ${history.ref.id}`
-          );
-          return null;
-        }
-
-        try {
-          const payment = await db.payments.get(paymentId);
-          return payment?.data || null;
-        } catch (error) {
-          console.error(`Error fetching payment ${paymentId}:`, error);
-          return null;
-        }
-      })
-    );
-
-    const membershipHistoryData = paymentResults.filter(
-      (payment) => payment !== null
-    ) as Schema["payments"]["ServerData"][];
-
-    const data: UserHistoryProps[] = membershipHistoryData.map((history) => ({
-      id: history.id,
-      name: history.availedPlan.name,
-      duration: history.availedPlan.duration,
-      startDate: history.availedPlan.startDate,
-      expiryDate: history.availedPlan.expiryDate,
-      amount: history.availedPlan.amount,
+    const data: UserHistoryProps[] = payments.map(({ data }) => ({
+      id: data.id,
+      name: data.availedPlan.name,
+      duration: data.availedPlan.duration,
+      startDate: data.availedPlan.startDate,
+      expiryDate: data.availedPlan.expiryDate,
+      amount: data.availedPlan.amount,
     }));
 
-    return NextResponse.json({
-      data,
-    });
+    return NextResponse.json({ data });
   } catch (error) {
     console.error("Error fetching membership history:", error);
 

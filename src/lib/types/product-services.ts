@@ -34,16 +34,12 @@ export interface COACHDATA {
 export interface MEMBERSHIPDATA {
   id: number;
   name: string;
-  type: string;
   description: string;
-  price: {
-    regular: number;
-    student: number;
-    discount: number;
-  };
+  price: number;
   duration: number;
   status: "active" | "archived";
-  planDateEnd?: Date;
+  planType: "individual" | "package" | "walk-in";
+  createdAt: Date;
 }
 
 export interface CLASSDATA {

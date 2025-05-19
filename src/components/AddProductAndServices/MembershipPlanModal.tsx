@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+"use client";
+
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,9 +24,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { DialogTrigger } from "@radix-ui/react-dialog";
 import membershipPlanSchema from "@/lib/zod/schemas/membershipPlanFormSchema";
 import { createMembershipPlan } from "@/app/actions/admin/createMembershipPlan";
 import { mutate } from "swr";
@@ -31,61 +34,54 @@ import { mutate } from "swr";
 type FormData = z.infer<typeof membershipPlanSchema>;
 
 export function MembershipPlanForm() {
+  const [open, setOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
     control,
     reset,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(membershipPlanSchema),
     defaultValues: {
       name: "",
       description: "",
-      price: { regular: 0, student: 0, discount: 0 },
+      price: 0,
       duration: 0,
       status: "active",
+      planType: "individual", // updated field name here
     },
   });
-
-  const discountPrice = watch("price.discount");
 
   const onSubmit = async (data: FormData) => {
     try {
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("description", data.description);
-      formData.append("price", JSON.stringify(data.price));
+      formData.append("price", data.price.toString());
       formData.append("duration", data.duration.toString());
       formData.append("status", data.status);
+      formData.append("planType", data.planType);
 
-      if (data.planDateEnd) {
-        formData.append(
-          "planDateEnd",
-          new Date(data.planDateEnd).toISOString()
-        );
-      }
       const result = await createMembershipPlan(formData);
-      console.log("Membership plan data:", data);
 
       if (result.status === 201) {
         toast.success("Membership plan created successfully!");
         mutate("/api/membership-plan");
+        setOpen(false);
+        reset();
       } else {
         toast.error(result.message || "Failed to create membership plan.");
-        console.log(result);
       }
     } catch (err) {
       console.error(err);
       toast.error("An unexpected error occurred.");
-    } finally {
-      reset();
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
@@ -121,24 +117,19 @@ export function MembershipPlanForm() {
             )}
           </div>
 
-          {(["regular", "student", "discount"] as const).map((type) => (
-            <div key={type}>
-              <Label
-                htmlFor={type}
-              >{`${type.charAt(0).toUpperCase() + type.slice(1)} Price`}</Label>
-              <Input
-                id={type}
-                type="number"
-                min="0"
-                {...register(`price.${type}`)}
-              />
-              {errors.price?.[type] && (
-                <p className="text-sm text-red-500">
-                  {errors.price[type]?.message}
-                </p>
-              )}
-            </div>
-          ))}
+          <div>
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              step="0.01"
+              {...register("price", { valueAsNumber: true })}
+            />
+            {errors.price && (
+              <p className="text-sm text-red-500">{errors.price.message}</p>
+            )}
+          </div>
 
           <div>
             <Label htmlFor="duration">Duration (days)</Label>
@@ -146,10 +137,33 @@ export function MembershipPlanForm() {
               id="duration"
               type="number"
               min="1"
-              {...register("duration")}
+              {...register("duration", { valueAsNumber: true })}
             />
             {errors.duration && (
               <p className="text-sm text-red-500">{errors.duration.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="planType">Plan Type</Label>
+            <Controller
+              control={control}
+              name="planType"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select plan type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="individual">Individual</SelectItem>
+                    <SelectItem value="package">Package</SelectItem>
+                    <SelectItem value="walk-in">Walk-in</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.planType && (
+              <p className="text-sm text-red-500">{errors.planType.message}</p>
             )}
           </div>
 
@@ -174,24 +188,6 @@ export function MembershipPlanForm() {
               <p className="text-sm text-red-500">{errors.status.message}</p>
             )}
           </div>
-
-          {discountPrice > 0 && (
-            <div>
-              <Label htmlFor="planDateEnd">
-                Plan End Date (for Special Price Promo)
-              </Label>
-              <Input
-                id="planDateEnd"
-                type="date"
-                {...register("planDateEnd")}
-              />
-              {errors.planDateEnd && (
-                <p className="text-sm text-red-500">
-                  {errors.planDateEnd.message}
-                </p>
-              )}
-            </div>
-          )}
 
           <DialogFooter>
             <DialogClose asChild>

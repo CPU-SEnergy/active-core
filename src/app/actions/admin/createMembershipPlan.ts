@@ -20,30 +20,22 @@ export async function createMembershipPlan(formData: FormData) {
 
   console.log("FormData entries:", Array.from(formData.entries()));
 
-  let parsedPrice;
   const rawPrice = formData.get("price");
+  const parsedPrice = rawPrice ? Number(rawPrice) : 0;
 
-  try {
-    parsedPrice = rawPrice
-      ? JSON.parse(rawPrice as string)
-      : { regular: 0, student: 0, discount: 0 };
-  } catch (error) {
-    console.error("Error parsing price:", error);
+  if (isNaN(parsedPrice)) {
     return { message: "Invalid price format", status: 400 };
   }
 
+  // Prepare raw data for validation (no planDateEnd here)
   const rawData: any = {
     name: formData.get("name"),
     description: formData.get("description"),
     duration: Number(formData.get("duration")),
     price: parsedPrice,
     status: formData.get("status"),
+    planType: formData.get("planType"),
   };
-
-  const planDateEnd = formData.get("planDateEnd");
-  if (planDateEnd) {
-    rawData.planDateEnd = planDateEnd;
-  }
 
   const parse = membershipPlanSchema.safeParse(rawData);
   if (!parse.success) {
@@ -64,15 +56,11 @@ export async function createMembershipPlan(formData: FormData) {
       name: data.name,
       description: data.description,
       duration: data.duration,
-      price: {
-        regular: data.price.regular,
-        student: data.price.student,
-        discount: data.price.discount,
-      },
+      price: data.price,
       status: data.status,
+      planType: data.planType,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...(data.planDateEnd && { planDateEnd: new Date(data.planDateEnd) }),
     };
 
     await db.membershipPlan.add(membershipPlanData, {
