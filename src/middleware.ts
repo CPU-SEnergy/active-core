@@ -11,6 +11,7 @@ import { clientConfig, serverConfig } from "@/lib/config";
 
 const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
 const cashierAllowedRoutes = [
+  "/admin",
   "/admin/active-customer",
   "/admin/inactive-customer",
   "/admin/messages",
