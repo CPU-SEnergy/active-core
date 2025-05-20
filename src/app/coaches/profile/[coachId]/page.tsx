@@ -93,7 +93,7 @@ export default function CoachDetail({
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4 pt-20">
-        <div className="my-6">
+        <div className="my-4">
           <Link href="/coaches" passHref>
             <Button variant="outline" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
@@ -227,10 +227,6 @@ export default function CoachDetail({
                         </div>
                       </div>
                     )}
-                  </div>
-
-                  <div className="mt-6">
-                    <Button className="w-full">Book a Session</Button>
                   </div>
                 </CardContent>
               </Card>
