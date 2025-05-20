@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
@@ -10,6 +9,8 @@ import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
 import Link from "next/link"
 import { getISOWeek } from "date-fns"
 import Footer from "@/components/Footer"
+
+
 
 // Custom animations
 const smokeRevealKeyframes = `
@@ -77,6 +78,8 @@ const smokeOverlayKeyframes = `
     }
   }
 `
+
+
 
 // Add new animation for champions background
 const championsBackgroundKeyframes = `
@@ -392,7 +395,7 @@ export default function HomePage() {
         <div className="relative h-full w-full overflow-hidden">
           {/* Video Background */}
           <video autoPlay muted loop className="absolute inset-0 w-full h-full object-cover">
-            <source src="/videos/official imaa.MOV" type="video/mp4" />
+            <source src="/videos/imaa promo.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -420,17 +423,22 @@ export default function HomePage() {
           >
             <div className="text-center px-4 max-w-4xl mx-auto relative z-40">
               <h1
-                className="text-5xl md:text-7xl font-bold text-white mb-6 animate-smoke-reveal"
+                className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"
                 style={{
-                  textShadow: "0 0 20px rgba(0, 0, 0, 0.7)",
+                  textShadow: `
+                    0 0 4px rgb(255, 255, 255),
+                    0 0 8px rgba(255, 255, 255, 0.4)
+                  `,
                   transform: `translateY(${scrollY * -0.3}px)`,
                   animation: "smokeReveal 2s forwards",
                 }}
               >
                 ILOILO MARTIAL ARTIST ASSOCIATION
               </h1>
+
+
               <p
-                className="text-xl md:text-2xl text-white mb-8"
+                className="text-xl md:text-2xl text-white mb-8 py-5"
                 style={{
                   transform: `translateY(${scrollY * -0.2}px)`,
                   animation: "comingSoon 2s forwards",
@@ -823,7 +831,7 @@ export default function HomePage() {
         <section
           className="py-16 bg-gray-50 relative"
           style={{
-            backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
+            //backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
