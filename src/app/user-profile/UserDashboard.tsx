@@ -95,7 +95,7 @@ export default function UserDashboard({ uid }: UserDashboardProps) {
     : "Not specified";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 md:p-8 pt-16 md:pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 md:p-8 pt-24 md:pt-24">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-center items-center">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">

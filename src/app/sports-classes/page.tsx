@@ -66,27 +66,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-white bg-black">
-      <div className="w-full h-[50vh] relative flex items-center justify-center">
-        <Image
-          src="/placeholder.svg?height=800&width=1600"
-          alt="Gym hero image"
-          fill
-          className="object-cover brightness-50"
-          priority
-        />
-        <div className="relative z-10 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold">CLASSES</h1>
-          <p className="mt-4 text-xl">
-            {" "}
-            &quot;The journey in combat sports is not just about the
-            victories.&quot;
-            <br />
-            &quot;It is about the character forged in the fires of
-            struggle.&quot;
-          </p>
-        </div>
+      <div className="relative z-10 text-center py-24 md:py-32 px-4">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold">
+          CLASSES
+        </h1>
+        <p className="mt-4 text-lg sm:text-xl md:text-2xl max-w-md mx-auto md:max-w-none">
+          &quot;The journey in combat sports is not just about the
+          victories.&quot;
+          <br />
+          &quot;It is about the character forged in the fires of struggle.&quot;
+        </p>
       </div>
-
       <div className="container mx-auto px-4 py-8 space-y-24">
         {classes &&
           classes.map((cls, index) => (

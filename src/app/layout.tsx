@@ -7,8 +7,8 @@ import { serverConfig, clientConfig } from "@/lib/config";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { toUser } from "@/utils/helpers/user";
 import Navbar from "@/components/navbar";
-import { Toaster } from "@/components/ui/toaster";
 import ChatWidget from "../components/ChatWidget";
+import { Toaster } from "sonner";
 
 
 const geistSans = localFont({

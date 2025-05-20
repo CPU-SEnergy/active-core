@@ -93,7 +93,7 @@ export default function CoachDetail({
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4 pt-20">
-        <div className="my-6">
+        <div className="my-4">
           <Link href="/coaches" passHref>
             <Button variant="outline" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
@@ -141,24 +141,6 @@ export default function CoachDetail({
                     </div>
                   )}
                 </div>
-
-                {/* Status indicator */}
-                {coach.isActive !== undefined && (
-                  <div className="mt-4 md:mt-0">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-                        coach.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      <span
-                        className={`h-2 w-2 rounded-full mr-2 ${coach.isActive ? "bg-green-500" : "bg-gray-500"}`}
-                      ></span>
-                      {coach.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -245,10 +227,6 @@ export default function CoachDetail({
                         </div>
                       </div>
                     )}
-                  </div>
-
-                  <div className="mt-6">
-                    <Button className="w-full">Book a Session</Button>
                   </div>
                 </CardContent>
               </Card>

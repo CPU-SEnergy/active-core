@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -29,7 +28,7 @@ import { toast } from "sonner";
 import { mutate } from "swr";
 import membershipPlanSchema from "@/lib/zod/schemas/membershipPlanFormSchema";
 import { editMembershipPlan } from "@/app/actions/admin/products-services/editMembershipPlan";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 
 type FormData = z.infer<typeof membershipPlanSchema>;
 
@@ -52,8 +51,8 @@ export function EditMembershipPlanModal({
     defaultValues: {
       name: data.name,
       description: data.description,
-      price: data.price,
-      duration: data.duration,
+      price: Number(data.price),
+      duration: Number(data.duration),
       planType: data.planType,
     },
   });
@@ -62,7 +61,7 @@ export function EditMembershipPlanModal({
     try {
       setIsLoadingPlanData(true);
 
-      const response = await fetch(`/api/membership-plan/${data.id}`);
+      const response = await fetch(`/api/membershipPlans/${data.id}`);
 
       if (!response.ok) {
         throw new Error(
@@ -81,8 +80,8 @@ export function EditMembershipPlanModal({
       reset({
         name: latestData.name,
         description: latestData.description,
-        price: latestData.price,
-        duration: latestData.duration,
+        price: Number(latestData.price),
+        duration: Number(latestData.duration),
         planType: latestData.planType,
       });
 
@@ -102,16 +101,27 @@ export function EditMembershipPlanModal({
       updatedFormData.append("id", data.id);
       updatedFormData.append("name", formData.name);
       updatedFormData.append("description", formData.description);
-      updatedFormData.append("price", JSON.stringify(formData.price));
+
+      updatedFormData.append("price", formData.price.toString());
       updatedFormData.append("duration", formData.duration.toString());
+
       updatedFormData.append("planType", formData.planType);
+
+      console.log("Submitting form data:", {
+        id: data.id,
+        name: formData.name,
+        description: formData.description,
+        price: formData.price.toString(),
+        duration: formData.duration.toString(),
+        planType: formData.planType,
+      });
 
       const result = await editMembershipPlan(updatedFormData);
 
       if (result.status === 200) {
-        toast.success("Membership plan updated successfully!");
-        await mutate("/api/membership-plan");
         setOpen(false);
+        toast.success("Membership plan updated successfully!");
+        await mutate("/api/membershipPlans");
       } else {
         toast.error(result.message || "Error updating membership plan.");
       }
@@ -151,7 +161,7 @@ export function EditMembershipPlanModal({
         {isLoadingPlanData ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-2">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-black"></div>
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
               <p className="text-sm text-gray-500">Loading latest data...</p>
             </div>
           </div>
@@ -176,7 +186,7 @@ export function EditMembershipPlanModal({
             </div>
 
             <div>
-              <Label htmlFor="description">Price</Label>
+              <Label htmlFor="price">Price</Label>
               <Input
                 id="price"
                 type="number"
@@ -184,14 +194,19 @@ export function EditMembershipPlanModal({
                 step="0.01"
                 {...register("price", { valueAsNumber: true })}
               />
+              {errors.price && (
+                <p className="text-sm text-red-500">{errors.price.message}</p>
+              )}
             </div>
+
             <div>
               <Label htmlFor="duration">Duration (days)</Label>
               <Input
                 id="duration"
                 type="number"
+                step="1"
                 min="1"
-                {...register("duration")}
+                {...register("duration", { valueAsNumber: true })}
               />
               {errors.duration && (
                 <p className="text-sm text-red-500">
@@ -241,7 +256,14 @@ export function EditMembershipPlanModal({
                 className="w-full"
                 disabled={isSubmitting || isLoadingPlanData}
               >
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </DialogFooter>
           </form>
