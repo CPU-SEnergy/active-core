@@ -503,7 +503,7 @@ export default function HomePage() {
         </section>
 
         {/* Meet the Champions! */}
-        <section className="py-24 bg-white relative overflow-hidden">
+        <section className="py-24 bg-white relative overflow-fixed">
           {/* Animated Background */}
           <div
             className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"

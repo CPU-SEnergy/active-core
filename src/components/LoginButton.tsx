@@ -11,9 +11,9 @@ export default function LoginButton() {
     <Button
       variant={"default"}
       onClick={() => router.push("/auth/login")}
-      className="text-gray-300 bg-green-600 px-5 hover:bg-green-700 text-lg md:text-base"
+      className="text-black-600 bg-white border border-gray-900 px-5 text-lg md:text-base hover:bg-black hover:text-white transition-colors duration-300"
     >
-      Sign In
+      Login
     </Button>
   );
 }

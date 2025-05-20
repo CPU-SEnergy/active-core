@@ -31,7 +31,7 @@ export default function Footer() {
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-6 justify-center md:justify-start mt-4">
+              <div className="flex space-x-9 justify-center md:justify-start mt-9">
                 <SocialIcon icon={<Facebook className="h-6 w-6" />} />
               </div>
             </div>
