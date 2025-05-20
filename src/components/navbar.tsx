@@ -42,11 +42,8 @@ export default function Navbar() {
     "My Profile": "/user-profile",
   }
 
-  const isActive = (href: string) => pathname === href
-
-  // Define the semi-transparent style that will be used for:
-  // 1. Home page when scrolled
-  // 2. Other pages all the time (regardless of scroll position)
+  const isActive = (href: string) => pathname === href;
+  const isAdmin = user?.customClaims?.role === "admin" || user?.customClaims?.role === "cashier";
   const semiTransparentStyle = "bg-black/80 backdrop-blur-sm"
 
   // Determine the navbar style based on the current page and scroll position
@@ -110,6 +107,14 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
           >
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-black hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
+              >
+                Admin Page
+              </Link>
+            )}
             <LogoutButton user={user} />
           </motion.div>
 

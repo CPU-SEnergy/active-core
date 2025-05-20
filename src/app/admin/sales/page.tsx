@@ -5,6 +5,69 @@ import SalesMetrics from "../../../components/salesComponents/salesMetrics";
 import EarningsChart from "../../../components/salesComponents/earningsChart";
 import DonutCharts from "@/components/salesComponents/donutChart";
 import MembershipChart from "@/components/salesComponents/membershipChart";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+
+function SalesSkeleton() {
+  return (
+    <div className="space-y-6 w-screen">
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Sales Metrics Card */}
+        <div className="md:col-span-1">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Earnings Chart */}
+        <div className="md:col-span-2">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-[300px] w-full" />
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Bottom Charts */}
+      <div className="flex flex-row gap-6">
+        {/* Donut Chart */}
+        <div className="flex-1">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-[200px] w-[200px] rounded-full mx-auto" />
+            </div>
+          </Card>
+        </div>
+
+        {/* Membership Chart */}
+        <div className="flex-1">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-40" />
+              <Skeleton className="h-[200px] w-full" />
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 interface SalesData {
   earnings: number[];
@@ -57,11 +120,15 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <SalesSkeleton />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="p-6 text-center">
+        <div className="text-red-500 font-medium">Error: {error}</div>
+      </div>
+    );
   }
 
   return (

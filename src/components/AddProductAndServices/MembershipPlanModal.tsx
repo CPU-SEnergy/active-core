@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import membershipPlanSchema from "@/lib/zod/schemas/membershipPlanFormSchema";
-import { createMembershipPlan } from "@/app/actions/admin/createMembershipPlan";
+import { createMembershipPlan } from "@/app/actions/admin/products-services/createMembershipPlan";
 import { mutate } from "swr";
 
 type FormData = z.infer<typeof membershipPlanSchema>;
@@ -49,7 +49,6 @@ export function MembershipPlanForm() {
       description: "",
       price: 0,
       duration: 0,
-      status: "active",
       planType: "individual", // updated field name here
     },
   });
@@ -61,7 +60,6 @@ export function MembershipPlanForm() {
       formData.append("description", data.description);
       formData.append("price", data.price.toString());
       formData.append("duration", data.duration.toString());
-      formData.append("status", data.status);
       formData.append("planType", data.planType);
 
       const result = await createMembershipPlan(formData);
@@ -164,28 +162,6 @@ export function MembershipPlanForm() {
             />
             {errors.planType && (
               <p className="text-sm text-red-500">{errors.planType.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.status && (
-              <p className="text-sm text-red-500">{errors.status.message}</p>
             )}
           </div>
 

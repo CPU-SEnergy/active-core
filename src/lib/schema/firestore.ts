@@ -3,7 +3,7 @@ import { schema, Typesaurus } from "typesaurus";
 export const db = schema(
   ($) => ({
     users: $.collection<User>(),
-    membershipPlan: $.collection<MembershipPlan>(),
+    membershipPlans: $.collection<MembershipPlan>(),
     payments: $.collection<Payment>(),
     kpis: $.collection<KPIs>().sub({ months: $.collection<MonthKPI>() }),
     customers: $.collection<Customers>(),
@@ -38,14 +38,14 @@ interface MembershipPlan {
   description: string;
   duration: number;
   price: number;
-  status: "active" | "archived";
+  isActive: boolean;
   planType: "individual" | "package" | "walk-in";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
 
 interface AvailedPlan {
-  membershipPlanId: Schema["membershipPlan"]["Id"];
+  membershipPlanId: Schema["membershipPlans"]["Id"];
   name: string;
   amount: number;
   duration: number;
@@ -56,12 +56,20 @@ interface AvailedPlan {
 interface Payment {
   id: string;
   paymentMethod: string;
-  status: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  customerId: string;
-  customerType: "user" | "walk-in";
+  isWalkIn: "user" | "walk-in";
+  customer: CustomerBasicInfo;
   availedPlan: AvailedPlan;
+}
+
+interface CustomerBasicInfo {
+  customerId:
+    | Schema["walkInCustomers"]["Data"]["userId"]
+    | Schema["customer"]["Data"]["userId"];
+  firstName: string;
+  lastName: string;
+  type: "regular" | "student";
 }
 
 interface KPIs {
@@ -84,6 +92,7 @@ export interface Apparels {
   imageUrl: string;
   description: string;
   type: string;
+  isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
@@ -97,6 +106,7 @@ interface Coaches {
   imageUrl: string;
   contactInfo: string;
   certifications: string[];
+  isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
@@ -107,6 +117,7 @@ interface Classes {
   imageUrl?: string;
   schedule: string;
   coachId: Schema["coaches"]["Id"][];
+  isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
@@ -130,5 +141,5 @@ interface WalkInCustomer {
   email: string;
   type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
-  linkedUserId?: Schema["users"]["Id"];
+  userId?: Schema["users"]["Id"];
 }
