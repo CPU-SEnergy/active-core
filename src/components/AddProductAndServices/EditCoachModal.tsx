@@ -132,9 +132,11 @@ export function EditCoach({ data }: { data: COACHDATA }) {
     updatedFormData.append("experience", formData.experience.toString());
     updatedFormData.append("bio", formData.bio);
 
-    formData.certifications.forEach((cert) =>
-      updatedFormData.append("certifications", cert)
-    );
+    if (formData.certifications) {
+      formData.certifications.forEach((cert) => {
+        if (cert) updatedFormData.append("certifications", cert);
+      });
+    }
 
     updatedFormData.append("existingImageUrl", data.imageUrl);
     if (formData.image instanceof File) {
@@ -148,6 +150,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
 
         reset();
         await mutate("/api/coaches");
+        setOpen(false);
       } else {
         toast.error(result.message || "Error updating coach.");
       }
@@ -188,8 +191,8 @@ export function EditCoach({ data }: { data: COACHDATA }) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+            <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" {...register("name")} />
               {errors.name && (
@@ -197,7 +200,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
               )}
             </div>
 
-            <div>
+            <div className="grid gap-2">
               <Label htmlFor="specialization">Specialization</Label>
               <Input id="specialization" {...register("specialization")} />
               {errors.specialization && (
@@ -207,7 +210,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
               )}
             </div>
 
-            <div>
+            <div className="grid gap-2">
               <Label htmlFor="dob">Date of Birth</Label>
               <Input id="dob" type="date" {...register("dob")} />
               {errors.dob && (
@@ -215,7 +218,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
               )}
             </div>
 
-            <div>
+            <div className="grid gap-2">
               <Label htmlFor="contactInfo">Contact Info</Label>
               <Input id="contactInfo" {...register("contactInfo")} />
               {errors.contactInfo && (
@@ -225,8 +228,8 @@ export function EditCoach({ data }: { data: COACHDATA }) {
               )}
             </div>
 
-            <div>
-              <Label htmlFor="experience">Experience</Label>
+            <div className="grid gap-2">
+              <Label htmlFor="experience">Years Experience</Label>
               <Input
                 id="experience"
                 type="number"
@@ -240,27 +243,47 @@ export function EditCoach({ data }: { data: COACHDATA }) {
               )}
             </div>
 
-            <div>
+            <div className="grid gap-2">
               <Label>Certifications</Label>
               {fields.map((field, index) => (
-                <div key={field.id} className="flex items-center gap-2">
-                  <Input {...register(`certifications.${index}` as const)} />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash className="h-4 w-4 text-red-500" />
-                  </Button>
+                <div key={field.id} className="flex flex-col w-full mb-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Enter certification"
+                      {...register(`certifications.${index}` as const)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => remove(index)}
+                      className="flex-shrink-0"
+                    >
+                      <Trash className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                  {errors.certifications &&
+                    Array.isArray(errors.certifications) &&
+                    errors.certifications[index] && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {(errors.certifications[index] as any).message}
+                      </p>
+                    )}
                 </div>
               ))}
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => append("")}
+                className="mt-2"
               >
                 + Add Certification
               </Button>
+              {errors.certifications &&
+                !Array.isArray(errors.certifications) && (
+                  <p className="text-sm text-red-500 mt-2">
+                    {errors.certifications.message}
+                  </p>
+                )}
             </div>
 
             <div className="grid gap-2">

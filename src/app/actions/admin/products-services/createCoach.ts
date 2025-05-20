@@ -75,7 +75,7 @@ export async function createCoach(formData: FormData) {
       experience: data.experience,
       imageUrl: fileUrl.url,
       contactInfo: data.contactInfo,
-      certifications: data.certifications,
+      certifications: data.certifications ?? [],
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),

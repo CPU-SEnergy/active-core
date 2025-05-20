@@ -127,6 +127,7 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
       if (result.success) {
         toast.success("Apparel updated successfully!");
         mutate("/api/apparels");
+        setOpen(false);
       } else {
         toast.error(result.message || "Failed to update apparel.");
         console.log(result);

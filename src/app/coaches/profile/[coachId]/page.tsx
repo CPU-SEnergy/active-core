@@ -49,7 +49,7 @@ export default function CoachDetail({
             Error Loading Coach
           </h1>
           <p className="text-gray-600 my-6">
-            We couldn't load the coach information. Please try again later.
+            We couldn&apos;t load the coach information. Please try again later.
           </p>
           <Link href="/coaches" passHref>
             <Button>
@@ -70,7 +70,8 @@ export default function CoachDetail({
             Coach Not Found
           </h1>
           <p className="text-gray-600 my-6">
-            The coach you're looking for doesn't exist or has been removed.
+            The coach you&apos;re looking for doesn&apos;t exist or has been
+            removed.
           </p>
           <Link href="/coaches" passHref>
             <Button>
@@ -83,12 +84,10 @@ export default function CoachDetail({
     );
   }
 
-  // Format specializations into an array
   const specializations = coach.specialization
     ? coach.specialization.split(",").map((s) => s.trim())
     : [];
 
-  // Get the image URL from either image or imageUrl property
   const imageUrl = coach.imageUrl || coach.image || "/placeholder.svg";
 
   return (
