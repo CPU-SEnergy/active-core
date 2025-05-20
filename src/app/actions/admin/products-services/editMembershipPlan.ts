@@ -27,7 +27,6 @@ export async function editMembershipPlan(formData: FormData) {
 
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
-
     const priceRaw = formData.get("price");
     const durationRaw = formData.get("duration");
     const planType = formData.get("planType") as MEMBERSHIPDATA["planType"];
@@ -41,46 +40,22 @@ export async function editMembershipPlan(formData: FormData) {
       planType,
     });
 
-    let price: number;
-    try {
-      if (typeof priceRaw === "string") {
-        try {
-          const parsed = JSON.parse(priceRaw);
-          price = Number(parsed);
-        } catch (e) {
-          price = Number(priceRaw);
-        }
-      } else {
+    let price = Number(priceRaw);
+    if (typeof priceRaw === "string") {
+      try {
+        price = Number(JSON.parse(priceRaw));
+      } catch {
         price = Number(priceRaw);
       }
-    } catch (e) {
-      console.error("Error parsing price:", e);
-      return {
-        success: false,
-        message: "Invalid price format",
-        status: 400,
-      };
     }
 
-    let duration: number;
-    try {
-      if (typeof durationRaw === "string") {
-        try {
-          const parsed = JSON.parse(durationRaw);
-          duration = Number(parsed);
-        } catch (e) {
-          duration = Number(durationRaw);
-        }
-      } else {
+    let duration = Number(durationRaw);
+    if (typeof durationRaw === "string") {
+      try {
+        duration = Number(JSON.parse(durationRaw));
+      } catch {
         duration = Number(durationRaw);
       }
-    } catch (e) {
-      console.error("Error parsing duration:", e);
-      return {
-        success: false,
-        message: "Invalid duration format",
-        status: 400,
-      };
     }
 
     if (isNaN(price)) {
