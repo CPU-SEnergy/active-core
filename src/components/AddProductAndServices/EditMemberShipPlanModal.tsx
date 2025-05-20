@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,12 +39,14 @@ export function EditMembershipPlanModal({
   data: FormData & { id: string };
 }) {
   const [open, setOpen] = useState(false);
+  const [isLoadingPlanData, setIsLoadingPlanData] = useState(false);
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(membershipPlanSchema),
     defaultValues: {
@@ -55,6 +57,44 @@ export function EditMembershipPlanModal({
       planType: data.planType,
     },
   });
+
+  const fetchLatestPlanData = async () => {
+    try {
+      setIsLoadingPlanData(true);
+
+      const response = await fetch(`/api/membership-plan/${data.id}`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch membership plan data: ${response.statusText}`
+        );
+      }
+
+      const latestData = await response.json();
+
+      if (!latestData) {
+        toast.error("Failed to load the latest membership plan data.");
+        setIsLoadingPlanData(false);
+        return;
+      }
+
+      reset({
+        name: latestData.name,
+        description: latestData.description,
+        price: latestData.price,
+        duration: latestData.duration,
+        planType: latestData.planType,
+      });
+
+      setIsLoadingPlanData(false);
+    } catch (error) {
+      console.error("Error fetching latest membership plan data:", error);
+      toast.error(
+        "Failed to load the latest membership plan data. Please try again."
+      );
+      setIsLoadingPlanData(false);
+    }
+  };
 
   async function onSubmit(formData: FormData) {
     try {
@@ -82,7 +122,15 @@ export function EditMembershipPlanModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (newOpen) {
+          fetchLatestPlanData();
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           size="icon"
@@ -100,82 +148,104 @@ export function EditMembershipPlanModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Plan Name</Label>
-            <Input id="name" {...register("name")} />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name.message}</p>
-            )}
+        {isLoadingPlanData ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-black"></div>
+              <p className="text-sm text-gray-500">Loading latest data...</p>
+            </div>
           </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Input id="description" {...register("description")} />
-            {errors.description && (
-              <p className="text-sm text-red-500">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="description">Price</Label>
-            <Input
-              id="price"
-              type="number"
-              min="0"
-              step="0.01"
-              {...register("price", { valueAsNumber: true })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="duration">Duration (days)</Label>
-            <Input
-              id="duration"
-              type="number"
-              min="1"
-              {...register("duration")}
-            />
-            {errors.duration && (
-              <p className="text-sm text-red-500">{errors.duration.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="planType">Plan Type</Label>
-            <Controller
-              control={control}
-              name="planType"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select plan type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="individual">Individual</SelectItem>
-                    <SelectItem value="package">Package</SelectItem>
-                    <SelectItem value="walk-in">Walk-in</SelectItem>
-                  </SelectContent>
-                </Select>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Plan Name</Label>
+              <Input id="name" {...register("name")} />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
-            />
-            {errors.planType && (
-              <p className="text-sm text-red-500">{errors.planType.message}</p>
-            )}
-          </div>
+            </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary" className="w-full">
-                Cancel
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" {...register("description")} />
+              {errors.description && (
+                <p className="text-sm text-red-500">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="description">Price</Label>
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                {...register("price", { valueAsNumber: true })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="duration">Duration (days)</Label>
+              <Input
+                id="duration"
+                type="number"
+                min="1"
+                {...register("duration")}
+              />
+              {errors.duration && (
+                <p className="text-sm text-red-500">
+                  {errors.duration.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="planType">Plan Type</Label>
+              <Controller
+                control={control}
+                name="planType"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select plan type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="individual">Individual</SelectItem>
+                      <SelectItem value="package">Package</SelectItem>
+                      <SelectItem value="walk-in">Walk-in</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.planType && (
+                <p className="text-sm text-red-500">
+                  {errors.planType.message}
+                </p>
+              )}
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full"
+                  disabled={isLoadingPlanData}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || isLoadingPlanData}
+              >
+                {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
-            </DialogClose>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
-            </Button>
-          </DialogFooter>
-        </form>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

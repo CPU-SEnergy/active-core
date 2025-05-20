@@ -30,6 +30,7 @@ type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
 export function ApparelForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const {
     register,
@@ -57,6 +58,7 @@ export function ApparelForm() {
       if (result.status === 201) {
         toast.success("Apparel updated successfully!");
         mutate("/api/apparels");
+        setOpen(false);
       } else {
         toast.error(result.message || "Failed to update apparel.");
         console.log(result);
@@ -91,7 +93,7 @@ export function ApparelForm() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"

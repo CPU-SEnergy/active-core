@@ -5,10 +5,6 @@ import { getTokens } from "next-firebase-auth-edge";
 import { cookies, headers } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/config";
 
-interface UserRole {
-  role: "admin" | "cashier";
-}
-
 export default async function Layout({
   children,
 }: {

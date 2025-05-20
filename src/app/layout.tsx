@@ -56,7 +56,14 @@ export default async function RootLayout({
         <AuthProvider>
           <Navbar />
           {children}
+
           {user && <ChatWidget userId={user.uid} />}
+          {user &&
+            user.customClaims.role !== "admin" &&
+            user.customClaims.role !== "cashier" && (
+              <ChatWidget userId={user.uid} />
+            )}
+
           <Toaster />
         </AuthProvider>
       </body>

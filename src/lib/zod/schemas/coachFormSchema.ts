@@ -16,8 +16,8 @@ const coachFormSchema = z.object({
     z.number().gt(0, "Experience must be greater than 0")
   ),
   certifications: z
-    .array(z.string().min(1, "Certification is required"))
-    .min(1, { message: "At least one certification is required" }),
+    .array(z.string().min(1, "Certifications is required"))
+    .optional(),
   bio: z.string().min(1, "Bio is required"),
   image: z.preprocess(
     (val) => (typeof val === "string" ? undefined : val),
