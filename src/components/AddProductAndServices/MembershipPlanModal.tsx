@@ -49,7 +49,7 @@ export function MembershipPlanForm() {
       description: "",
       price: 0,
       duration: 0,
-      planType: "individual", // updated field name here
+      planType: "individual",
     },
   });
 
@@ -66,7 +66,7 @@ export function MembershipPlanForm() {
 
       if (result.status === 201) {
         toast.success("Membership plan created successfully!");
-        mutate("/api/membership-plan");
+        mutate("/api/membershipPlans");
         setOpen(false);
         reset();
       } else {

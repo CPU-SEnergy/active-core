@@ -105,7 +105,7 @@ interface Coaches {
   experience: number;
   imageUrl: string;
   contactInfo: string;
-  certifications: string[];
+  certifications?: string[];
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
@@ -116,7 +116,7 @@ interface Classes {
   description: string;
   imageUrl?: string;
   schedule: string;
-  coachId: Schema["coaches"]["Id"][];
+  coaches: Schema["coaches"]["Id"][];
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useEffect, useRef, useState } from "react"
@@ -257,20 +258,44 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     return null
   }
 
-  const sendMessage = async () => {
-    if (!input.trim()) return
-    if (!user) return
-    const database = getDatabase(app)
-    const messageRef = push(ref(database, `systemChats/${roomId}/messages`))
-    await set(messageRef, {
-      senderId: user.uid,
-      senderName: `${user.firstName} ${user.lastName}`,
-      text: input,
-      timestamp: Date.now(),
-    })
-    setInput("")
-    shouldScrollToBottomRef.current = true
+const sendMessage = async () => {
+  if (!input.trim()) return;
+  if (!user) return;
+
+  const database = getDatabase(app);
+  const roomRef = ref(database, `systemChats/${roomId}`);
+  const roomSnapshot = await get(roomRef);
+
+  if (!roomSnapshot.exists()) {
+    await set(roomRef, {
+      createdAt: Date.now(),
+      createdBy: user.uid,
+    });
   }
+
+  const participantRef = ref(database, `systemChats/${roomId}/participants/${user.uid}`);
+  const participantSnapshot = await get(participantRef);
+
+  if (!participantSnapshot.exists()) {
+    await set(participantRef, {
+      uid: user.uid,
+      name: `${user.firstName} ${user.lastName}`,
+      joinedAt: Date.now(),
+    });
+  }
+
+  const messageRef = push(ref(database, `systemChats/${roomId}/messages`));
+  await set(messageRef, {
+    senderId: user.uid,
+    senderName: `${user.firstName} ${user.lastName}`,
+    text: input,
+    timestamp: Date.now(),
+  });
+
+  setInput("");
+  shouldScrollToBottomRef.current = true;
+};
+
 
   if (!isOpen) {
     return (

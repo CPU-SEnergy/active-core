@@ -66,7 +66,7 @@ export async function createClass(formData: FormData) {
       name: data.name,
       schedule: data.schedule,
       description: data.description,
-      coachId: data.coaches.map(
+      coaches: data.coaches.map(
         (coach) => coach.coachId
       ) as unknown as Schema["coaches"]["Id"][],
       isActive: true,

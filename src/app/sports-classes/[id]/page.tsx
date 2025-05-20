@@ -5,36 +5,19 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { CLASSDATA } from "@/lib/types/product-services";
-import { useEffect, useState } from "react";
-
-interface COACHDATA {
-  id: string;
-  name: string;
-  image: string;
-  bio: string;
-}
+import type { CLASSDATA } from "@/lib/types/product-services";
+import CoachDisplay from "@/components/CoachDisplay";
 
 export default function Page({ params }: { params: { id: string } }) {
-  const [coaches, setCoaches] = useState<COACHDATA[]>([]);
   const {
     data: classData,
     error: classError,
     isLoading: classDataLoading,
   } = useSWR<CLASSDATA>(`/api/classes/${params.id}`, fetcher);
 
-  useEffect(() => {
-    if (classData?.coachId) {
-      Promise.all(
-        classData.coachId.map((id) =>
-          fetch(`/api/coaches/${id}`).then((res) => res.json())
-        )
-      ).then(setCoaches);
-    }
-  }, [classData]);
-
   if (classDataLoading) return <div>Loading...</div>;
   if (classError) return <div>Error loading classes</div>;
+
   return (
     <>
       {classData && (
@@ -98,7 +81,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className="w-full lg:w-1/2 relative order-1 lg:order-2 mt-10 mb-10 ">
               <Image
                 className="absolute inset-0 h-full w-full object-cover rounded-l-3xl"
-                src={classData.imageUrl}
+                src={classData.imageUrl || "/placeholder.svg"}
                 alt="Students practicing taekwondo in a traditional dojang"
                 width={1080}
                 height={1080}
@@ -111,21 +94,20 @@ export default function Page({ params }: { params: { id: string } }) {
             <h2 className="text-3xl font-bold mb-6">Meet Our Coaches</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {coaches.map((coach, index) => (
-                <Card key={index} className="coach-card">
-                  <CardContent className="p-4">
-                    <Image
-                      src={coach.image}
-                      alt={coach.name}
-                      width={150}
-                      height={150}
-                      className="rounded-full mb-4"
-                    />
-                    <div className="font-semibold text-lg">{coach.name}</div>
-                    <p className="text-sm text-muted-foreground">{coach.bio}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {classData.coaches && classData.coaches.length > 0 ? (
+                classData.coaches.map((coaches) => (
+                  <Card
+                    key={coaches}
+                    className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <CoachDisplay coachId={coaches} displayMode="card" />
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500">
+                  No coaches assigned to this class
+                </div>
+              )}
             </div>
           </div>
         </div>

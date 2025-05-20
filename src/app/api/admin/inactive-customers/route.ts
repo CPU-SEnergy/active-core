@@ -9,7 +9,12 @@ export async function GET() {
     const payments = await db.payments.all();
 
     const inactiveCustomers = payments
-      .filter((p) => new Date(p.data.availedPlan.expiryDate) <= new Date())
+      .filter(
+        (p) =>
+          p.data?.availedPlan?.expiryDate &&
+          new Date(p.data.availedPlan.expiryDate) <= new Date() &&
+          p.data?.customer?.customerId
+      )
       .map((p) => {
         const daysRemaining = differenceInDays(
           new Date(p.data.availedPlan.expiryDate),
@@ -21,7 +26,7 @@ export async function GET() {
           customerId: p.data.customer.customerId,
           requestNumber: `#${String(p.ref.id).padStart(6, "0")}`,
           timeApproved: p.data.createdAt
-            ? p.data.createdAt.toLocaleString()
+            ? new Date(p.data.createdAt).toLocaleString()
             : "N/A",
           subscription: p.data.availedPlan.name,
           remainingTime:
