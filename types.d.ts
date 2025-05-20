@@ -1,3 +1,7 @@
+interface UserRole {
+  role: "admin" | "cashier";
+}
+
 type ProductFormData = {
   name: string;
   price: string;
