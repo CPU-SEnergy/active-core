@@ -141,24 +141,6 @@ export default function CoachDetail({
                     </div>
                   )}
                 </div>
-
-                {/* Status indicator */}
-                {coach.isActive !== undefined && (
-                  <div className="mt-4 md:mt-0">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-                        coach.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      <span
-                        className={`h-2 w-2 rounded-full mr-2 ${coach.isActive ? "bg-green-500" : "bg-gray-500"}`}
-                      ></span>
-                      {coach.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
