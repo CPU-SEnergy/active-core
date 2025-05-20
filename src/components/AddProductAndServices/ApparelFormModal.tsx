@@ -1,13 +1,16 @@
 "use client";
 
+import type React from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload } from "lucide-react";
+import { Upload, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import apparelFormSchema from "@/lib/zod/schemas/apparelFormSchema";
@@ -15,17 +18,24 @@ import { mutate } from "swr";
 import { createApparel } from "@/app/actions/admin/products-services/createApparel";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { useState } from "react";
+} from "@/components/ui/dialog";
 
 type FormData = z.infer<ReturnType<typeof apparelFormSchema>>;
+
+const APPAREL_TYPES = [
+  { value: "gloves", label: "Gloves" },
+  { value: "t-shirt", label: "T-Shirt" },
+  { value: "pants", label: "Pants" },
+  { value: "jersey", label: "Jersey" },
+  { value: "shorts", label: "Shorts" },
+  { value: "tracksuits", label: "Tracksuits" },
+];
 
 export function ApparelForm() {
   const [preview, setPreview] = useState<string | null>(null);
@@ -40,7 +50,23 @@ export function ApparelForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(apparelFormSchema(false)),
+    defaultValues: {
+      name: "",
+      type: "",
+      price: 0,
+      description: "",
+      discount: undefined,
+    },
   });
+
+  // Cleanup URL object when component unmounts or preview changes
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -48,27 +74,30 @@ export function ApparelForm() {
       formData.append("name", data.name);
       formData.append("type", data.type);
       formData.append("price", data.price.toString());
-      formData.append("discount", data.discount?.toString() || "");
       formData.append("description", data.description);
+
+      if (data.discount !== undefined) {
+        formData.append("discount", data.discount.toString());
+      }
+
       if (data.image) {
         formData.append("image", data.image);
       }
 
       const result = await createApparel(formData);
       if (result.status === 201) {
-        toast.success("Apparel updated successfully!");
+        toast.success("Apparel created successfully!");
         mutate("/api/apparels");
         setOpen(false);
+        reset();
+        setPreview(null);
       } else {
-        toast.error(result.message || "Failed to update apparel.");
+        toast.error(result.message || "Failed to create apparel.");
         console.log(result);
       }
     } catch (err) {
       console.error(err);
       toast.error("An unexpected error occurred.");
-    } finally {
-      reset();
-      setPreview(null);
     }
   };
 
@@ -86,19 +115,36 @@ export function ApparelForm() {
   };
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/"))
-      return toast.error("Please upload an image file");
-    setValue("image", file);
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file");
+      return;
+    }
+    setValue("image", file, { shouldValidate: true });
     setPreview(URL.createObjectURL(file));
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+
+    // Only reset the form when closing the dialog
+    if (!newOpen && !isSubmitting) {
+      // Small delay to avoid visual glitches
+      setTimeout(() => {
+        reset();
+        setPreview(null);
+      }, 300);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
-          variant={"outline"}
+          variant="outline"
+          onClick={() => setOpen(true)}
         >
+          <Plus className="mr-2 h-5 w-5" />
           Add Apparel
         </Button>
       </DialogTrigger>
@@ -123,6 +169,7 @@ export function ApparelForm() {
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
+
           <div className="grid gap-2">
             <Label htmlFor="type">Type of Apparel</Label>
             <select
@@ -131,17 +178,17 @@ export function ApparelForm() {
               className="bg-gray-50 border rounded-md px-3 py-2"
             >
               <option value="">Select apparel type</option>
-              <option value="gloves">Gloves</option>
-              <option value="t-shirt">T-Shirt</option>
-              <option value="pants">Pants</option>
-              <option value="jersey">Jersey</option>
-              <option value="shorts">Shorts</option>
-              <option value="tracksuits">Tracksuits</option>
+              {APPAREL_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             </select>
             {errors.type && (
               <p className="text-sm text-red-500">{errors.type.message}</p>
             )}
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="price">Price</Label>
@@ -150,7 +197,7 @@ export function ApparelForm() {
                 type="number"
                 min="0.00"
                 step="0.01"
-                placeholder="Enter item price"
+                placeholder="Enter price"
                 className="bg-gray-50"
                 {...register("price")}
               />
@@ -158,9 +205,7 @@ export function ApparelForm() {
                 <p className="text-sm text-red-500">{errors.price.message}</p>
               )}
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="discount">Discount (Optional)</Label>
               <Input
@@ -168,7 +213,7 @@ export function ApparelForm() {
                 type="number"
                 min="0.00"
                 step="0.01"
-                placeholder="Enter discount price"
+                placeholder="Enter discount"
                 className="bg-gray-50"
                 {...register("discount")}
               />
@@ -194,10 +239,13 @@ export function ApparelForm() {
               </p>
             )}
           </div>
+
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
+                dragActive ? "border-black bg-gray-50" : ""
+              }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -213,16 +261,16 @@ export function ApparelForm() {
                   variant="outline"
                   className="mt-2"
                   onClick={() =>
-                    document.getElementById("file-upload")?.click()
+                    document.getElementById("add-file-upload")?.click()
                   }
                 >
                   Browse Files
                 </Button>
                 <input
-                  id="file-upload"
+                  id="add-file-upload"
                   type="file"
                   className="hidden"
-                  accept=".png,.jpg,.jpeg"
+                  accept="image/png,image/jpeg,image/jpg"
                   onChange={(e) =>
                     e.target.files?.[0] && handleFile(e.target.files[0])
                   }
@@ -234,32 +282,44 @@ export function ApparelForm() {
             )}
             {preview && (
               <div className="flex justify-center mt-2">
-                <Image
-                  width={96}
-                  height={96}
-                  src={preview}
-                  alt="Preview"
-                  className="w-24 h-24 object-cover rounded-md"
-                />
+                <div className="relative w-24 h-24">
+                  <Image
+                    fill
+                    src={preview || "/placeholder.svg"}
+                    alt="Preview"
+                    className="object-cover rounded-md"
+                    sizes="96px"
+                  />
+                </div>
               </div>
             )}
           </div>
-          <div className="flex justify-end gap-2">
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary" className="w-full">
-                  Close
-                </Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                className="bg-black hover:bg-gray-800"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Creating..." : "Create"}
-              </Button>
-            </DialogFooter>
-          </div>
+
+          <DialogFooter className="pt-4 flex flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={isSubmitting}
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto bg-black hover:bg-gray-800"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create"
+              )}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
