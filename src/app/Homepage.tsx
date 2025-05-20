@@ -145,7 +145,24 @@ export default function HomePage() {
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Generate particles for the champions section
+  const [coaches, setCoaches] = useState<
+    Array<{
+      id: string
+      name: string
+      specialization: string
+      imageUrl: string
+      bio?: string
+      experience?: string
+      certifications?: string[]
+      contact?: string
+      age?: number
+      [key: string]: unknown 
+    }>
+  >([])
+  const [isLoadingCoach, setIsLoadingCoach] = useState(true)
+  const [coachError, setCoachError] = useState<string | null>(null)
+
+
   useEffect(() => {
     const newParticles = []
     for (let i = 0; i < 20; i++) {
@@ -160,53 +177,45 @@ export default function HomePage() {
     setParticles(newParticles)
   }, [])
 
-  // Coach of the Week data
-  const coaches = [
-    {
-      name: "Coach Paiton Rey Gaitan",
-      rank: "5th Dan Black Belt",
-      image: "/pictures/payton gaitan.jpg",
-      bio: "With over 20 years of competitive experience and 15 years of coaching, Master Vasquez has produced multiple national and international champions in Brazilian Jiu-Jitsu and MMA.",
-      specialties: "BJJ, MMA, Grappling",
-      classes: "Advanced BJJ, Competition Training",
-    },
-    {
-      name: "Coach Zoey Jan Alejandra",
-      rank: "4th Dan Black Belt",
-      image: "/pictures/zoey alejandra.jpg",
-      bio: "A former national team member with Olympic experience, Sensei Reyes brings world-class striking techniques and competition strategies to her students.",
-      specialties: "Muay Thai, Boxing, Kickboxing",
-      classes: "Women's Self-Defense, Advanced Striking",
-    },
-    {
-      name: "Coach Jeffrey Punzalan",
-      rank: "Black Belt",
-      image: "/pictures/jeffrey punzalan.jpg",
-      bio: "Known for his technical precision and innovative training methods, Coach Santos specializes in developing competition-ready athletes with a focus on modern grappling techniques.",
-      specialties: "No-Gi Grappling, Wrestling",
-      classes: "Competition Team, Takedown Specialists",
-    },
-    {
-      name: "Coach Rho Fajutrao",
-      rank: "6th Dan Black Belt",
-      image: "/placeholder.svg?height=600&width=400&text=Master+Chen",
-      bio: "With over 30 years of traditional martial arts experience, Master Chen combines ancient wisdom with modern training methodologies to develop well-rounded martial artists.",
-      specialties: "Traditional Martial Arts, Kata, Forms",
-      classes: "Youth Program, Traditional Forms",
-    },
-  ]
-
-  // Add useEffect to automatically set coach based on current week of the year
-
+ 
   useEffect(() => {
-    const now = new Date()
-    const weekNumber = getISOWeek(now)
-    setCurrentCoachIndex(weekNumber % coaches.length)
+    const fetchCoaches = async () => {
+      setIsLoadingCoach(true)
+      setCoachError(null)
+
+      try {
+        const response = await fetch("/api/coaches")
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch coaches: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.error) {
+          throw new Error(data.error)
+        }
+
+        console.log("Coaches data from API:", data)
+        setCoaches(data)
+
+        // Set current coach based on week of year
+        const now = new Date()
+        const weekNumber = getISOWeek(now)
+        setCurrentCoachIndex(weekNumber % data.length)
+      } catch (error) {
+        console.error("Error fetching coaches:", error)
+        setCoachError(error instanceof Error ? error.message : "Failed to fetch coaches")
+      } finally {
+        setIsLoadingCoach(false)
+      }
+    }
+
+    fetchCoaches()
   }, [])
 
   useEffect(() => {
     const handleScroll = () => {
-      // Check if we've scrolled enough to show the content overlay
       setScrolled(window.scrollY > 100)
       setScrollY(window.scrollY)
     }
@@ -503,7 +512,7 @@ export default function HomePage() {
         </section>
 
         {/* Meet the Champions! */}
-        <section className="py-24 bg-white relative overflow-fixed">
+        <section className="py-24 bg-white relative overflow-hidden">
           {/* Animated Background */}
           <div
             className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"
@@ -671,7 +680,7 @@ export default function HomePage() {
           }}
         >
           {/* Overlay for background */}
-          <div className="absolute inset-0 bg-gray-50/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
@@ -681,59 +690,88 @@ export default function HomePage() {
               <p className="text-xl text-gray-600">Recognizing excellence in our coaching staff</p>
             </div>
 
-            <Card
-              className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
-              data-aos="zoom-in"
-              data-aos-duration="1000"
-              data-aos-delay="200"
-            >
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-1/3 relative overflow-hidden">
-                  <Image
-                    src={coaches[currentCoachIndex]?.image || "/placeholder.svg"}
-                    alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
-                    width={400}
-                    height={600}
-                    className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
-                  />
+            {isLoadingCoach ? (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-32 w-32 bg-gray-200 rounded-full mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
-                <div className="md:w-2/3 p-8">
-                  <div className="flex items-center mb-4">
-                    <h3 className="text-2xl font-bold text-black relative group">
-                      {coaches[currentCoachIndex]?.name || "Unknown Coach"}
-                      <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all group-hover:w-full"></span>
-                    </h3>
-                    <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
-                      {coaches[currentCoachIndex]?.rank || "Rank not available"}
-                    </span>
+              </Card>
+            ) : coachError ? (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <div className="text-red-500">
+                  <p>Unable to load coach data: {coachError}</p>
+                  <Button onClick={() => window.location.reload()} className="mt-4 bg-black text-white">
+                    Try Again
+                  </Button>
+                </div>
+              </Card>
+            ) : coaches.length > 0 ? (
+              <Card
+                className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
+                data-aos="zoom-in"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 relative overflow-hidden">
+                    <Image
+                      src={coaches[currentCoachIndex]?.imageUrl || "/placeholder.svg?height=600&width=400&text=Coach"}
+                      alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
+                      width={400}
+                      height={600}
+                      className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
+                    />
                   </div>
-                  <p className="text-gray-600 mb-4">{coaches[currentCoachIndex]?.bio || "Bio not available"}</p>
-                  <div className="mb-6">
-                    <div className="flex items-center mb-2">
-                      <span className="font-bold text-black mr-2">Specialties:</span>
-                      <span className="text-gray-600">
-                        {coaches[currentCoachIndex]?.specialties || "Specialties not available"}
+                  <div className="md:w-2/3 p-8">
+                    <div className="flex items-center mb-4">
+                      <h3 className="text-2xl font-bold text-black relative group">
+                        {coaches[currentCoachIndex]?.name || "Unknown Coach"}
+                        <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all group-hover:w-full"></span>
+                      </h3>
+                      <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
+                        {coaches[currentCoachIndex]?.experience
+                          ? `${coaches[currentCoachIndex].experience} Experience`
+                          : "Experience not available"}
                       </span>
                     </div>
-                    <div className="flex items-center">
-                      <span className="font-bold text-black mr-2">Classes:</span>
-                      <span className="text-gray-600">
-                        {coaches[currentCoachIndex]?.classes || "Classes not available"}
-                      </span>
+                    <p className="text-gray-600 mb-4">{coaches[currentCoachIndex]?.bio || "Bio not available"}</p>
+                    <div className="mb-6">
+                      <div className="flex items-center mb-2">
+                        <span className="font-bold text-black mr-2">Specialization:</span>
+                        <span className="text-gray-600">
+                          {coaches[currentCoachIndex]?.specialization || "Specialization not available"}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-bold text-black mr-2">Certifications:</span>
+                        <span className="text-gray-600">
+                          {coaches[currentCoachIndex]?.certifications
+                            ? coaches[currentCoachIndex].certifications.join(", ")
+                            : "Certifications not available"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Link href={`/coaches/profile/${coaches[currentCoachIndex]?.id || 0}`} passHref>
+                        <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
+                          <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                            View Coach
+                          </span>
+                          <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                          <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
-                      <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                        View Coach
-                      </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                      <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            ) : (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <p>No coaches available at this time.</p>
+              </Card>
+            )}
           </div>
         </section>
 
@@ -785,7 +823,7 @@ export default function HomePage() {
         <section
           className="py-16 bg-gray-50 relative"
           style={{
-            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000&text=Headquarters")',
+            backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
@@ -799,7 +837,7 @@ export default function HomePage() {
               <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
                 <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
                   <Image
-                    src="/placeholder.svg?height=500&width=700"
+                    src="/pictures/Second Part Picture.jpg"
                     alt="IMAA Headquarters"
                     width={700}
                     height={500}
@@ -839,15 +877,7 @@ export default function HomePage() {
 
                   {/* Google Map Embed */}
                   <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.22417813355!2d122.5683143152608!3d10.72001839236564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33aee5306c5c9c3d%3A0x5e9e72ce7349828c!2sIloilo%20City%2C%20Iloilo!5e0!3m2!1sen!2sph!4v1629876543210!5m2!1sen!2sph"
-                      width="100%"
-                      height="300"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      title="IMAA Location"
-                    />
+                    <iframe src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sph!4v1747768845833!5m2!1sen!2sph!6m8!1m7!1sWcYMQsJ9GoU4fu7KfMMAuQ!2m2!1d10.70443302427233!2d122.5528555203559!3f255.23038086380515!4f-5.281414180810728!5f0.7820865974627469" width="800" height="600" style={{ border: 0 }} allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
                   </div>
                 </Card>
               </div>
@@ -855,8 +885,7 @@ export default function HomePage() {
           </div>
         </section>
 
-<Footer/>
-
+        <Footer />
       </div>
       <div
         className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`}
@@ -1068,7 +1097,7 @@ function PhotoCarousel() {
 // Helper Components
 interface ChampionCardProps {
   name: string
-  age?: number // Make age optional
+  age?: number 
   image: string
   achievement: string
   delay?: number
@@ -1164,11 +1193,11 @@ const champions = [
   {
     name: "Carlos Reyes",
     image: "/pictures/advert pic 3.jpeg",
-    achievement: "National Champion 2022",
+    achievement: "National Champion 2022 of Palarong Pambansa",
   },
   {
     name: "Andrea Gomez",
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 1.jpeg",
     achievement: "Gold Medalist - Youth World Championships 2023",
   },
 ]
@@ -1205,4 +1234,3 @@ const facilities = [
   "Locker rooms",
   "Pro shop",
 ]
-

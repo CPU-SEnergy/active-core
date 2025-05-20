@@ -42,7 +42,9 @@ export default function Navbar() {
     "My Profile": "/user-profile",
   }
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
+
   const isAdmin = user?.customClaims?.role === "admin" || user?.customClaims?.role === "cashier";
   const semiTransparentStyle = "bg-black/80 backdrop-blur-sm"
 
@@ -55,6 +57,7 @@ export default function Navbar() {
     // Other pages: always semi-transparent regardless of scroll position
     navbarStyle = semiTransparentStyle
   }
+
 
   return (
     <motion.nav
