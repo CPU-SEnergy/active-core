@@ -1,5 +1,7 @@
+import type React from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Audiowide } from "next/font/google";
 import "./globals.css";
 import { getTokens } from "next-firebase-auth-edge";
 import { cookies, headers } from "next/headers";
@@ -16,10 +18,18 @@ const geistSans = localFont({
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
+});
+
+const audiowide = Audiowide({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-audiowide",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -43,14 +53,8 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} antialiased`}
         style={{ fontFamily: "var(--font-geist-sans), sans-serif" }}
       >
         <AuthProvider>
