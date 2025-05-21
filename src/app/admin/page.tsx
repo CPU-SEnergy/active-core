@@ -12,7 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 function DashboardSkeleton() {
   return (
     <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
-      {/* Sidebar with KPI Cards */}
       <aside className="w-full lg:w-64 bg-white p-6 border-r">
         <nav className="space-y-6">
           <div>
@@ -34,15 +33,12 @@ function DashboardSkeleton() {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-4xl">
-          {/* Search Bar */}
           <div className="relative mb-6">
             <Skeleton className="h-10 w-full" />
           </div>
 
-          {/* Recent Activity Table */}
           <div className="bg-white rounded-lg border">
             <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b">
               <Skeleton className="h-6 w-32 mb-4 lg:mb-0" />
