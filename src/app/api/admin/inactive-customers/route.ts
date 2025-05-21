@@ -1,11 +1,9 @@
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { db } from "@/lib/schema/firestore";
-import { differenceInDays } from "date-fns";
 
 export async function GET() {
   try {
     getFirebaseAdminApp();
-
     const payments = await db.payments.all();
 
     const inactiveCustomers = payments
@@ -15,26 +13,16 @@ export async function GET() {
           new Date(p.data.availedPlan.expiryDate) <= new Date() &&
           p.data?.customer?.customerId
       )
-      .map((p) => {
-        const daysRemaining = differenceInDays(
-          new Date(p.data.availedPlan.expiryDate),
-          new Date()
-        );
-
-        return {
-          id: p.ref.id,
-          customerId: p.data.customer.customerId,
-          requestNumber: `#${String(p.ref.id).padStart(6, "0")}`,
-          timeApproved: p.data.createdAt
-            ? new Date(p.data.createdAt).toLocaleString()
-            : "N/A",
-          subscription: p.data.availedPlan.name,
-          remainingTime:
-            daysRemaining > 30
-              ? `${Math.floor(daysRemaining / 30)} Month`
-              : `${daysRemaining} Days`,
-        };
-      });
+      .map((p) => ({
+        id: p.ref.id,
+        customerId: p.data.customer.customerId,
+        firstName: p.data.customer.firstName,
+        lastName: p.data.customer.lastName,
+        price: p.data.availedPlan.amount,
+        requestNumber: `#${String(p.ref.id).padStart(6, "0")}`,
+        expiryDate: p.data.availedPlan.expiryDate,
+        subscription: p.data.availedPlan.name,
+      }));
 
     return new Response(JSON.stringify(inactiveCustomers), {
       status: 200,
