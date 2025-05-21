@@ -30,14 +30,13 @@ export async function GET(request: Request, context: { params: Params }) {
 
     const result = {
       earnings,
-      memberships
-    }
+      memberships,
+    };
 
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     console.error("Error fetching document: ", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
@@ -51,13 +50,15 @@ async function getEarningsForYear(year: string): Promise<number[]> {
   const earnings: number[] = [];
 
   for (let month = 1; month <= 12; month++) {
-    const startDate = new Date(`${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`);
+    const startDate = new Date(
+      `${year}-${month.toString().padStart(2, "0")}-01T00:00:00Z`
+    );
     const endDate = new Date(startDate);
     endDate.setMonth(startDate.getMonth() + 1);
 
     const paymentsCollection = await db.payments.query(($) => [
       $.field("createdAt").gte(startDate),
-      $.field("createdAt").lt(endDate)
+      $.field("createdAt").lt(endDate),
     ]);
 
     const totalAmount = paymentsCollection.reduce((total, doc) => {
@@ -70,22 +71,30 @@ async function getEarningsForYear(year: string): Promise<number[]> {
   return earnings;
 }
 
-async function getMembershipsForYear(year: string): Promise<{ regular: number, student: number }> {
+async function getMembershipsForYear(
+  year: string
+): Promise<{ regular: number; student: number }> {
   let regularCount = 0;
   let studentCount = 0;
 
   for (let month = 1; month <= 12; month++) {
-    const startDate = new Date(`${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`);
+    const startDate = new Date(
+      `${year}-${month.toString().padStart(2, "0")}-01T00:00:00Z`
+    );
     const endDate = new Date(startDate);
     endDate.setMonth(startDate.getMonth() + 1);
 
     const paymentsCollection = await db.payments.query(($) => [
       $.field("createdAt").gte(startDate),
-      $.field("createdAt").lt(endDate)
+      $.field("createdAt").lt(endDate),
     ]);
 
-    regularCount += paymentsCollection.filter(doc => doc.data.user.type === "regular").length;
-    studentCount += paymentsCollection.filter(doc => doc.data.user.type === "student").length;
+    regularCount += paymentsCollection.filter(
+      (doc) => doc.data?.customer?.type === "regular"
+    ).length;
+    studentCount += paymentsCollection.filter(
+      (doc) => doc.data?.customer?.type === "student"
+    ).length;
   }
 
   return { regular: regularCount, student: studentCount };

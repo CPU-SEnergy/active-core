@@ -1,393 +1,1244 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
 import Image from "next/image"
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
 import Link from "next/link"
-import { Play, X } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { getISOWeek } from "date-fns"
+import Footer from "@/components/Footer"
 
 
-export default function Home() {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null)
+
+// Custom animations
+const smokeRevealKeyframes = `
+  @keyframes smokeReveal {
+    0% {
+      opacity: 0;
+      filter: blur(15px);
+      transform: translateX(-50px);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateX(0);
+    }
+  }
+`
+
+const comingSoonKeyframes = `
+  @keyframes comingSoon {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    85% {
+      opacity: 1;
+      transform: scale(1.1);
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`
+
+const glowButtonKeyframes = `
+  @keyframes glowPulse {
+    0% {
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+  }
+`
+
+const smokeOverlayKeyframes = `
+  @keyframes smokeOverlay {
+    0% {
+      opacity: 1;
+      background-position: left center;
+      backdrop-filter: blur(10px);
+    }
+    100% {
+      opacity: 0;
+      background-position: right center;
+      backdrop-filter: blur(0);
+    }
+  }
+`
+
+
+
+// Add new animation for champions background
+const championsBackgroundKeyframes = `
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes floatingParticles {
+    0% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-100px) translateX(100px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulseGlow {
+    0% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  @keyframes subtleWave {
+    0% {
+      transform: translateX(-50%) translateY(0) rotate(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(15px) rotate(1deg);
+    }
+    100% {
+      transform: translateX(-50%) translateY(0) rotate(0);
+    }
+  }
+`
+
+export default function HomePage() {
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [scrolled, setScrolled] = useState(false)
+  const [scrollY, setScrollY] = useState(0)
+  const [particles, setParticles] = useState<
+    Array<{ id: number; size: number; delay: number; duration: number; left: string }>
+  >([])
+
+  const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const [coaches, setCoaches] = useState<
+    Array<{
+      id: string
+      name: string
+      specialization: string
+      imageUrl: string
+      bio?: string
+      experience?: string
+      certifications?: string[]
+      contact?: string
+      age?: number
+      [key: string]: unknown 
+    }>
+  >([])
+  const [isLoadingCoach, setIsLoadingCoach] = useState(true)
+  const [coachError, setCoachError] = useState<string | null>(null)
+
+
+  useEffect(() => {
+    const newParticles = []
+    for (let i = 0; i < 20; i++) {
+      newParticles.push({
+        id: i,
+        size: Math.floor(Math.random() * 6) + 2, // 2-7px
+        delay: Math.random() * 5, // 0-5s delay
+        duration: Math.random() * 10 + 10, // 10-20s duration
+        left: `${Math.random() * 100}%`,
+      })
+    }
+    setParticles(newParticles)
+  }, [])
+
+ 
+  useEffect(() => {
+    const fetchCoaches = async () => {
+      setIsLoadingCoach(true)
+      setCoachError(null)
+
+      try {
+        const response = await fetch("/api/coaches")
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch coaches: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.error) {
+          throw new Error(data.error)
+        }
+
+        console.log("Coaches data from API:", data)
+        setCoaches(data)
+
+        // Set current coach based on week of year
+        const now = new Date()
+        const weekNumber = getISOWeek(now)
+        setCurrentCoachIndex(weekNumber % data.length)
+      } catch (error) {
+        console.error("Error fetching coaches:", error)
+        setCoachError(error instanceof Error ? error.message : "Failed to fetch coaches")
+      } finally {
+        setIsLoadingCoach(false)
+      }
+    }
+
+    fetchCoaches()
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 100)
+      setScrollY(window.scrollY)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Video player functionality
+  useEffect(() => {
+    const videoContainer = document.getElementById("workshop-video-container")
+    const video = document.getElementById("workshop-video") as HTMLVideoElement
+    const playButton = document.getElementById("play-workshop-btn")
+    const videoOverlay = document.getElementById("video-overlay")
+
+    if (video && playButton && videoContainer && videoOverlay) {
+      // Auto-play without sound when in view
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              video.play().catch(() => {
+                // Autoplay might be blocked, that's okay
+              })
+            } else {
+              video.pause()
+            }
+          })
+        },
+        { threshold: 0.5 },
+      )
+
+      observer.observe(videoContainer)
+
+      // Handle hover to show controls in normal state
+      videoContainer.addEventListener("mouseenter", () => {
+        video.controls = true
+        videoOverlay.style.opacity = "0.3" // Make overlay more transparent on hover
+      })
+
+      videoContainer.addEventListener("mouseleave", () => {
+        video.controls = false
+        videoOverlay.style.opacity = "1"
+      })
+
+      // Handle play button click to enter fullscreen
+      playButton.addEventListener("click", (e) => {
+        e.stopPropagation()
+
+        // Unmute the video
+        video.muted = false
+
+        // Request fullscreen
+        if (video.requestFullscreen) {
+          video.requestFullscreen()
+        } else if ("webkitRequestFullscreen" in video) {
+          /* Safari */
+          ;(video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
+        } else if ("msRequestFullscreen" in video) {
+          /* IE11 */
+          ;(video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
+        }
+
+        // Ensure controls are visible in fullscreen
+        video.controls = true
+
+        // Play the video
+        video.play()
+      })
+
+      // Handle fullscreen change
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          // Exited fullscreen
+          video.muted = true
+        }
+      })
+
+      document.addEventListener("webkitfullscreenchange", () => {
+        if (!(document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement) {
+          // Exited fullscreen in Safari
+          video.muted = true
+        }
+      })
+
+      return () => {
+        observer.disconnect()
+        playButton.removeEventListener("click", () => {})
+        videoContainer.removeEventListener("mouseenter", () => {})
+        videoContainer.removeEventListener("mouseleave", () => {})
+        document.removeEventListener("fullscreenchange", () => {})
+        document.removeEventListener("webkitfullscreenchange", () => {})
+      }
+    }
+  }, [])
+
+  // Inject custom animations
+  useEffect(() => {
+    // Create style element
+    const style = document.createElement("style")
+
+    // Add keyframes
+    style.textContent = `
+    ${smokeRevealKeyframes}
+    ${comingSoonKeyframes}
+    ${glowButtonKeyframes}
+    ${smokeOverlayKeyframes}
+    ${championsBackgroundKeyframes}
+    
+    .animate-smoke-reveal {
+      animation: smokeReveal 2s forwards;
+    }
+    
+    .animate-coming-soon {
+      animation: comingSoon 3.5s forwards;
+    }
+    
+    .glow-button {
+      animation: glowPulse 2s infinite;
+    }
+    
+    .animate-gradient-shift {
+      animation: gradientShift 15s ease infinite;
+    }
+    
+    .animate-floating-particle {
+      animation: floatingParticles var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    
+    .animate-pulse-glow {
+      animation: pulseGlow 4s ease-in-out infinite;
+    }
+    
+    .animate-subtle-wave {
+      animation: subtleWave 8s ease-in-out infinite;
+    }
+  `
+
+    // Append to head
+    document.head.appendChild(style)
+
+    // Clean up
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Only run in browser environment
+    if (typeof window !== "undefined") {
+      try {
+        // Preload smoke image with error handling
+        const smokeImage = new window.Image(1, 1)
+        smokeImage.crossOrigin = "anonymous"
+        smokeImage.onload = () => {
+          console.log("Smoke texture loaded successfully")
+        }
+        smokeImage.onerror = () => {
+          console.warn("Could not load smoke texture, using fallback")
+        }
+        smokeImage.src =
+          "https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748"
+      } catch (error) {
+        console.error("Error in smoke image preloading:", error)
+      }
+    }
+  }, [])
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      {" "}
-      {/* Add pt-20 for navbar space */}
-      {/* Hero Section */}
-      <section className="relative h-screen">
-        {" "}
-        {/* Adjust height for navbar */}
-        <Image src="/pictures/hero 2.jpg" alt="Gym Interior" fill className="object-cover" priority />
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          className="absolute inset-0 bg-gradient-to-r from-red-900/50 to-black/50"
-        >
-          <div className="container mx-auto px-4 h-full flex flex-col justify-center">
-            <motion.h1
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-6xl font-family: Audiowide mb-4"
-            >
-              GO HARD GET HARD
-            </motion.h1>
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
-              className="space-y-2"
-            >
-              <p className="text-3xl">YOUR FITNESS,</p>
-              <p className="text-3xl">YOUR JOURNEY,</p>
-              <p className="text-3xl">OUR MISSION</p>
-            </motion.div>
+    <main className="bg-white text-gray-900 overflow-x-hidden">
+      {/* Main Section with Promotional Video - Fixed */}
+      <section className="fixed top-0 left-0 w-full h-screen z-0">
+        <div className="relative h-full w-full overflow-hidden">
+          {/* Video Background */}
+          <video autoPlay muted loop className="absolute inset-0 w-full h-full object-cover">
+            <source src="/videos/imaa promo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="mt-8 bg-red-600 text-white px-12 py-3 rounded-full text-lg font-semibold hover:bg-red-700 transition duration-300 w-64"
-            >
-              Start Here
-            </motion.button>
+          {/* Smoke Overlay - Full page transition */}
+          <div
+            className="absolute inset-0 z-30 pointer-events-none"
+            style={{
+              backgroundImage:
+                'url("https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748")',
+              backgroundSize: "200% 100%",
+              animation: "smokeOverlay 3s forwards",
+              backgroundRepeat: "no-repeat",
+              backgroundColor: "rgba(0,0,0,0.85)", // Darker fallback if image fails to load
+              mixBlendMode: "multiply",
+            }}
+          ></div>
+
+          {/* Parallax Overlay */}
+          <div
+            className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center z-20"
+            style={{
+              transform: `translateY(${scrollY * 0.2}px)`,
+              opacity: Math.max(0.3, 1 - scrollY * 0.001),
+            }}
+          >
+            <div className="text-center px-4 max-w-4xl mx-auto relative z-40">
+              <h1
+                className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"
+                style={{
+                  textShadow: `
+                    0 0 4px rgb(255, 255, 255),
+                    0 0 8px rgba(255, 255, 255, 0.4)
+                  `,
+                  transform: `translateY(${scrollY * -0.3}px)`,
+                  animation: "smokeReveal 2s forwards",
+                }}
+              >
+                ILOILO MARTIAL ARTIST ASSOCIATION
+              </h1>
+
+
+              <p
+                className="text-xl md:text-2xl text-white mb-8 py-5"
+                style={{
+                  transform: `translateY(${scrollY * -0.2}px)`,
+                  animation: "comingSoon 2s forwards",
+                }}
+              >
+                A premier training ground for world-class Ilonggo martial artists.
+              </p>
+              <Button
+                size="lg"
+                className="bg-white text-black relative overflow-hidden group font-bold transition-all duration-500"
+                style={{ animation: "glowPulse 2s infinite" }}
+                onClick={() => {
+                  const advertisementSection = document.querySelector(".advertisement-section")
+                  if (advertisementSection) {
+                    advertisementSection.scrollIntoView({ behavior: "smooth" })
+                  }
+                }}
+              >
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">LEARN MORE</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+              </Button>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </section>
-      {/* About Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="py-16 bg-gradient-to-b from-black to-red-950 relative"
-      >
-        <Image src="/pictures/Second Part Picture.jpg" alt="Background" fill className="object-cover opacity-20" />
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-4xl font-bold mb-4"
-          >
-            Sports and Fitness Center
-          </motion.h2>
-          <motion.h3
-            initial={{ y: -20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-2xl mb-8 text-red-500"
-          >
-            The bearer of champions!
-          </motion.h3>
-          <motion.p
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="max-w-4xl mx-auto text-lg leading-relaxed text-gray-300"
-          >
-            Located in the heart of Iloilo City, Sports & Fitness Center is the premier destination for athletes,
-            fitness enthusiasts, and martial arts practitioners. As Iloilo&apos;s #1 sports and fitness center, we offer
-            state-of-the-art gym facilities, top-tier training programs, and expert coaching in various disciplines,
-            including boxing, Muay Thai, Brazilian Jiu-Jitsu, and more. Our world-class trainers have molded champions,
-            producing elite athletes who compete on national and international stages. Whether you&apos;re a beginner or a
-            professional, our dynamic community fosters discipline, strength, and excellence-helping you achieve peak
-            performance. Join us and become the next champion!
-          </motion.p>
-        </div>
-      </motion.section>
-      {/* Coach Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="min-h-screen py-16 bg-gradient-to-r from-red-950 to-black flex items-center"
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
-          >
-            Coach of the Week
-          </motion.h2>
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="relative aspect-square"
-            >
-              <Image
-                src="/pictures/Manaf Kassim.png"
-                alt="Coach Manaf Kassim"
-                fill
-                className="object-cover rounded-lg"
-              />
-            </motion.div>
-            <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="space-y-4"
-            >
-              <h3 className="text-2xl font-bold text-red-500">Manaf Kassim</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Coach Manaf Kassim is a highly skilled boxing coach known for his strategic training methods and
-                dedication to developing top-tier fighters. With years of experience in the sport, he has trained both
-                amateur and professional boxers, focusing on technique, endurance, and mental toughness. His expertise
-                has helped athletes sharpen their skills and achieve championship-level performance. Passionate and
-                disciplined, Coach Manaf pushes his fighters to their limits, ensuring they reach their full potential
-                in the ring.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-      {/* Move Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="min-h-screen py-16 bg-gradient-to-r from-red-950 to-black flex items-center"
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
-          >
-            Move of the Week
-          </motion.h2>
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="relative aspect-square"
-            >
-              <Image
-                src="/pictures/combat.jpg"
-                alt="The Jab"
-                fill
-                className="object-cover rounded-lg"
-              />
-            </motion.div>
-            <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="space-y-4"
-            >
-              <h3 className="text-2xl font-bold text-red-500">The Jab</h3>
-              <p className="text-gray-300 leading-relaxed">
-                The Jab is a highly skilled boxing coach known for his strategic training methods and
-                dedication to developing top-tier fighters. With years of experience in the sport, he has trained both
-                amateur and professional boxers, focusing on technique, endurance, and mental toughness. His expertise
-                has helped athletes sharpen their skills and achieve championship-level performance. Passionate and
-                disciplined, Coach Manaf pushes his fighters to their limits, ensuring they reach their full potential
-                in the ring.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-      {/* Gym Tour Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="min-h-screen py-16 bg-gradient-to-b from-black to-red-950 flex items-center"
+
+      {/* Spacer to push content below the fold */}
+      <div className="h-screen"></div>
+
+      {/* Content Container that slides over the main section */}
+      <div
+        ref={contentRef}
+        className="relative z-10 bg-white transition-transform duration-500"
         style={{
-          backgroundImage: 'url("/pictures/gym tour backdrop.jpg")',
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          boxShadow: "0 -40px 80px rgba(0, 0, 0, 0.5)",
         }}
       >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-8 text-center"
-          >
-            GYM TOUR
-          </motion.h2>
-          <motion.p
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-xl mb-12 text-center text-gray-300"
-          >
-            Experience top-tier amenities and elite training at Sports and Fitness Center—where champions are made!
-          </motion.p>
-
-          <h3 className="text-2xl font-bold text-red-500 mb-8">Discover Strength, Build Champions!</h3>
-
-          {/* Main Video Player */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="relative aspect-video mb-12 bg-gray-800 rounded-lg max-w-4xl mx-auto"
-          >
-            <button className="absolute inset-0 flex items-center justify-center">
-              <Play className="w-16 h-16 text-white animate-pulse" />
-            </button>
-          </motion.div>
-
-          {/* Image Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ scale: 0.8, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 * i, duration: 0.5 }}
-                className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => setSelectedImage(i)}
+        {/* Advertisement Banner */}
+        <section className="py-16 bg-gray-50 rounded-t-[40px] shadow-2xl advertisement-section">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center">
+              <div
+                className="md:w-1/2 mb-8 md:mb-0 md:pr-8 animate-punch-in"
+                data-aos="fade-right"
+                data-aos-duration="1000"
               >
-                <Image
-                  src="/placeholder.svg"
-                  alt={`Gym Tour Image ${i + 1}`}
-                  fill
-                  className="object-cover rounded-lg transition-transform duration-300 hover:scale-110"
-                />
-              </motion.div>
-            ))}
+                <PhotoCarousel />
+              </div>
+              <div
+                className="md:w-1/2 animate-spin-kick"
+                data-aos="fade-left"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
+                <h2 className="text-3xl font-bold text-black mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+                  The Premier Martial Arts Academy in Iloilo
+                </h2>
+                <p className="text-gray-600 mb-6 text-lg">
+                  Established in 2025, IMAA has been the home of champions, nurturing world-class Ilonggo martial
+                  artists through our comprehensive training programs and expert coaching staff.
+                </p>
+                <p className="text-gray-600 mb-8 text-lg">
+                  We offer classes in various disciplines including Brazilian Jiu-Jitsu, Muay Thai, Boxing, and Mixed
+                  Martial Arts for all skill levels.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
+                    <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                      <Link href="/sports-classes">Explore Classes</Link>
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                    <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Meet the Champions! */}
+        <section className="py-24 bg-white relative overflow-hidden">
+          {/* Animated Background */}
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"
+            style={{ backgroundSize: "400% 400%" }}
+          ></div>
+
+          {/* Geometric Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute left-1/2 top-1/4 w-[800px] h-[800px] border border-gray-400 rounded-full animate-subtle-wave"></div>
+            <div
+              className="absolute left-1/2 top-1/4 w-[600px] h-[600px] border border-gray-500 rounded-full animate-subtle-wave"
+              style={{ animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute left-1/2 top-1/4 w-[400px] h-[400px] border border-gray-600 rounded-full animate-subtle-wave"
+              style={{ animationDelay: "2s" }}
+            ></div>
           </div>
 
-          {/* Modal */}
-          <AnimatePresence>
-            {selectedImage !== null && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-                onClick={() => setSelectedImage(null)}
-              >
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.8 }}
-                  className="relative max-w-4xl w-full mx-4"
-                  onClick={(e) => e.stopPropagation()}
+          {/* Floating Particles */}
+          {particles.map((particle) => (
+            <div
+              key={particle.id}
+              className="absolute bottom-0 rounded-full bg-gray-500 animate-floating-particle"
+              style={
+                {
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
+                  left: particle.left,
+                  opacity: 0,
+                  "--delay": `${particle.delay}s`,
+                  "--duration": `${particle.duration}s`,
+                } as React.CSSProperties
+              }
+            ></div>
+          ))}
+
+          {/* Glowing Orbs */}
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow"></div>
+          <div
+            className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow"
+            style={{ animationDelay: "2s" }}
+          ></div>
+          <div
+            className="absolute top-3/4 left-2/3 w-24 h-24 rounded-full bg-white/5 blur-xl animate-pulse-glow"
+            style={{ animationDelay: "1s" }}
+          ></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
+              <h2 className="text-5xl font-bold text-black mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+                Meet Our Champions!
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                These exceptional athletes trained at IMAA and brought home prestigious awards in local and
+                international competitions.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {champions.map((champion, index) => (
+                <div
+                  key={index}
+                  className={`animate-fade-in`}
+                  data-aos="fade-in"
+                  data-aos-duration="1000"
+                  data-aos-delay={index * 100}
                 >
-                  <Image
-                    src="/placeholder.svg"
-                    alt={`Expanded Gym Tour Image ${selectedImage + 1}`}
-                    width={1000}
-                    height={600}
-                    className="w-full h-auto rounded-lg"
-                  />
-                  <button
-                    className="absolute top-4 right-4 text-white bg-red-600 rounded-full p-2"
-                    onClick={() => setSelectedImage(null)}
+                  <ChampionCard name={champion.name} image={champion.image} achievement={champion.achievement} />
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center mt-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+              <Button
+                variant="outline"
+                className="border-2 border-black text-black font-bold relative overflow-hidden group transition-all duration-500"
+              >
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                  View All Champions
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Outreach Workshop Section */}
+        <section className="py-16 bg-black text-white relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
+              <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+                Community Outreach
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Bringing martial arts education to communities across the Philippines
+              </p>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-8 items-center">
+              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">
+                <div className="relative rounded-lg overflow-hidden cursor-pointer" id="workshop-video-container">
+                  <video
+                    id="workshop-video"
+                    ref={videoRef}
+                    className="w-full rounded-lg"
+                    poster="/placeholder.svg?height=500&width=800&text=Workshop+Video"
+                    muted
+                    loop
+                    preload="metadata"
+                    controlsList="nodownload"
                   >
-                    <X size={24} />
-                  </button>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1, duration: 0.8 }}
-            className="text-center mt-12"
-          >
-            <h3 className="text-2xl font-bold text-red-500 mb-8">Discover Strength, Build Champions!</h3>
-          </motion.div>
-        </div>
-      </motion.section>
-      {/* Cafe Section */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="py-16 bg-black"
-      >
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ y: -30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-3xl font-bold mb-12 text-center"
-          >
-            Café
-          </motion.h2>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative aspect-video max-w-4xl mx-auto"
-          >
-            <Image
-              src="/pictures/cafe picture.jpg"
-              alt="Sports and Fitness Center Cafe"
-              fill
-              className="object-cover rounded-lg"
-            />
-          </motion.div>
-        </div>
-      </motion.section>
-      {/* Footer */}
-      <footer className="bg-black py-12 border-t border-red-900">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-red-500 font-semibold mb-4">Product</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/apparels" className="text-gray-300 hover:text-white transition-colors duration-300">
-                    Apparels
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/services" className="text-gray-300 hover:text-white transition-colors duration-300">
-                    Services
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-red-500 font-semibold mb-4">Company</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/classes" className="text-gray-300 hover:text-white transition-colors duration-300">
-                    Locate Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-300">
-                    About Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="md:col-span-2">
-              <h3 className="text-red-500 font-semibold mb-4">Subscribe to our website</h3>
-              <p className="text-gray-300 mb-4">For product announcements and exclusive insights</p>
-              <form className="flex">
-                <input
-                  type="email"
-                  placeholder="Input your email"
-                   className="flex-grow px-4 py-2 rounded-l-full bg-gray-800 border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring:red-500 transition-all duration-300"
-                />
-                <button
-                  type="submit"
-                  className="bg-red-600 text-white px-6 py-2 rounded-r-full hover:bg-red-700 transition-colors duration-300"
-                >
-                  Subscribe
-                </button>
-              </form>
+                    <source src="/videos/semirara workshop.mov" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  <div
+                    className="absolute inset-0 bg-black/50 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none"
+                    id="video-overlay"
+                  >
+                    <button
+                      className="bg-white/20 hover:bg-white/40 rounded-full p-4 backdrop-blur-sm transition-all duration-300 transform group-hover:scale-110 pointer-events-auto"
+                      id="play-workshop-btn"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="white"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/3" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya Antique</h3>
+                  <p className="text-gray-300">
+                    Our team recently conducted a special martial arts workshop for students in Semirara, Caluya
+                    Antique. This initiative aims to introduce martial arts disciplines to communities, promoting
+                    physical fitness, discipline, and self-confidence among the youth.
+                  </p>
+                  <div className="flex flex-wrap gap-3 pt-4"></div>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
+
+        {/* Coach of the Week */}
+        <section
+          className="py-16 bg-gray-50 relative"
+          style={{
+            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
+              <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+                Coach of the Week
+              </h2>
+              <p className="text-xl text-gray-600">Recognizing excellence in our coaching staff</p>
+            </div>
+
+            {isLoadingCoach ? (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-32 w-32 bg-gray-200 rounded-full mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </Card>
+            ) : coachError ? (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <div className="text-red-500">
+                  <p>Unable to load coach data: {coachError}</p>
+                  <Button onClick={() => window.location.reload()} className="mt-4 bg-black text-white">
+                    Try Again
+                  </Button>
+                </div>
+              </Card>
+            ) : coaches.length > 0 ? (
+              <Card
+                className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
+                data-aos="zoom-in"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 relative overflow-hidden">
+                    <Image
+                      src={coaches[currentCoachIndex]?.imageUrl || "/placeholder.svg?height=600&width=400&text=Coach"}
+                      alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
+                      width={400}
+                      height={600}
+                      className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
+                    />
+                  </div>
+                  <div className="md:w-2/3 p-8">
+                    <div className="flex items-center mb-4">
+                      <h3 className="text-2xl font-bold text-black relative group">
+                        {coaches[currentCoachIndex]?.name || "Unknown Coach"}
+                        <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all group-hover:w-full"></span>
+                      </h3>
+                      <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
+                        {coaches[currentCoachIndex]?.experience
+                          ? `${coaches[currentCoachIndex].experience} Experience`
+                          : "Experience not available"}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mb-4">{coaches[currentCoachIndex]?.bio || "Bio not available"}</p>
+                    <div className="mb-6">
+                      <div className="flex items-center mb-2">
+                        <span className="font-bold text-black mr-2">Specialization:</span>
+                        <span className="text-gray-600">
+                          {coaches[currentCoachIndex]?.specialization || "Specialization not available"}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-bold text-black mr-2">Certifications:</span>
+                        <span className="text-gray-600">
+                          {coaches[currentCoachIndex]?.certifications
+                            ? coaches[currentCoachIndex].certifications.join(", ")
+                            : "Certifications not available"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Link href={`/coaches/profile/${coaches[currentCoachIndex]?.id || 0}`} passHref>
+                        <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
+                          <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                            View Coach
+                          </span>
+                          <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                          <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <p>No coaches available at this time.</p>
+              </Card>
+            )}
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section
+          className="py-16 bg-white relative overflow-hidden"
+          style={{
+            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for parallax background */}
+          <div className="absolute inset-0 bg-white/90"></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
+              <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+                What Our Members Say
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Hear from our community of martial artists about their IMAA experience
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
+                <div
+                  key={index}
+                  className={`animate-fade-in`}
+                  data-aos="fade-up"
+                  data-aos-duration="1000"
+                  data-aos-delay={index * 100}
+                >
+                  <TestimonialCard
+                    name={testimonial.name}
+                    role={testimonial.role}
+                    image={testimonial.image}
+                    quote={testimonial.quote}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Headquarters */}
+        <section
+          className="py-16 bg-gray-50 relative"
+          style={{
+            //backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay for background */}
+          <div className="absolute inset-0 bg-gray-50/95"></div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
+                <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
+                  <Image
+                    src="/pictures/Second Part Picture.jpg"
+                    alt="IMAA Headquarters"
+                    width={700}
+                    height={500}
+                    className="w-full h-auto transition-all duration-700"
+                  />
+                </div>
+              </div>
+              <div
+                className="lg:w-1/2 animate-spin-kick"
+                data-aos="fade-left"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
+                <Card className="p-6 h-full hover:shadow-2xl transition-all duration-700 hover:translate-y-[-15px] hover:rotate-2">
+                  <h3 className="text-2xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[3px] after:bottom-[-4px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all hover:after:w-full">
+                    IMAA Main Facility
+                  </h3>
+                  <p className="text-gray-600 mb-6">Our 5,000 sq ft facility features:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    {facilities.map((facility, index) => (
+                      <div key={index} className="flex items-center">
+                        <CheckCircle className="text-black mr-2 h-5 w-5" />
+                        <span>{facility}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mb-6">
+                    <h4 className="font-bold text-black mb-2">Location</h4>
+                    <p className="text-gray-600">123 Martial Arts Avenue, Iloilo City, 5000</p>
+                  </div>
+
+                  <div className="mb-6">
+                    <h4 className="font-bold text-black mb-2">Operating Hours</h4>
+                    <p className="text-gray-600">Monday-Saturday: 7AM - 12PM and 3PM to 9PM</p>
+                  </div>
+
+                  {/* Google Map Embed */}
+                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                    <iframe src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sph!4v1747768845833!5m2!1sen!2sph!6m8!1m7!1sWcYMQsJ9GoU4fu7KfMMAuQ!2m2!1d10.70443302427233!2d122.5528555203559!3f255.23038086380515!4f-5.281414180810728!5f0.7820865974627469" width="800" height="600" style={{ border: 0 }} allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </div>
+      <div
+        className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`}
+      >
+        <div className="flex flex-col items-center">
+          <p className="text-white mb-2 text-sm font-medium">Scroll Down</p>
+          <div className="w-8 h-12 border-2 border-white rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-bounce"></div>
+          </div>
         </div>
-      </footer>
+      </div>
+    </main>
+  )
+}
+
+// Photo Carousel
+function PhotoCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const photos = [
+    { src: "/pictures/advert pic 7.jpg", alt: "IMAA Training 1" },
+    { src: "/pictures/advert pic 1.jpeg", alt: "IMAA Training 2" },
+    { src: "/pictures/advert pic 2.jpeg", alt: "IMAA Training 3" },
+    { src: "/pictures/advert pic 3.jpeg", alt: "IMAA Training 4" },
+    { src: "/pictures/advert pic 5.jpg", alt: "IMAA Training 5" },
+    { src: "/pictures/advert pic 6.jpg", alt: "IMAA Training 6" },
+    { src: "/pictures/advert pic 4.jpeg", alt: "IMAA Training 7" },
+    { src: "/pictures/advert pic 8.jpg", alt: "IMAA Training 8" },
+    { src: "/pictures/advert pic 9.jpeg", alt: "IMAA Training 9" },
+    { src: "/pictures/advert pic 10.jpg", alt: "IMAA Training 10" },
+  ]
+
+  // Auto-rotation effect
+  useEffect(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+    }
+
+    // Don't auto-rotate if paused or if an image is expanded
+    if (!isPaused && !expandedImage) {
+      timerRef.current = setInterval(() => {
+        setCurrentIndex((prevIndex) => (prevIndex === photos.length - 1 ? 0 : prevIndex + 1))
+      }, 3000) // Change photo every 3 seconds
+    }
+
+    // Cleanup function to clear the interval when component unmounts or dependencies change
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
+  }, [currentIndex, isPaused, expandedImage, photos.length])
+
+  const goToPrevious = () => {
+    // Temporarily pause auto-rotation when user manually navigates
+    setIsPaused(true)
+    const isFirstSlide = currentIndex === 0
+    const newIndex = isFirstSlide ? photos.length - 1 : currentIndex - 1
+    setCurrentIndex(newIndex)
+
+    // Resume auto-rotation after a short delay
+    setTimeout(() => setIsPaused(false), 5000)
+  }
+
+  const goToNext = () => {
+    // Temporarily pause auto-rotation when user manually navigates
+    setIsPaused(true)
+    const isLastSlide = currentIndex === photos.length - 1
+    const newIndex = isLastSlide ? 0 : currentIndex + 1
+    setCurrentIndex(newIndex)
+
+    // Resume auto-rotation after a short delay
+    setTimeout(() => setIsPaused(false), 5000)
+  }
+
+  const handleDotClick = (index: number) => {
+    // Temporarily pause auto-rotation when user manually navigates
+    setIsPaused(true)
+    setCurrentIndex(index)
+
+    // Resume auto-rotation after a short delay
+    setTimeout(() => setIsPaused(false), 5000)
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-lg shadow-xl group"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Main Image */}
+      <div
+        className="relative h-[400px] md:h-[500px] w-full overflow-hidden cursor-pointer"
+        onClick={() => setExpandedImage(photos[currentIndex]?.src ?? null)}
+      >
+        <Image
+          src={photos[currentIndex]?.src || "/placeholder.svg"}
+          alt={photos[currentIndex]?.alt || "Default Alt Text"}
+          fill
+          className="object-cover transition-all duration-700 group-hover:scale-105"
+        />
+
+        {/* Image Counter */}
+        <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+          {currentIndex + 1} / {photos.length}
+        </div>
+
+        {/* Expand Icon */}
+        <div className="absolute top-4 right-4 bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={goToPrevious}
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
+        aria-label="Previous photo"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+
+      <button
+        onClick={goToNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg"
+        aria-label="Next photo"
+      >
+        <ChevronRight className="h-6 w-6" />
+      </button>
+
+      {/* Dots Indicator */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+        {photos.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleDotClick(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              index === currentIndex ? "bg-white scale-125" : "bg-white/50"
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Auto-rotation indicator */}
+      <div className="absolute top-4 left-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {isPaused ? "Paused" : "Auto"}
+      </div>
+
+      {/* Expanded Image Modal */}
+      {expandedImage && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] w-full">
+            <Image
+              src={expandedImage || "/placeholder.svg"}
+              alt="Expanded view"
+              width={1200}
+              height={800}
+              className="object-contain w-full h-full"
+            />
+            <button
+              className="absolute top-4 right-4 bg-black/70 text-white p-2 rounded-full hover:bg-white hover:text-black transition-all duration-300"
+              onClick={() => setExpandedImage(null)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+// Helper Components
+interface ChampionCardProps {
+  name: string
+  age?: number 
+  image: string
+  achievement: string
+  delay?: number
+}
+
+function ChampionCard({ name, image, achievement }: ChampionCardProps) {
+  return (
+    <Card className="relative bg-white/10 backdrop-blur-md rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 transition-all duration-700 border border-white/20">
+      {/* Change to monochromatic gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>
+
+      <div className="relative h-64 w-full overflow-hidden z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
+          <span className="text-white font-bold text-lg">{achievement}</span>
+        </div>
+        <Image
+          src={image || "/placeholder.svg"}
+          alt={name}
+          fill
+          className="object-cover transition-all duration-700 group-hover:scale-125 group-hover:rotate-3"
+        />
+        <div className="absolute top-3 right-3 z-10">
+          <div className="bg-black text-white p-1 rounded-full">
+            <Trophy className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+      <CardContent className="p-6 relative z-10">
+        <h3 className="text-xl font-bold text-black mb-2 relative group">
+          {name}
+          <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
+        </h3>
+        <p className="text-gray-600 mb-3 font-medium">{achievement}</p>
+        <div className="mt-4 flex justify-end"></div>
+      </CardContent>
+
+      {/* Change to monochromatic glow */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-600 to-white rounded-lg blur opacity-0 group-hover:opacity-70 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+    </Card>
+  )
+}
+
+interface TestimonialCardProps {
+  name: string
+  role: string
+  image: string
+  quote: string
+  delay?: number
+}
+
+function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
+  return (
+    <Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
+      <div className="flex items-center mb-6">
+        <div className="relative">
+          <Image
+            src={image || "/placeholder.svg"}
+            alt={name}
+            width={48}
+            height={48}
+            className="rounded-full object-cover mr-4 transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
+          />
+        </div>
+        <div>
+          <h4 className="font-bold text-black relative group">
+            {name}
+            <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
+          </h4>
+          <p className="text-gray-500 text-sm">{role}</p>
+        </div>
+      </div>
+      <p className="text-gray-600 italic relative">
+        <span className="absolute -top-4 -left-2 text-4xl text-black/20">&quot;</span>
+        {quote}
+        <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
+      </p>
+    </Card>
+  )
+}
+
+// Data
+const champions = [
+  {
+    name: "Juan Dela Cruz",
+    image: "/pictures/advert pic 1.jpeg",
+    achievement: "Gold Medalist - SEA Games 2023",
+  },
+  {
+    name: "Maria Santos",
+    image: "/pictures/advert pic 2.jpeg",
+    achievement: "Silver Medalist - Asian Championships 2023",
+  },
+  {
+    name: "Carlos Reyes",
+    image: "/pictures/advert pic 3.jpeg",
+    achievement: "National Champion 2022 of Palarong Pambansa",
+  },
+  {
+    name: "Andrea Gomez",
+    image: "/pictures/advert pic 1.jpeg",
+    achievement: "Gold Medalist - Youth World Championships 2023",
+  },
+]
+
+const testimonials = [
+  {
+    name: "Lawrence",
+    role: "Student since 2022",
+    image: "/pictures/Lawrence.jpg",
+    quote:
+      "I've been training under coach Rho since 2022, I trained everyday ever since. Now, I've won multiple competitions such as Kickboxing, Muay Thai and Jiu Jitsu. Martial arts taught me discipline, consistency and confidence. Before martial arts, I was 98 kilos and after a month I went to 88 and 78 in the next month. IMAA helped me propel to victory. Throughout the years, I've won three golds, one silver and four bronze",
+  },
+  {
+    name: "Sarah Lim",
+    role: "Student since 2020",
+    image: "/placeholder.svg?height=100&width=100",
+    quote:
+      "As a woman, I was initially hesitant to start martial arts, but IMAA made me feel completely comfortable. The self-defense skills I've learned are invaluable, and I've made lifelong friends here.",
+  },
+  {
+    name: "David Chen",
+    role: "Parent of student",
+    image: "/placeholder.svg?height=100&width=100",
+    quote:
+      "My son has been training at IMAA for three years. Not only has he developed incredible martial arts skills, but also discipline, confidence, and respect that carries over to all aspects of his life.",
+  },
+]
+
+const facilities = [
+  "Competition-grade mats",
+  "Weight training area",
+  "MMA cage",
+  "Boxing ring",
+  "Locker rooms",
+  "Pro shop",
+]

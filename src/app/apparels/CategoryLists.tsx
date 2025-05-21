@@ -9,7 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import React from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useSearchParams } from "next/navigation";
@@ -23,6 +22,16 @@ export default function CategoryLists() {
     currentParams.set("c", category);
     return `/apparels?${currentParams.toString()}`;
   };
+
+  // Define categories in a single array to maintain consistency
+  const categories = [
+    { title: "T-Shirt", value: "t-shirt" },
+    { title: "Gloves", value: "gloves" },
+    { title: "Pants", value: "pants" },
+    { title: "Jersey", value: "jersey" },
+    { title: "Shorts", value: "shorts" },
+    { title: "Tracksuits", value: "tracksuits" },
+  ];
 
   return (
     <>
@@ -43,24 +52,14 @@ export default function CategoryLists() {
               <SheetDescription></SheetDescription>
             </SheetHeader>
             <div className="p-2 flex flex-col items-center text-black">
-              <SheetClose asChild>
-                <ParamsLink
-                  title="T-Shirts"
-                  href={appendSearchParams("t-shirt")}
-                />
-              </SheetClose>
-              <SheetClose asChild>
-                <ParamsLink title="Shorts" href={appendSearchParams("short")} />
-              </SheetClose>
-              <SheetClose asChild>
-                <ParamsLink
-                  title="Headgears"
-                  href={appendSearchParams("headgear")}
-                />
-              </SheetClose>
-              <SheetClose asChild>
-                <ParamsLink title="Gloves" href={appendSearchParams("glove")} />
-              </SheetClose>
+              {categories.map((category) => (
+                <SheetClose key={category.value} asChild>
+                  <ParamsLink
+                    title={category.title}
+                    href={appendSearchParams(category.value)}
+                  />
+                </SheetClose>
+              ))}
             </div>
           </SheetContent>
         </Sheet>
@@ -70,10 +69,13 @@ export default function CategoryLists() {
       <Card className="hidden md:block p-5 w-60 space-y-4">
         <span className="font-semibold text-xl">Categories</span>
         <div className="flex flex-col gap-2">
-          <ParamsLink title="T-Shirts" href={appendSearchParams("t-shirt")} />
-          <ParamsLink title="Shorts" href={appendSearchParams("short")} />
-          <ParamsLink title="Headgears" href={appendSearchParams("headgear")} />
-          <ParamsLink title="Gloves" href={appendSearchParams("glove")} />
+          {categories.map((category) => (
+            <ParamsLink
+              key={category.value}
+              title={category.title}
+              href={appendSearchParams(category.value)}
+            />
+          ))}
         </div>
       </Card>
     </>
