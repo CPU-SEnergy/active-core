@@ -58,7 +58,7 @@ interface Payment {
   paymentMethod: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  isWalkIn: "user" | "walk-in";
+  isWalkIn: boolean;
   customer: CustomerBasicInfo;
   availedPlan: AvailedPlan;
 }
@@ -127,7 +127,6 @@ interface Customer {
   firstName: string;
   lastName: string;
   email: string;
-  dob: Date;
   sex: string;
   phone: string;
   type: "regular" | "student" | "senior";
