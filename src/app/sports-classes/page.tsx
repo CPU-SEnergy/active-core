@@ -6,7 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import Footer from "@/components/Footer"
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 
 interface FitnessSectionProps {
   title: string;
@@ -44,9 +45,32 @@ function FitnessSection({
         <h2 className="text-3xl md:text-4xl font-bold text-White">{title}</h2>
         <p className="text-gray-300 pb-2">{description}</p>
         <Link href={`/sports-classes/${id}`}>
-          <button className="bg-white hover:bg-grey text-black rounded-md px-6 py-2 font-medium">
-            READ MORE
-          </button>
+          <>
+            <style jsx global>{`
+              @keyframes glowPulse {
+                0% {
+                  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+                }
+                50% {
+                  box-shadow:
+                    0 0 8px rgba(255, 255, 255, 0.6),
+                    0 0 12px rgba(255, 255, 255, 0.3);
+                }
+                100% {
+                  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+                }
+              }
+            `}</style>
+            <Button
+              size="lg"
+              className="bg-white text-black relative overflow-hidden group font-bold transition-all duration-500"
+              style={{ animation: "glowPulse 3s infinite" }}
+            >
+              <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                LEARN MORE
+              </span>
+            </Button>
+          </>
         </Link>
       </div>
     </motion.div>
@@ -67,14 +91,21 @@ export default function Home() {
   return (
     <div className="min-h-screen text-white bg-black">
       <div className="relative z-10 text-center py-24 md:py-32 px-4">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold">
+        <h1
+          className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"
+          style={{
+            textShadow: `
+              0 0 4px rgb(255, 255, 255),
+              0 0 8px rgba(255, 255, 255, 0.4)
+            `,
+            transform: `translateY(0px)`,
+            animation: "smokeReveal 2s forwards",
+          }}
+        >
           CLASSES
         </h1>
-        <p className="mt-4 text-lg sm:text-xl md:text-2xl max-w-md mx-auto md:max-w-none">
-          &quot;The journey in combat sports is not just about the
-          victories.&quot;
-          <br />
-          &quot;It is about the character forged in the fires of struggle.&quot;
+        <p className="text-lg md:text-2xl text-gray-300">
+          Explore our wide range of fitness classes designed for all levels.
         </p>
       </div>
       <div className="container mx-auto px-4 py-8 space-y-24">
@@ -91,7 +122,7 @@ export default function Home() {
             />
           ))}
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
