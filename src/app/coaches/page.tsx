@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 
 async function fetchCoaches() {
   try {
@@ -51,15 +52,38 @@ function CoachSection({
         />
       </div>
       <div className="w-full lg:w-1/2 space-y-4 text-center lg:text-left">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-500">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
           {name}
         </h2>
         <p className="text-gray-300 text-base sm:text-lg">{specialization}</p>
         <div className="flex justify-center lg:justify-start">
           <Link href={`/coaches/profile/${coachId}`}>
-            <button className="bg-red-500 hover:bg-red-600 text-white rounded-md px-6 py-2 font-medium">
-              DETAILS
-            </button>
+            <>
+              <style>{`
+              @keyframes glowPulse {
+                0% {
+                  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+                }
+                50% {
+                  box-shadow:
+                    0 0 8px rgba(255, 255, 255, 0.6),
+                    0 0 12px rgba(255, 255, 255, 0.3);
+                }
+                100% {
+                  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+                }
+              }
+            `}</style>
+              <Button
+                size="lg"
+                className="bg-white text-black relative overflow-hidden group font-bold transition-all duration-500"
+                style={{ animation: "glowPulse 3s infinite" }}
+              >
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                  LEARN MORE
+                </span>
+              </Button>
+            </>
           </Link>
         </div>
       </div>
@@ -79,12 +103,22 @@ export default async function CoachDeck() {
           fill
           className="object-cover brightness-50 object-center"
           priority
-        />
-        <div className="relative z-10 text-center px-4">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
+        />{" "}
+        <div className="relative z-10 text-center py-24 md:py-32 px-4">
+          <h1
+            className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"
+            style={{
+              textShadow: `
+              0 0 4px rgb(255, 255, 255),
+              0 0 8px rgba(255, 255, 255, 0.4)
+            `,
+              transform: `translateY(0px)`,
+              animation: "smokeReveal 2s forwards",
+            }}
+          >
             MEET OUR COACHES
           </h1>
-          <p className="mt-2 sm:mt-4 text-lg sm:text-xl">
+          <p className="text-lg md:text-2xl text-gray-300">
             Train with the best in the industry.
           </p>
         </div>
@@ -104,8 +138,7 @@ export default async function CoachDeck() {
         ))}
       </div>
 
-    <Footer/>
-
+      <Footer />
     </div>
   );
 }

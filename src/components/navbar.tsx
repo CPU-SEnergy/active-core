@@ -113,7 +113,7 @@ export default function Navbar() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="text-black hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
+                className="text-white hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
               >
                 Admin Page
               </Link>

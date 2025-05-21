@@ -25,6 +25,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { getAuth, signOut } from "firebase/auth";
+import { app } from "@/lib/firebaseClient";
 
 const menuItems = [
   {
@@ -135,11 +137,10 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
     );
   };
 
-  const handleLogout = () => {
-    const logoutBtn = document.querySelector('button[class*="bg-red-600"]');
-    if (logoutBtn && user) {
-      (logoutBtn as HTMLButtonElement).click();
-    }
+  const handleLogout = async () => {
+    await signOut(getAuth(app));
+    await fetch("/api/logout");
+    router.push("/");
     setShowLogoutModal(false);
   };
 
