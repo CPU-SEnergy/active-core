@@ -21,7 +21,7 @@ export default function AddProductsPage() {
             <Card variant="dark" className="p-6 hover:bg-[#2C2C2C] transition-all duration-300 hover:scale-105">
               <div className="flex items-center space-x-4">
                 <Users className="w-12 h-12 text-white" />
-                <h2 className="text-xl font-medium text-white">Membership</h2>
+                <h2 className="text-xl font-medium text-white">Membership Plans</h2>
               </div>
             </Card>
           </Link>

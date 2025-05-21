@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { clientConfig } from "@/lib/config";
+import { getAuth } from "firebase/auth";
 
 export const app = (() => {
   if (!clientConfig || Object.keys(clientConfig).length === 0) {
@@ -20,3 +21,9 @@ export const app = (() => {
 
   return getApp();
 })();
+
+export function getFirebaseAuth() {
+  const auth = getAuth(app);
+
+  return auth;
+}

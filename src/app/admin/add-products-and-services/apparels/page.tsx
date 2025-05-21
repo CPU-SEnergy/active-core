@@ -1,74 +1,60 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pencil } from "lucide-react";
 import { ApparelForm } from "@/components/AddProductAndServices/ApparelFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
-const apparels = [
-  {
-    id: 1,
-    name: "Sweatpants",
-    size: "Small",
-    price: { regular: 1900.0, sale: 1200.0 },
-    image: "/placeholder.svg",
-  },
-  {
-    id: 2,
-    name: "Boxing Gloves",
-    size: "Medium | Large",
-    price: { regular: 2200.0, sale: 1600.0 },
-    image: "/placeholder.svg",
-  },
-  {
-    id: 3,
-    name: "Sweatpants",
-    size: "Small",
-    price: { regular: 1900.0, sale: 1200.0 },
-    image: "/placeholder.svg",
-  },
-  {
-    id: 4,
-    name: "Sweatpants",
-    size: "Small",
-    price: { regular: 1900.0, sale: 1200.0 },
-    image: "/placeholder.svg",
-  },
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
+import { APPARELDATA } from "@/lib/types/product-services";
+import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
+import { Skeleton } from "@/components/ui/skeleton";
+import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 
-  {
-    id: 5,
-    name: "Sweatpants",
-    size: "Small",
-    price: { regular: 1900.0, sale: 1200.0 },
-    image: "/placeholder.svg",
-  },
-  {
-    id: 6,
-    name: "Boxing Gloves",
-    size: "Medium | Large",
-    price: { regular: 2200.0, sale: 1600.0 },
-    image: "/placeholder.svg",
-  },
-  {
-    id: 7,
-    name: "Sweatpants",
-    size: "Small",
-    price: { regular: 1900.0, sale: 1200.0 },
-    image: "/placeholder.svg",
-  },
-  {
-    id: 8,
-    name: "Sweatpants",
-    size: "Small",
-    price: { regular: 1900.0, sale: 1200.0 },
-    image: "/placeholder.svg",
-  },
-];
+function ApparelsSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-8">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Skeleton className="h-10 w-32 mb-8" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <Card key={index} className="relative">
+              <div className="relative aspect-square">
+                <Skeleton className="absolute inset-0 rounded-t-lg" />
+              </div>
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <Skeleton className="h-5 w-32" />
+                </div>
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ApparelsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { data, error, isLoading } = useSWR<APPARELDATA[]>(
+    "/api/apparels",
+    fetcher
+  );
+
+  if (error) {
+    console.error("Error fetching apparels:", error);
+    return <>Error fetching apparels</>;
+  }
+
+  if (isLoading) {
+    return <ApparelsSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -77,61 +63,73 @@ export default function ApparelsPage() {
           <h1 className="text-2xl font-semibold">Apparels</h1>
           <SelectProductAndServices />
         </div>
-        <Button
-          className="w-semifull mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
-          variant="outline"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Add Apparels
-        </Button>
+        <ApparelForm />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {apparels.map((apparel) => (
-            <Card key={apparel.id} className="relative group">
-              <div className="relative aspect-square">
-                <Image
-                  src={apparel.image || "/placeholder.svg"}
-                  alt={apparel.name}
-                  fill
-                  className="object-cover rounded-t-lg"
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium">{apparel.name}</h3>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
+          {isLoading && <p>Loading apparels...</p>}
+          {data &&
+            data.length > 0 &&
+            data.map((apparel) => (
+              <Card key={apparel.id} className="relative group">
+                <div className="relative aspect-square rounded-t-lg overflow-hidden">
+                  <Image
+                    src={apparel.imageUrl || "/placeholder.svg"}
+                    alt={apparel.name}
+                    fill
+                    sizes="300px"
+                    priority
+                    className="object-cover"
+                  />
                 </div>
-                <p className="text-sm text-gray-500 mb-2">{apparel.size}</p>
-                <p className="text-sm">
-                  P {apparel.price.regular.toFixed(2)} | P{" "}
-                  {apparel.price.sale.toFixed(2)}
-                </p>
-              </div>
-            </Card>
-          ))}
+
+                <div
+                  className={`flex justify-end items-center gap-4 mb-4 p-1 rounded transition-colors ${
+                    apparel.isActive ? "bg-white" : "bg-red-100"
+                  }`}
+                >
+                  <span
+                    className={`font-semibold ${
+                      apparel.isActive ? "text-green-600" : "text-gray-500"
+                    }`}
+                  >
+                    {apparel.isActive ? "Active" : "Archived"}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <ProductAndServicesSwitch
+                      collectionName={"apparels"}
+                      id={apparel.id}
+                      isActive={apparel.isActive}
+                    />
+                    <EditApparel data={apparel} />
+                  </div>
+                </div>
+
+                <div className="p-4 pt-2">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium">{apparel.name}</h3>
+                  </div>
+                  <p className="text-sm inline-flex gap-1">
+                    {apparel.discount ? (
+                      <>
+                        <span className="line-through text-gray-500 font-semibold">
+                          P {apparel.price.toFixed(2)}
+                        </span>
+                        <span className="text-red-500 font-semibold">
+                          P {apparel.discount.toFixed(2)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-semibold">
+                        P {apparel.price.toFixed(2)}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </Card>
+            ))}
         </div>
       </div>
-      <ApparelForm
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          console.log("Apparel form submitted successfully");
-        }}
-      />
     </div>
   );
 }
-

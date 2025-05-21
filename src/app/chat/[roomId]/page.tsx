@@ -37,7 +37,7 @@ export default function ChatRoomPage({ params }: { params: Params }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 py-20">
       <ChatRoom roomId={user.uid} user={user} />
     </div>
   );

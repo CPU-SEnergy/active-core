@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { useFieldArray, useForm } from "react-hook-form";
@@ -13,42 +12,26 @@ import { Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
+import { createCoach } from "@/app/actions/admin/products-services/createCoach";
+import { mutate } from "swr";
+import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  specialization: z.string().min(1, "Specialty is required"),
-  contactInfo: z.string().min(1, "Contact info is required"),
-  dob: z.preprocess(
-    (val) => {
-      if (typeof val === "string" || val instanceof Date) {
-        return new Date(val);
-      }
-      return val;
-    },
-    z.date({ required_error: "Date of birth is required" })
-  ),
-  experience: z.preprocess(
-    (val) => Number(val),
-    z.number().gt(0, "Experience must be greater than 0")
-  ),
-  certifications: z
-    .array(z.string().min(1, "Certification is required"))
-    .min(1, { message: "At least one certification is required" }),
-  bio: z.string().min(1, "Bio is required"),
-  image: z.any().optional(),
-});
+type FormData = z.infer<typeof coachFormSchema>;
 
-type FormData = z.infer<typeof formSchema>;
-
-interface CoachFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
+export function CoachForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const {
     register,
@@ -58,7 +41,17 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(coachFormSchema),
+    defaultValues: {
+      name: "",
+      specialization: "",
+      contactInfo: "",
+      dob: "",
+      experience: 0,
+      certifications: [""],
+      bio: "",
+      image: undefined,
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -68,16 +61,45 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      reset();
-      toast.success("Coach added successfully!");
-      setPreview(null);
-      onSuccess();
-      onClose();
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("specialization", data.specialization);
+      formData.append("contactInfo", data.contactInfo);
+      formData.append("dob", data.dob ? data.dob.toString() : "");
+      formData.append("experience", data.experience.toString());
+      formData.append("bio", data.bio);
+
+      if (data.certifications) {
+        data.certifications.forEach((cert) => {
+          if (cert) formData.append("certifications", cert);
+        });
+      }
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      const result = await createCoach(formData);
+      console.log("createCoach result:", result);
+
+      if (!result || !result.status) {
+        toast.error("Unexpected response from server.");
+        return;
+      }
+
+      if (result.status === 200) {
+        toast.success(result.message || "Coach added successfully!");
+
+        reset();
+        setPreview(null);
+        await mutate("/api/coaches");
+        setOpen(false);
+      } else {
+        toast.error(result.message || "Error creating a coach.");
+      }
     } catch (error) {
-      console.error("Error adding coach:", error);
-      toast.error("Error adding coach. Please try again.");
+      console.error("Error creating a coach:", error);
+      toast.error("Error creating a coach. Please try again.");
     }
   };
 
@@ -101,12 +123,23 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
     if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4 text-center">Add Coach</h2>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
+          variant={"outline"}
+        >
+          Add Coach
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Coach</DialogTitle>
+          <DialogDescription>
+            Fill in the details for creating new coaches.
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
@@ -122,7 +155,7 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="specialization">Specialty</Label>
+            <Label htmlFor="specialization">Specialization</Label>
             <Input
               id="specialization"
               placeholder="Enter coach specialization"
@@ -144,7 +177,7 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="specialty">Contact Info</Label>
+            <Label htmlFor="contactInfo">Contact Info</Label>
             <Input
               id="contactInfo"
               placeholder="Enter coach contact info"
@@ -158,7 +191,7 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="experience">Experience</Label>
+            <Label htmlFor="experience">Years Experience</Label>
             <Input
               id="experience"
               type="number"
@@ -222,7 +255,9 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
           <div className="grid gap-2">
             <Label>Upload Image</Label>
             <div
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${dragActive ? "border-black bg-gray-50" : ""}`}
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
+                dragActive ? "border-black bg-gray-50" : ""
+              }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -254,11 +289,17 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
                 />
               </div>
             </div>
+            {errors.image?.message && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.image.message as string}
+              </p>
+            )}
             {preview && (
               <div className="flex justify-center mt-2">
                 <Image
                   width={96}
                   height={96}
+                  sizes="96px"
                   src={preview}
                   alt="Preview"
                   className="w-24 h-24 object-cover rounded-md"
@@ -266,21 +307,22 @@ export function CoachForm({ isOpen, onClose, onSuccess }: CoachFormProps) {
               </div>
             )}
           </div>
-
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
             <Button
               type="submit"
               className="bg-black hover:bg-gray-800"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Adding..." : "Add Coach"}
+              {isSubmitting ? "Creating..." : "Create"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

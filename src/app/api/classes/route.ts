@@ -1,24 +1,24 @@
-import { NextResponse } from 'next/server';
-import { getFirebaseAdminApp } from '@/lib/firebaseAdmin';
-import { getFirestore } from 'firebase-admin/firestore';
-import { ProductType } from '@/lib/types/product';
-
-const db = getFirestore(getFirebaseAdminApp());
+import { NextResponse } from "next/server";
+import { db } from "@/lib/schema/firestore";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
-    const classesCollection = db.collection(ProductType.CLASSES);
+    getFirebaseAdminApp();
 
-    const querySnapshot = await classesCollection.get();
+    const classesCollection = await db.classes.all();
 
-    const classes = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
+    const cleanClasses = classesCollection.map((doc) => ({
+      id: doc.ref.id,
+      ...doc.data,
     }));
-    
-    return NextResponse.json(classes)
+
+    return NextResponse.json(cleanClasses, { status: 200 });
   } catch (error) {
-    console.error("Error fetching classes: ", error);
-    return NextResponse.json({ error: "Failed to fetch classes" });
+    console.error("Error fetching classes:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
