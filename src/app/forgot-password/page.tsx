@@ -1,108 +1,149 @@
-"use client";
+"use client"
 
-import { FormEvent, useState } from "react";
-import Link from "next/link";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
-import { z } from "zod";
+import { type FormEvent, useState } from "react"
+import Link from "next/link"
+import { getAuth, sendPasswordResetEmail } from "firebase/auth"
+import { app } from "@/lib/firebaseClient"
+import { z, type ZodError } from "zod"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import Image from "next/image"
+import { ArrowLeft } from "lucide-react"
 
 const emailSchema = z.object({
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
-});
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+})
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<ZodError | null>(null)
 
   async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    setError("");
-    setMessage("");
+    event.preventDefault()
+    setError("")
+    setMessage("")
+    setLoading(true)
+    setValidationErrors(null)
 
     // Validate email input using Zod
-    const result = emailSchema.safeParse({ email });
+    const validation = emailSchema.safeParse({ email })
 
-    if (!result.success) {
-      setError(result.error.errors[0]?.message || "An error occurred");
-      return;
+    if (!validation.success) {
+      setValidationErrors(validation.error)
+      setLoading(false)
+      return
     }
 
     try {
-      await sendPasswordResetEmail(getAuth(app), email);
-      setMessage("Password reset email sent! Check your inbox.");
+      await sendPasswordResetEmail(getAuth(app), email)
+      setMessage("Password reset email sent! Check your inbox.")
     } catch (e) {
-      setError((e as Error).message);
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
     }
   }
 
+  const getValidationError = (field: string) => {
+    return validationErrors?.errors.find((err) => err.path.includes(field))?.message
+  }
+
   return (
-    <main
-      className="flex min-h-screen flex-col items-center justify-center p-8 bg-cover bg-center"
-      style={{ backgroundImage: "url('/pictures/sportsfitness.jpg')" }}
+    <div
+      className="min-h-screen w-full flex items-center justify-center p-4"
+      style={{
+        background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
+      }}
     >
-      <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-        <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-          <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-            Reset account password
-          </h1>
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4 md:space-y-6"
-            action="#"
-          >
-            <div>
-              <label
-                htmlFor="email"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+      <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
+        <CardContent className="flex-1 p-6">
+          <div className="w-full max-w-sm mx-auto space-y-6">
+            <Link href="/auth/login">
+              <Button
+                type="button"
+                variant="ghost"
+                className="mb-2 p-0 h-auto flex items-center text-gray-500 hover:text-gray-700"
               >
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                id="email"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="name@company.com"
-                required
-              />
-            </div>
-            {message && (
-              <div
-                className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
-                role="alert"
-              >
-                <span className="block sm:inline">{message}</span>
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                <span>Back to Login</span>
+              </Button>
+            </Link>
+
+            <h1 className="text-center text-2xl md:text-4xl font-bold tracking-tighter md:my-6">Reset Password</h1>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2 mb-6 md:mb-8">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={email}
+                  required
+                  autoComplete="email"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {getValidationError("email") && (
+                  <div className="text-red-500 text-sm">{getValidationError("email")}</div>
+                )}
               </div>
-            )}
-            {error && (
-              <div
-                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                role="alert"
-              >
-                <span className="block sm:inline">{error}</span>
-              </div>
-            )}
-            <button
-              type="submit"
-              className="w-full text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-primary-800"
-            >
-              Reset Password
-            </button>
-            <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+
+              {message && <div className="bg-green-50 text-green-800 rounded-md p-4 mb-4">{message}</div>}
+
+              {error && <div className="text-red-500 text-sm">{error}</div>}
+
+              <Button className={`w-full py-3 md:py-6 ${loading ? "opacity-50" : ""}`} type="submit" disabled={loading}>
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>Sending...</span>
+                  </div>
+                ) : (
+                  "Reset Password"
+                )}
+              </Button>
+            </form>
+
+            <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
               Remember your password?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-gray-600 hover:underline dark:text-gray-500"
-              >
-                Login
+              <Link className="text-blue-500 hover:text-blue-600" href="/auth/login">
+                Log in
               </Link>
             </p>
-          </form>
+          </div>
+        </CardContent>
+        <div className="relative hidden md:flex bg-zinc-950 w-full md:w-1/2">
+          <Image
+            src="/pictures/IMAA Official no-bg.png"
+            alt="Sports and Fitness"
+            width={700}
+            height={700}
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/25 flex items-center justify-center p-6"></div>
         </div>
-      </div>
-    </main>
-  );
+      </Card>
+    </div>
+  )
 }

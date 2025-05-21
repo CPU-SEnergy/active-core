@@ -1,3 +1,5 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -87,4 +89,375 @@
   body {
     @apply bg-background text-foreground;
   }
+
+
+@fonts
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+  
+  body {
+    color: rgb(var(--foreground-rgb));
+    background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+  }
+
+@section dividers
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
 }
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+.geometric-pattern {
+  background-image: linear-gradient(45deg, #dc2626 25%, transparent 25%),
+    linear-gradient(-45deg, #dc2626 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #dc2626 75%),
+    linear-gradient(-45deg, transparent 75%, #dc2626 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.text-shadow-fire {
+  text-shadow: 0 0 10px #dc2626, 0 0 20px #dc2626, 0 0 30px #dc2626;
+}
+
+.clip-diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes flame {
+  0% {
+    d: path("M0,0 Q300,120 600,0 T1200,0 V120 H0 V0 Z");
+  }
+  50% {
+    d: path("M0,0 Q300,90 600,30 T1200,0 V120 H0 V0 Z");
+  }
+  100% {
+    d: path("M0,0 Q300,120 600,0 T1200,0 V120 H0 V0 Z");
+  }
+}
+
+.animate-flame {
+  animation: flame 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+}
+
+.text-shadow-flicker {
+  color: #ff9900;
+  text-shadow: 
+    0px 0px 5px #ff3300, 
+    2px -2px 10px #ff6600, 
+    -2px 2px 15px #ff0000, 
+    3px -3px 20px #cc0000;
+  animation: flicker 0.15s infinite alternate;
+}
+
+@keyframes flicker {
+  0% {
+    text-shadow: 
+      0px 0px 5px #ff3300, 
+      2px -2px 10px #ff6600, 
+      -2px 2px 15px #ff0000, 
+      3px -3px 20px #cc0000;
+  }
+  50% {
+    text-shadow: 
+      0px 0px 6px #ff4500, 
+      -2px 2px 12px #ff0000, 
+      2px -2px 18px #cc0000, 
+      -3px 3px 24px #990000;
+  }
+  100% {
+    text-shadow: 
+      0px 0px 4px #ff2200, 
+      1px -1px 8px #ff5500, 
+      -1px 1px 12px #ff1100, 
+      2px -2px 16px #880000;
+  }
+}
+
+.fire-text {
+  color: #ffbb33;
+  text-shadow: 0px 0px 5px #ff7700, 0px 0px 10px #ff4400, 0px 0px 15px #cc2200;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations for martial arts effects */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(100px) scale(0.8);
+  }
+  60% {
+    transform: translateY(-20px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes flyingKick {
+  0% {
+    transform: translateY(200px) rotateX(90deg) scale(0.5);
+    opacity: 0;
+    filter: blur(15px);
+  }
+  60% {
+    transform: translateY(-40px) rotateX(-15deg) scale(1.15);
+    filter: blur(0);
+  }
+  80% {
+    transform: translateY(10px) rotateX(5deg) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) rotateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes punchIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateX(-100px) rotateY(40deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.2) translateX(20px) rotateY(-15deg);
+  }
+  80% {
+    transform: scale(0.95) translateX(-10px) rotateY(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0) rotateY(0);
+  }
+}
+
+@keyframes sweepIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px) skewX(30deg);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) skewX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes spinKick {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.5);
+  }
+  60% {
+    transform: rotate(15deg) scale(1.15);
+  }
+  80% {
+    transform: rotate(-5deg) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+/* Add more dramatic hover effects */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-25px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px) rotate(-5deg);
+  }
+  50% {
+    transform: translateX(10px) rotate(5deg);
+  }
+  75% {
+    transform: translateX(-5px) rotate(-2deg);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Pattern background */
+.martial-pattern {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 25px 25px;
+}
+
+/* Add utility classes for the new animations */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-custom {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.hover-shake:hover {
+  animation: shake 0.5s ease-in-out;
+}
+
+.cube-button-group {
+  perspective: 1000px;
+  display: inline-block;
+}
+
+.cube-button {
+  width: 120px;
+  height: 120px;
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+  font-size: 1.125rem;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.cube-button:hover {
+  transform: rotateY(180deg);
+  background-color: black;
+  color: white;
+}
+
+.glow-text {
+  animation: glowPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+  from {
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 0.5),
+      0 0 8px rgba(255, 255, 255, 0.4);
+  }
+  to {
+    text-shadow:
+      0 0 6px rgba(255, 255, 255, 0.6),
+      0 0 10px rgba(255, 255, 255, 0.5);
+  }
+}
+
+
+
+
+

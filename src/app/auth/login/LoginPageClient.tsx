@@ -9,8 +9,9 @@ import { z, ZodError } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; 
 import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 
 const loginSchema = z.object({
@@ -21,8 +22,11 @@ const loginSchema = z.object({
 export default function LoginPageClient() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword ] = useState(false);
   const [error, setError] = useState<string>("");
-  const [validationErrors, setValidationErrors] = useState<ZodError | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ZodError | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
@@ -56,6 +60,7 @@ export default function LoginPageClient() {
       router.refresh();
       router.push("/");
     } catch (e) {
+      console.log(e);
       setError((e as Error).message);
     } finally {
       setLoading(false);
@@ -63,16 +68,18 @@ export default function LoginPageClient() {
   }
 
   const getValidationError = (field: string) => {
-    return validationErrors?.errors.find((err) => err.path.includes(field))?.message;
+    return validationErrors?.errors.find((err) => err.path.includes(field))
+      ?.message;
   };
 
   return (
     <>
       <div
-        className="min-h-screen w-full flex items-center justify-center p-4"
-        style={{
-          background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
-        }}
+      className="min-h-screen w-full flex items-center justify-center p-4"
+      style={{
+        background:
+        "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
+      }}
       >
         <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
           <CardContent className="flex-1 p-6">
@@ -100,15 +107,28 @@ export default function LoginPageClient() {
                 </div>
                 <div className="space-y-2 mb-8 md:mb-10">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    placeholder="••••••••"
-                    type="password"
-                    autoComplete="password"
-                    value={password}
-                    required
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      placeholder="••••••••"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="password"
+                      value={password}
+                      required
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                   {getValidationError("password") && (
                     <div className="text-red-500 text-sm">
                       {getValidationError("password")}
@@ -170,7 +190,10 @@ export default function LoginPageClient() {
               </div>
               <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Don&apos;t have an account?{" "}
-                <Link className="text-blue-500 hover:text-blue-600" href="/auth/register">
+                <Link
+                  className="text-blue-500 hover:text-blue-600"
+                  href="/auth/register"
+                >
                   Sign up
                 </Link>
               </p>
@@ -178,10 +201,10 @@ export default function LoginPageClient() {
           </CardContent>
           <div className="relative hidden md:flex bg-zinc-950 w-full md:w-1/2">
             <Image
-              src="/pictures/loginphoto.jpg"
+              src="/pictures/IMAA Official no-bg.png"
               alt="Login Illustration"
-              width={500}
-              height={500}
+              width={700}
+              height={700}
               className="object-cover"
               priority
             />

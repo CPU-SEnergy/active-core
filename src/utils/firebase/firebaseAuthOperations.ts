@@ -13,6 +13,7 @@ import {
   Timestamp,
   setDoc,
 } from "firebase/firestore";
+import { addUserToAlgolia } from "@/app/actions/AddUserToAlgolia";
 
 export const createFirebaseUser = async (formResult: RegisterFormProps) => {
   try {
@@ -42,6 +43,13 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     });
 
     const idToken = await userCredential.user.getIdToken();
+
+    await addUserToAlgolia({
+      uuid: userCredential.user.uid,
+      firstName: formResult.firstName,
+      lastName: formResult.lastName,
+      email: formResult.email,
+    });
 
     await fetch("/api/login", {
       method: "POST",

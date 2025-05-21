@@ -3,14 +3,15 @@ import { schema, Typesaurus } from "typesaurus";
 export const db = schema(
   ($) => ({
     users: $.collection<User>(),
-    membershipPlan: $.collection<MembershipPlan>(),
+    membershipPlans: $.collection<MembershipPlan>(),
     payments: $.collection<Payment>(),
-    membershipHistory: $.collection<MembershipHistory>(),
     kpis: $.collection<KPIs>().sub({ months: $.collection<MonthKPI>() }),
     customers: $.collection<Customers>(),
     apparels: $.collection<Apparels>(),
     coaches: $.collection<Coaches>(),
     classes: $.collection<Classes>(),
+    customer: $.collection<Customer>(),
+    walkInCustomers: $.collection<WalkInCustomer>(),
   }),
   { server: { preferRest: true } }
 );
@@ -29,34 +30,22 @@ interface User {
   type: "regular" | "student" | "senior";
   isCustomer: boolean;
   planExpiry?: Date;
-}
-
-interface Price {
-  regular: number;
-  student: number;
-  discount: number;
+  phone?: string;
 }
 
 interface MembershipPlan {
   name: string;
   description: string;
   duration: number;
-  price: Price;
-  status: "active" | "archived";
+  price: number;
+  isActive: boolean;
+  planType: "individual" | "package" | "walk-in";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
-  planDateEnd: Date;
-}
-
-interface UserBasicInfo {
-  userId: Schema["users"]["Id"];
-  name: string;
-  type: "regular" | "student";
-  imageUrl: string;
 }
 
 interface AvailedPlan {
-  membershipPlanId: Schema["membershipPlan"]["Id"];
+  membershipPlanId: Schema["membershipPlans"]["Id"];
   name: string;
   amount: number;
   duration: number;
@@ -67,16 +56,20 @@ interface AvailedPlan {
 interface Payment {
   id: string;
   paymentMethod: string;
-  status: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  user: UserBasicInfo;
+  isWalkIn: boolean;
+  customer: CustomerBasicInfo;
   availedPlan: AvailedPlan;
 }
 
-interface MembershipHistory {
-  userId: Schema["users"]["Id"];
-  paymentId: Schema["payments"]["Id"];
+interface CustomerBasicInfo {
+  customerId:
+    | Schema["walkInCustomers"]["Data"]["userId"]
+    | Schema["customer"]["Data"]["userId"];
+  firstName: string;
+  lastName: string;
+  type: "regular" | "student";
 }
 
 interface KPIs {
@@ -92,13 +85,14 @@ interface Customers {
   totalCustomers: number;
 }
 
-interface Apparels {
+export interface Apparels {
   name: string;
   price: number;
   discount?: number;
   imageUrl: string;
   description: string;
   type: string;
+  isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
@@ -110,8 +104,9 @@ interface Coaches {
   dob: Date;
   experience: number;
   imageUrl: string;
-  description: string;
-  certifications: string[];
+  contactInfo: string;
+  certifications?: string[];
+  isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
 }
@@ -121,8 +116,29 @@ interface Classes {
   description: string;
   imageUrl?: string;
   schedule: string;
-  types: string[];
-  coachId: Schema["coaches"]["Id"][];
+  coaches: Schema["coaches"]["Id"][];
+  isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
+}
+
+interface Customer {
+  userId: Schema["users"]["Id"];
+  firstName: string;
+  lastName: string;
+  email: string;
+  sex: string;
+  phone: string;
+  type: "regular" | "student" | "senior";
+  createdAt: Typesaurus.ServerDate;
+  updatedAt: Typesaurus.ServerDate;
+}
+
+interface WalkInCustomer {
+  firstName: string;
+  lastName: string;
+  email: string;
+  type: "regular" | "student" | "senior";
+  createdAt: Typesaurus.ServerDate;
+  userId?: Schema["users"]["Id"];
 }
