@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";;
+"use client";
 
 import type React from "react";
 import { useState } from "react";
@@ -311,12 +311,6 @@ const AddCustomerPage = () => {
               <Label className="text-sm font-medium">Sex</Label>
               <RadioGroup
                 value={formData.sex}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    sex: value as "male" | "female" | "other",
-                  }))
-                }
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
