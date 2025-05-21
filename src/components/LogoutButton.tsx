@@ -25,7 +25,7 @@ export default function LogoutButton({ user }: { user: User | null }) {
         <Button
           variant={"default"}
           onClick={handleLogout}
-          className="text-white font-semibold bg-red-600 text-lg md:text-base"
+          className="text-black-600 bg-white border border-gray-900 px-5 text-lg md:text-base hover:bg-black hover:text-white transition-colors duration-300"
         >
           Logout
         </Button>

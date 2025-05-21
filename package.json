@@ -41,6 +41,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.5",
     "react-hook-form": "^7.53.2",
+    "react-hot-toast": "^2.5.2",
     "react-instantsearch": "^7.15.3",
     "react-instantsearch-nextjs": "^0.4.4",
     "react-slick": "^0.30.3",
@@ -52,7 +53,7 @@
     "swr": "^2.3.3",
     "tailwind-merge": "^2.5.4",
     "typesaurus": "^10.7.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",

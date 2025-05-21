@@ -8,6 +8,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { formatEnumText } from "@/utils/helpers/formatEnumText";
+import Footer from "@/components/Footer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -393,6 +394,7 @@ export default function ApparelPage({
           </div>
         </div>
       </div>
+      <Footer/>
     </main>
   );
 }

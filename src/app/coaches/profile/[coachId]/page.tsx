@@ -337,3 +337,30 @@ function CoachDetailSkeleton() {
     </div>
   );
 }
+
+
+
+// async function fetchCoaches(id: string) {
+//   try {
+//     const res = await fetch(`http://localhost:3000/api/coaches/${id}`, {
+//       next: { revalidate: 60000 },
+//     });
+//     if (!res.ok) {
+//       throw new Error("Failed to fetch coaches");
+//     }
+//     return await res.json();
+//   } catch (error) {
+//     console.error(error);
+//     return [];
+//   }
+// }
+
+// export default async function CoachTest({
+//   params,
+// }: {
+//   params: Promise<{ id: string }>;
+// }) {
+//   const coach: Coach = await fetchCoaches((await params).id);
+//   console.log(coaches, "coaches");
+// }
+

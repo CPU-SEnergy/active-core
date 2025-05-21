@@ -4,11 +4,11 @@ import type React from "react"
 
 import Image from "next/image"
 import Link from "next/link"
-import { Facebook,MapPin, Phone, Mail } from "lucide-react"
+import { Facebook, MapPin, Phone, Mail } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white pt-16 pb-1.5">
+    <footer className="bg-black text-white pt-16 pb-1.5 w-full">
       <div className="max-w-9xl mx-auto px-10 sm:px-10 lg:px-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-16">
           {/* Logo and About */}
@@ -31,7 +31,7 @@ export default function Footer() {
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-6 justify-center md:justify-start mt-4">
+              <div className="flex space-x-9 justify-center md:justify-start mt-9">
                 <SocialIcon icon={<Facebook className="h-6 w-6" />} />
               </div>
             </div>
@@ -78,15 +78,13 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-    
       </div>
-      <div className="border-t border-gray-800 my-12 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm text-center md:text-left pt-6 px-10">
-            Est. 2025 Iloilo Martial Artist Association. All rights reserved.
-          </p>
-          <div className="mt-4 md:mt-0 flex space-x-6">
-          </div>
-        </div>
+      <div className="border-t border-gray-800 mt-12 mb-6 flex flex-col md:flex-row justify-between items-center">
+        <p className="text-gray-400 text-sm text-center md:text-left pt-6 px-10">
+          Est. 2025 Iloilo Martial Artist Association. All rights reserved.
+        </p>
+        <div className="mt-4 md:mt-0 flex space-x-6 px-10"></div>
+      </div>
     </footer>
   )
 }
