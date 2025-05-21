@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
 import { motion } from "framer-motion";
+import Footer from "@/components/Footer"
 
 interface FitnessSectionProps {
   title: string;
@@ -90,6 +91,7 @@ export default function Home() {
             />
           ))}
       </div>
+      <Footer/>
     </div>
   );
 }

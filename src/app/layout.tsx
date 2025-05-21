@@ -12,6 +12,7 @@ import Navbar from "@/components/navbar";
 import ChatWidget from "../components/ChatWidget";
 import { Toaster } from "sonner";
 
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -59,6 +60,8 @@ export default async function RootLayout({
         <AuthProvider>
           <Navbar />
           {children}
+
+          {user && <ChatWidget userId={user.uid} />}
           {user &&
             user.customClaims.role !== "admin" &&
             user.customClaims.role !== "cashier" && (
