@@ -92,7 +92,7 @@ export function ClassesModal() {
         toast.success(result.message || "Class added successfully!");
         reset();
         setPreview(null);
-        await mutate("/api/classes");
+        mutate("/api/classes");
         setOpen(false);
       } else {
         toast.error(result.message || "Error creating a class.");
