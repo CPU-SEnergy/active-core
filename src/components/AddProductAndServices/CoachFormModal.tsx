@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
 import { createCoach } from "@/app/actions/admin/products-services/createCoach";
-import { mutate } from "swr";
+import { useSWRConfig } from "swr";
 import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
 import {
   Dialog,
@@ -32,7 +32,8 @@ export function CoachForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [open, setOpen] = useState(false);
-
+  const { mutate } = useSWRConfig()
+  
   const {
     register,
     handleSubmit,
