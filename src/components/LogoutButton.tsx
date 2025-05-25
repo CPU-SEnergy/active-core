@@ -7,7 +7,7 @@ import { signOut } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 import LoginButton from "./LoginButton";
 import { User } from "@/auth/AuthContext";
-import { logout } from "../../api";
+import { logout } from "../../not-api";
 
 export default function LogoutButton({ user }: { user: User | null }) {
   const router = useRouter();
