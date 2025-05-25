@@ -3,12 +3,12 @@
 import type React from "react";
 
 import ChatList from "@/components/ChatList";
-import { app } from "@/lib/firebaseClient";
-import { getAuth, type User, onAuthStateChanged } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { type User, onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
 
 export default function Page() {
-  const auth = getAuth(app);
+  const auth = getFirebaseAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
