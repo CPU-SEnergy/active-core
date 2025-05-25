@@ -13,7 +13,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { addUserToAlgolia } from "@/app/actions/AddUserToAlgolia";
-import { loginWithCredential } from "../../../api";
+import { loginWithCredential } from "../../../not-api";
 
 export const createFirebaseUser = async (formResult: RegisterFormProps) => {
   try {
