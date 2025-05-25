@@ -115,7 +115,7 @@ export default function Navbar() {
                 href="/admin"
                 className="text-white hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
               >
-                Admin Page
+                Admin
               </Link>
             )}
             <LogoutButton user={user} />
