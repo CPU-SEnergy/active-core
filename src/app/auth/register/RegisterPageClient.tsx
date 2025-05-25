@@ -12,6 +12,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
 import { Eye, EyeOff } from "lucide-react"
+import { useRedirectParam } from "@/app/shared/useRedirectParam"
+import { appendRedirectParam } from "@/app/shared/redirect"
 
 export default function RegisterPageClient() {
   const { toast } = useToast()
@@ -20,6 +22,7 @@ export default function RegisterPageClient() {
   const { step, formState, error, handleChange, handleNextStep, handleSignUp } = useRegisterForm()
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+  const redirect = useRedirectParam();
 
   // Simplified back button handler
   const handleBackStep = (e: React.MouseEvent) => {
@@ -56,8 +59,8 @@ export default function RegisterPageClient() {
 
       setLoading(false)
 
-      router.refresh()
-      router.push("/")
+      router.push(redirect ?? "/");
+      router.refresh();
     } catch (e) {
       setLoading(false)
       toast({
@@ -273,7 +276,10 @@ export default function RegisterPageClient() {
 
             <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
               Already have an account?{" "}
-              <Link className="text-blue-500 hover:text-blue-600" href="/auth/login">
+              <Link
+                className="text-blue-500 hover:text-blue-600"
+                href={appendRedirectParam("/auth/login", redirect)}
+              >
                 Log in
               </Link>
             </p>

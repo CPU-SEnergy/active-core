@@ -12,7 +12,6 @@ import Navbar from "@/components/navbar";
 import ChatWidget from "../components/ChatWidget";
 import { Toaster } from "sonner";
 
-
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -57,7 +56,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} antialiased`}
         style={{ fontFamily: "var(--font-geist-sans), sans-serif" }}
       >
-        <AuthProvider>
+        <AuthProvider user={user}>
           <Navbar />
           {children}
 

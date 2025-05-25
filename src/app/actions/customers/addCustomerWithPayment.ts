@@ -1,5 +1,6 @@
 "use server";
 
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { db, type Schema } from "@/lib/schema/firestore";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 
@@ -20,6 +21,8 @@ export async function addCustomerWithPayment(
   isWalkIn = false
 ) {
   try {
+    getFirebaseAdminApp();
+    
     const user = await getCurrentUserCustomClaims();
     if (
       !user ||

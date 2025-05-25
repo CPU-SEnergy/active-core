@@ -1,63 +1,70 @@
-"use client"
+"use client";
 
-import { type FormEvent, useState } from "react"
-import Link from "next/link"
-import { getAuth, sendPasswordResetEmail } from "firebase/auth"
-import { app } from "@/lib/firebaseClient"
-import { z, type ZodError } from "zod"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Image from "next/image"
-import { ArrowLeft } from "lucide-react"
+import { type FormEvent, useState } from "react";
+import Link from "next/link";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { z, type ZodError } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
+import { useRedirectParam } from "@/app/shared/useRedirectParam";
+import { appendRedirectParam } from "@/app/shared/redirect";
 
 const emailSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
-})
+});
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [validationErrors, setValidationErrors] = useState<ZodError | null>(null)
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ZodError | null>(
+    null
+  );
+  const redirect = useRedirectParam();
 
   async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    setError("")
-    setMessage("")
-    setLoading(true)
-    setValidationErrors(null)
+    event.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
+    setValidationErrors(null);
 
     // Validate email input using Zod
-    const validation = emailSchema.safeParse({ email })
+    const validation = emailSchema.safeParse({ email });
 
     if (!validation.success) {
-      setValidationErrors(validation.error)
-      setLoading(false)
-      return
+      setValidationErrors(validation.error);
+      setLoading(false);
+      return;
     }
 
     try {
-      await sendPasswordResetEmail(getAuth(app), email)
-      setMessage("Password reset email sent! Check your inbox.")
+      await sendPasswordResetEmail(getFirebaseAuth(), email);
+      setMessage("Password reset email sent! Check your inbox.");
     } catch (e) {
-      setError((e as Error).message)
+      setError((e as Error).message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const getValidationError = (field: string) => {
-    return validationErrors?.errors.find((err) => err.path.includes(field))?.message
-  }
+    return validationErrors?.errors.find((err) => err.path.includes(field))
+      ?.message;
+  };
 
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center p-4"
       style={{
-        background: "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
+        background:
+          "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
       }}
     >
       <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
@@ -74,7 +81,9 @@ export default function ForgotPassword() {
               </Button>
             </Link>
 
-            <h1 className="text-center text-2xl md:text-4xl font-bold tracking-tighter md:my-6">Reset Password</h1>
+            <h1 className="text-center text-2xl md:text-4xl font-bold tracking-tighter md:my-6">
+              Reset Password
+            </h1>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2 mb-6 md:mb-8">
@@ -89,15 +98,25 @@ export default function ForgotPassword() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 {getValidationError("email") && (
-                  <div className="text-red-500 text-sm">{getValidationError("email")}</div>
+                  <div className="text-red-500 text-sm">
+                    {getValidationError("email")}
+                  </div>
                 )}
               </div>
 
-              {message && <div className="bg-green-50 text-green-800 rounded-md p-4 mb-4">{message}</div>}
+              {message && (
+                <div className="bg-green-50 text-green-800 rounded-md p-4 mb-4">
+                  {message}
+                </div>
+              )}
 
               {error && <div className="text-red-500 text-sm">{error}</div>}
 
-              <Button className={`w-full py-3 md:py-6 ${loading ? "opacity-50" : ""}`} type="submit" disabled={loading}>
+              <Button
+                className={`w-full py-3 md:py-6 ${loading ? "opacity-50" : ""}`}
+                type="submit"
+                disabled={loading}
+              >
                 {loading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <svg
@@ -114,7 +133,11 @@ export default function ForgotPassword() {
                         stroke="currentColor"
                         strokeWidth="4"
                       ></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
                     </svg>
                     <span>Sending...</span>
                   </div>
@@ -126,7 +149,10 @@ export default function ForgotPassword() {
 
             <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
               Remember your password?{" "}
-              <Link className="text-blue-500 hover:text-blue-600" href="/auth/login">
+              <Link
+                className="text-blue-500 hover:text-blue-600"
+                href={appendRedirectParam("/auth/login", redirect)}
+              >
                 Log in
               </Link>
             </p>
@@ -145,5 +171,5 @@ export default function ForgotPassword() {
         </div>
       </Card>
     </div>
-  )
+  );
 }

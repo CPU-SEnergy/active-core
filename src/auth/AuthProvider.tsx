@@ -1,57 +1,23 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, UserInfo } from 'firebase/auth';
-import { Claims } from 'next-firebase-auth-edge/lib/auth/claims';
-import { app } from '@/lib/firebaseClient';
-export interface User extends UserInfo {
-  idToken: string;
-  emailVerified: boolean;
-  customClaims: Claims;
-}
+import * as React from "react";
+import { AuthContext, User } from "./AuthContext";
 
-export const useAuth = () => useContext(AuthContext);
-
-export interface AuthContextValue {
+export interface AuthProviderProps {
   user: User | null;
-  loading: boolean;
+  children: React.ReactNode;
 }
 
-export const AuthContext = createContext<AuthContextValue>({
-  user: null,
-  loading: true,
-});
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(app), (firebaseUser) => {
-      if (firebaseUser) {
-        firebaseUser.getIdToken().then(async (idToken) => {
-          const idTokenResult = await firebaseUser.getIdTokenResult();
-          const customClaims = idTokenResult.claims;
-          setUser({
-            ...firebaseUser,
-            idToken,
-            emailVerified: firebaseUser.emailVerified,
-            customClaims,
-          });
-          setLoading(false);
-        });
-      } else {
-        setUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
+export const AuthProvider: React.FunctionComponent<AuthProviderProps> = ({
+  user,
+  children,
+}) => {
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
