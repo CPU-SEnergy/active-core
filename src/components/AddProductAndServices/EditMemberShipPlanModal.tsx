@@ -121,7 +121,7 @@ export function EditMembershipPlanModal({
       if (result.status === 200) {
         setOpen(false);
         toast.success("Membership plan updated successfully!");
-        await mutate("/api/membershipPlans");
+        mutate("/api/membershipPlans");
       } else {
         toast.error(result.message || "Error updating membership plan.");
       }
