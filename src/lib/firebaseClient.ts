@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { clientConfig } from "@/lib/config";
-import { getAuth } from "firebase/auth";
+import { getAuth, inMemoryPersistence, setPersistence } from "firebase/auth";
 
 export const app = (() => {
   if (!clientConfig || Object.keys(clientConfig).length === 0) {
@@ -24,6 +24,10 @@ export const app = (() => {
 
 export function getFirebaseAuth() {
   const auth = getAuth(app);
+
+  // App relies only on server token. We make sure Firebase does not store credentials in the browser.
+  // See: https://github.com/awinogrodzki/next-firebase-auth-edge/issues/143
+  setPersistence(auth, inMemoryPersistence);
 
   return auth;
 }

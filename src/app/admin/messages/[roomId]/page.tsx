@@ -2,8 +2,8 @@
 "use client";
 
 import ChatRoom from "@/components/ChatRoom";
-import { app } from "@/lib/firebaseClient";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { useState, useEffect } from "react";
 
 interface ChatRoomPageParams {
@@ -13,7 +13,7 @@ interface ChatRoomPageParams {
 }
 
 export default function ChatRoomPage({ params }: ChatRoomPageParams) {
-  const auth = getAuth(app);
+  const auth = getFirebaseAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
