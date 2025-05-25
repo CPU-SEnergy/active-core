@@ -94,7 +94,7 @@ export default function EditUserProfileModal({
 
         if (res.status === 200) {
           toast.success(res.message || "Profile updated successfully!");
-          await mutate(`/api/user/${userData.uid}`);
+          mutate(`/api/user/${userData.uid}`);
           setOpen(false);
         } else {
           toast.error("Error updating profile. Please try again.");

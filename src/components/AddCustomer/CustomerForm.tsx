@@ -169,8 +169,8 @@ export function CustomerPaymentModal() {
         toast.success(result.message);
         reset();
         setSelectedUserId(null);
-        await mutate("/api/payments");
-        await mutate("/api/active-customer"); // Refresh the customer list
+        mutate("/api/payments");
+        mutate("/api/active-customer"); // Refresh the customer list
         setOpen(false);
       } else {
         toast.error(result.error || "Failed to process payment");
