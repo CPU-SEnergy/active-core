@@ -14,7 +14,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { useRedirectParam } from "@/app/shared/useRedirectParam";
 import { appendRedirectParam } from "@/app/shared/redirect";
-import { loginWithCredential } from "../../../../api";
+import { loginWithCredential } from "../../../../not-api";
 import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({

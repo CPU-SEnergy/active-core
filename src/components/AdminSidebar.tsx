@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/auth/AuthContext";
-import { logout } from "../../api";
+import { logout } from "../../not-api";
 
 const menuItems = [
   {
