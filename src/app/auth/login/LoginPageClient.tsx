@@ -2,17 +2,20 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
+import { signInWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { z, ZodError } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input"; 
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
+import { useRedirectParam } from "@/app/shared/useRedirectParam";
+import { appendRedirectParam } from "@/app/shared/redirect";
+import { loginWithCredential } from "../../../../api";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
@@ -22,13 +25,21 @@ const loginSchema = z.object({
 export default function LoginPageClient() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword ] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string>("");
   const [validationErrors, setValidationErrors] = useState<ZodError | null>(
     null
   );
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const redirect = useRedirectParam();
+
+  async function handleLogin(credential: UserCredential) {
+    await loginWithCredential(credential);
+
+    router.push(redirect ?? "/");
+    router.refresh();
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -45,20 +56,12 @@ export default function LoginPageClient() {
 
     try {
       const credential = await signInWithEmailAndPassword(
-        getAuth(app),
+        getFirebaseAuth(),
         email,
         password
       );
-      const idToken = await credential.user.getIdToken();
 
-      await fetch("/api/login", {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      router.refresh();
-      router.push("/");
+      handleLogin(credential);
     } catch (e) {
       console.log(e);
       setError((e as Error).message);
@@ -75,11 +78,11 @@ export default function LoginPageClient() {
   return (
     <>
       <div
-      className="min-h-screen w-full flex items-center justify-center p-4"
-      style={{
-        background:
-        "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
-      }}
+        className="min-h-screen w-full flex items-center justify-center p-4"
+        style={{
+          background:
+            "linear-gradient(119.97deg, #F3F4F6FF 0%, #D8DBE0FF 78%, #DEE1E6FF 100%)",
+        }}
       >
         <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
           <CardContent className="flex-1 p-6">
@@ -181,7 +184,7 @@ export default function LoginPageClient() {
                   </label>
                 </div>
                 <Link
-                  href="/forgot-password"
+                  href={appendRedirectParam("/auth/reset-password", redirect)}
                   id="reset"
                   className="font-medium text-gray-600 hover:underline dark:text-gray-500"
                 >
@@ -192,7 +195,7 @@ export default function LoginPageClient() {
                 Don&apos;t have an account?{" "}
                 <Link
                   className="text-blue-500 hover:text-blue-600"
-                  href="/auth/register"
+                  href={appendRedirectParam("/auth/register", redirect)}
                 >
                   Sign up
                 </Link>

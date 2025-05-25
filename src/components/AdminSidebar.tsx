@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import LogoutButton from "./LogoutButton";
-import { useAuth } from "@/auth/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +24,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getAuth, signOut } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
+import { useAuth } from "@/auth/AuthContext";
+import { logout } from "../../api";
 
 const menuItems = [
   {
@@ -138,9 +137,9 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
   };
 
   const handleLogout = async () => {
-    await signOut(getAuth(app));
-    await fetch("/api/logout");
+    await logout();
     router.push("/");
+    router.refresh();
     setShowLogoutModal(false);
   };
 
