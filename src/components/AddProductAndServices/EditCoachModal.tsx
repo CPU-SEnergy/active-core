@@ -15,7 +15,7 @@ import { Trash, Upload, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { editCoach } from "@/app/actions/admin/products-services/editCoach";
-
+import { useSWRConfig } from "swr";
 import {
   Dialog,
   DialogTrigger,
@@ -26,7 +26,6 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { mutate } from "swr";
 import coachFormSchema from "@/lib/zod/schemas/coachFormSchema";
 import type { COACHDATA } from "@/lib/types/product-services";
 
@@ -35,6 +34,7 @@ type FormData = z.infer<typeof coachFormSchema>;
 export function EditCoach({ data }: { data: COACHDATA }) {
   const [open, setOpen] = useState(false);
   const [isLoadingCoachData, setIsLoadingCoachData] = useState(false);
+  const { mutate } = useSWRConfig();
 
   const {
     register,
