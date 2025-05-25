@@ -4,6 +4,7 @@ import { getFirebaseAuth, getTokens } from 'next-firebase-auth-edge';
 import { serverConfig } from '@/lib/config';
 import { getFirebaseAdminApp } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { toUser } from '@/utils/helpers/user';
 
 const { setCustomUserClaims, getUser } = getFirebaseAuth({
   serviceAccount: serverConfig.serviceAccount,
@@ -12,14 +13,23 @@ const { setCustomUserClaims, getUser } = getFirebaseAuth({
 
 export async function POST(request: NextRequest) {
   try {  
-  getFirebaseAdminApp();
-
   const db = getFirebaseAdminApp().firestore();
 
   const tokens = await getTokens(request.cookies, serverConfig);
+  const tokenUser = tokens ? toUser(tokens) : null;
 
-  if (!tokens) {
-    throw new Error('Cannot update custom claims of unauthenticated user');
+  if (!tokenUser) {
+    return new NextResponse(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { 'content-type': 'application/json' } }
+    );
+  }
+
+  if (tokenUser.customClaims.role && tokenUser.customClaims.role !== 'admin') {
+    return new NextResponse(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { 'content-type': 'application/json' } }
+    );
   }
 
   const { targetUid } = await request.json();
