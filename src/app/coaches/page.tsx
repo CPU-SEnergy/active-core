@@ -1,22 +1,18 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
 
-async function fetchCoaches() {
-  try {
-    const res = await fetch("http://localhost:3000/api/coaches/", {
-      next: { revalidate: 60000 },
-    });
-    if (!res.ok) {
-      throw new Error("Failed to fetch coaches");
-    }
-    return await res.json();
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
+interface Coach {
+  id: string;
+  name: string;
+  specialization: string;
+  imageUrl: string;
 }
 
 interface CoachSectionProps {
@@ -91,19 +87,44 @@ function CoachSection({
   );
 }
 
-export default async function CoachDeck() {
-  const coaches: Coach[] = await fetchCoaches();
+function CoachSectionSkeleton({
+  imagePosition,
+}: {
+  imagePosition: "left" | "right";
+}) {
+  return (
+    <div
+      className={`flex flex-col ${
+        imagePosition === "right" ? "lg:flex-row-reverse" : "lg:flex-row"
+      } gap-8 items-center`}
+    >
+      <div className="w-full lg:w-1/2 h-64 sm:h-80 md:h-96 relative">
+        <Skeleton className="w-full h-full rounded-lg bg-gray-800" />
+      </div>
+      <div className="w-full lg:w-1/2 space-y-4 text-center lg:text-left">
+        <Skeleton className="h-8 sm:h-10 md:h-12 w-3/4 mx-auto lg:mx-0 bg-gray-800" />
+        <Skeleton className="h-6 w-full bg-gray-800" />
+        <Skeleton className="h-6 w-2/3 mx-auto lg:mx-0 bg-gray-800" />
+        <div className="flex justify-center lg:justify-start">
+          <Skeleton className="h-12 w-32 bg-gray-800" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
+export default function CoachDeck() {
+  const {
+    data: coaches,
+    isLoading,
+    error,
+  } = useSWR<Coach[]>("/api/coaches", fetcher, {
+    dedupingInterval: 60 * 1000 * 60 * 24, // 24 hours
+  });
+  
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="w-full h-[40vh] sm:h-[50vh] relative flex items-center justify-center">
-        <Image
-          src="/placeholder.svg?height=800&width=1600"
-          alt="Coaches hero image"
-          fill
-          className="object-cover brightness-50 object-center"
-          priority
-        />{" "}
         <div className="relative z-10 text-center py-24 md:py-32 px-4">
           <h1
             className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"
@@ -125,17 +146,48 @@ export default async function CoachDeck() {
       </div>
 
       <div className="container mx-auto px-4 py-16 space-y-24">
-        {coaches.map((coach, index) => (
-          <CoachSection
-            key={coach.id}
-            name={coach.name}
-            specialization={coach.specialization}
-            image={coach.imageUrl}
-            alt={coach.name}
-            imagePosition={index % 2 === 0 ? "left" : "right"}
-            coachId={coach.id}
-          />
-        ))}
+        {error && (
+          <div className="text-center py-16">
+            <div className="text-red-400 text-xl mb-4">
+              Failed to load coaches
+            </div>
+            <p className="text-gray-400">Please try refreshing the page</p>
+          </div>
+        )}
+
+        {isLoading && (
+          <>
+            {[...Array(3)].map((_, index) => (
+              <CoachSectionSkeleton
+                key={index}
+                imagePosition={index % 2 === 0 ? "left" : "right"}
+              />
+            ))}
+          </>
+        )}
+
+        {coaches && !isLoading && !error && (
+          <>
+            {coaches.map((coach, index) => (
+              <CoachSection
+                key={coach.id}
+                name={coach.name}
+                specialization={coach.specialization}
+                image={coach.imageUrl}
+                alt={coach.name}
+                imagePosition={index % 2 === 0 ? "left" : "right"}
+                coachId={coach.id}
+              />
+            ))}
+          </>
+        )}
+
+        {coaches && coaches.length === 0 && !isLoading && !error && (
+          <div className="text-center py-16">
+            <div className="text-gray-400 text-xl mb-4">No coaches found</div>
+            <p className="text-gray-500">Check back later for updates</p>
+          </div>
+        )}
       </div>
 
       <Footer />
