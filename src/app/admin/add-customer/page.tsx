@@ -143,7 +143,7 @@ const AddCustomerPage = () => {
         });
         setSelectedMembership("");
 
-        await mutate("/api/admin/active-customers");
+        mutate("/api/admin/active-customers");
       } else {
         toast.error(result.error || "Failed to process payment");
       }

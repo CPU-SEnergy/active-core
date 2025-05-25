@@ -59,14 +59,13 @@ export default function CoachesPage() {
     error,
     isLoading,
   } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
-    dedupingInterval: 60 * 60 * 24,
+    dedupingInterval: 1000 * 60 * 60 * 24,
   });
 
   if (error) {
     console.error("Error fetching coaches:", error);
     return <>Error fetching coaches</>;
   }
-  console.log("coaches page", coaches);
 
   return (
     <>
