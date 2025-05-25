@@ -19,9 +19,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { timeFilters } from "@/lib/mock_data/overviewMockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { timeFilters } from "@/lib/timeFilters";
 
 function DashboardSkeleton() {
   return (
