@@ -12,9 +12,7 @@ const { setCustomUserClaims, getUser } = getFirebaseAuth({
 
 export async function POST(request: Request) {
   try {
-    // Initialize Firebase Admin
     getFirebaseAdminApp();
-    // Get and validate token
     const tokens = await getTokens(cookies(), serverConfig);
     const tokenUser = tokens ? toUser(tokens) : null;
 
@@ -32,7 +30,6 @@ export async function POST(request: Request) {
       });
     }
 
-    // Get request body
     const { targetUid } = await request.json();
 
     if (!targetUid) {
@@ -42,18 +39,15 @@ export async function POST(request: Request) {
       });
     }
 
-    // Update user claims
     await setCustomUserClaims(targetUid, {
       role: 'cashier',
     });
 
-    // Add to cashier collection
     await db.cashier.set(targetUid, {
       userId: targetUid,
       createdAt: new Date(),
     }, {as: 'server'});
 
-    // Get updated user data
     const updatedUser = await getUser(targetUid);
 
     return new Response(JSON.stringify({
