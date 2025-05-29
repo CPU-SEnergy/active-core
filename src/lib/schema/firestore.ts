@@ -58,7 +58,7 @@ interface Payment {
   paymentMethod: string;
   isNewCustomer: boolean;
   createdAt: Typesaurus.ServerDate;
-  isWalkIn: "user" | "walk-in";
+  isWalkIn: boolean;
   customer: CustomerBasicInfo;
   availedPlan: AvailedPlan;
 }
@@ -105,7 +105,7 @@ interface Coaches {
   experience: number;
   imageUrl: string;
   contactInfo: string;
-  certifications: string[];
+  certifications?: string[];
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
@@ -116,7 +116,7 @@ interface Classes {
   description: string;
   imageUrl?: string;
   schedule: string;
-  coachId: Schema["coaches"]["Id"][];
+  coaches: Schema["coaches"]["Id"][];
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
@@ -127,7 +127,6 @@ interface Customer {
   firstName: string;
   lastName: string;
   email: string;
-  dob: Date;
   sex: string;
   phone: string;
   type: "regular" | "student" | "senior";

@@ -90,10 +90,10 @@ async function getMembershipsForYear(
     ]);
 
     regularCount += paymentsCollection.filter(
-      (doc) => doc.data.customer.type === "regular"
+      (doc) => doc.data?.customer?.type === "regular"
     ).length;
     studentCount += paymentsCollection.filter(
-      (doc) => doc.data.customer.type === "student"
+      (doc) => doc.data?.customer?.type === "student"
     ).length;
   }
 

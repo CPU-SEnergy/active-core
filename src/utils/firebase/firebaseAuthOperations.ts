@@ -1,10 +1,9 @@
 import {
   createUserWithEmailAndPassword,
-  getAuth,
   sendEmailVerification,
   User,
 } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
+import { app, getFirebaseAuth } from "@/lib/firebaseClient";
 import { RegisterFormProps } from "@/lib/types/registerForm";
 import {
   collection,
@@ -14,10 +13,11 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { addUserToAlgolia } from "@/app/actions/AddUserToAlgolia";
+import { loginWithCredential } from "../../../not-api";
 
 export const createFirebaseUser = async (formResult: RegisterFormProps) => {
   try {
-    const auth = getAuth(app);
+    const auth = getFirebaseAuth();
 
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -34,15 +34,13 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     await setDoc(userRef, {
       uid: userCredential.user.uid,
       email: formResult.email,
-      role: "customer",
+      phoneNumber: formResult.phoneNumber || null,
       firstName: formResult.firstName,
       lastName: formResult.lastName,
       dob: formResult.dob,
       sex: formResult.sex,
       createdAt: Timestamp.now(),
     });
-
-    const idToken = await userCredential.user.getIdToken();
 
     await addUserToAlgolia({
       uuid: userCredential.user.uid,
@@ -51,12 +49,8 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
       email: formResult.email,
     });
 
-    await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
+    await loginWithCredential(userCredential);
+    // await sendVerificationEmail(userCredential.user);
 
     return { success: true };
   } catch (error) {

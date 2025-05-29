@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import LogoutButton from "./LogoutButton";
-import { useAuth } from "@/auth/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +24,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/auth/AuthContext";
+import { logout } from "../../not-api";
 
 const menuItems = [
   {
@@ -135,11 +136,10 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
     );
   };
 
-  const handleLogout = () => {
-    const logoutBtn = document.querySelector('button[class*="bg-red-600"]');
-    if (logoutBtn && user) {
-      (logoutBtn as HTMLButtonElement).click();
-    }
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+    router.refresh();
     setShowLogoutModal(false);
   };
 
@@ -163,19 +163,19 @@ export default function AdminSidebar({ role }: { role: "admin" | "cashier" }) {
               >
                 <Link href="/admin" className="flex items-center gap-2">
                   <Image
-                    src="/sports-fitness-logo.svg"
-                    alt="Sports and Fitness Logo"
-                    className="h-8 w-8"
-                    width={32}
-                    height={32}
+                    src="/pictures/IMAA Official no-bg.png"
+                    alt="IMAA Logo"
+                    className="h-10 w-10"
+                    width={50}
+                    height={50}
                   />
-                  <span className="font-semibold">Sports and Fitness</span>
+                  <span className="font-bold">IMAA</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-        <SidebarContent className="py-5">
+        <SidebarContent className="py-8">
           <SidebarMenu>
             {filteredMenuItems.map((item) => {
               const isActive =

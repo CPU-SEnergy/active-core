@@ -8,6 +8,8 @@ import {
   redirectToLogin,
 } from "next-firebase-auth-edge";
 import { clientConfig, serverConfig } from "@/lib/config";
+import { getTokens } from "next-firebase-auth-edge";
+import { toUser } from "./utils/helpers/user";
 
 const PUBLIC_PATHS = ["/auth/register", "/auth/login"];
 const cashierAllowedRoutes = [
@@ -19,11 +21,6 @@ const cashierAllowedRoutes = [
 ];
 
 export async function middleware(request: NextRequest) {
-  const { getUser } = getFirebaseAuth({
-    serviceAccount: serverConfig.serviceAccount,
-    apiKey: serverConfig.apiKey,
-  });
-
   return authMiddleware(request, {
     loginPath: "/api/login",
     logoutPath: "/api/logout",
@@ -35,13 +32,27 @@ export async function middleware(request: NextRequest) {
 
     handleValidToken: async ({ token, decodedToken }, headers) => {
       const path = request.nextUrl.pathname;
+      // const tokens = await getTokens(request.cookies, {
+      //   ...serverConfig,
+      //   apiKey: clientConfig.apiKey,
+      //   headers: request.headers,
+      // });
 
       if (PUBLIC_PATHS.includes(path)) {
         return redirectToHome(request);
       }
 
-      const user = await getUser(decodedToken.uid);
-      const role = user?.customClaims?.role;
+      // if (!tokens) {
+      //   return redirectToLogin(request, {
+      //     path: "/auth/login",
+      //     publicPaths: PUBLIC_PATHS,
+      //   });
+      // }
+
+      const role = decodedToken.role;
+
+      console.log("User role, middleware", { role });
+
       const isAdminRoute = path.startsWith("/admin");
 
       if (isAdminRoute) {

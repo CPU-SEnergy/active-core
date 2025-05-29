@@ -31,6 +31,7 @@ type FormData = z.infer<typeof coachFormSchema>;
 export function CoachForm() {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const {
     register,
@@ -68,9 +69,11 @@ export function CoachForm() {
       formData.append("experience", data.experience.toString());
       formData.append("bio", data.bio);
 
-      data.certifications.forEach((cert) =>
-        formData.append("certifications", cert)
-      );
+      if (data.certifications) {
+        data.certifications.forEach((cert) => {
+          if (cert) formData.append("certifications", cert);
+        });
+      }
 
       if (data.image instanceof File) {
         formData.append("image", data.image);
@@ -89,7 +92,8 @@ export function CoachForm() {
 
         reset();
         setPreview(null);
-        await mutate("/api/coaches");
+        mutate("/api/coaches");
+        setOpen(false);
       } else {
         toast.error(result.message || "Error creating a coach.");
       }
@@ -120,7 +124,7 @@ export function CoachForm() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           className="mb-8 py-6 text-base border-2 border-gray-200 bg-white text-black hover:bg-gray-100"
@@ -151,7 +155,7 @@ export function CoachForm() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="specialization">Specialty</Label>
+            <Label htmlFor="specialization">Specialization</Label>
             <Input
               id="specialization"
               placeholder="Enter coach specialization"
@@ -285,6 +289,11 @@ export function CoachForm() {
                 />
               </div>
             </div>
+            {errors.image?.message && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.image.message as string}
+              </p>
+            )}
             {preview && (
               <div className="flex justify-center mt-2">
                 <Image

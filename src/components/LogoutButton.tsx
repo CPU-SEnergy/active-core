@@ -3,20 +3,22 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
-import { getAuth, signOut } from "firebase/auth";
-import { app } from "@/lib/firebaseClient";
-import { User } from "@/auth/AuthProvider";
+import { signOut } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
 import LoginButton from "./LoginButton";
+import { User } from "@/auth/AuthContext";
+import { logout } from "../../not-api";
 
 export default function LogoutButton({ user }: { user: User | null }) {
   const router = useRouter();
 
   async function handleLogout() {
-    await signOut(getAuth(app));
+    await signOut(getFirebaseAuth());
 
-    await fetch("/api/logout");
+    await logout();
 
     router.push("/");
+    router.refresh();
   }
 
   return (
@@ -25,7 +27,7 @@ export default function LogoutButton({ user }: { user: User | null }) {
         <Button
           variant={"default"}
           onClick={handleLogout}
-          className="text-white font-semibold bg-red-600 text-lg md:text-base"
+          className="text-black-600 bg-white border border-gray-900 px-5 text-lg md:text-base hover:bg-black hover:text-white transition-colors duration-300"
         >
           Logout
         </Button>

@@ -1,69 +1,224 @@
 "use client"
 
+import type React from "react"
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, ChevronLeft, ChevronRight, Trophy, Medal, Star } from "lucide-react"
-import Footer from "@/components/Footer"
+import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
 import Link from "next/link"
 import { getISOWeek } from "date-fns"
+import Footer from "@/components/Footer"
+
+
+
+// Custom animations
+const smokeRevealKeyframes = `
+  @keyframes smokeReveal {
+    0% {
+      opacity: 0;
+      filter: blur(15px);
+      transform: translateX(-50px);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateX(0);
+    }
+  }
+`
+
+const comingSoonKeyframes = `
+  @keyframes comingSoon {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    85% {
+      opacity: 1;
+      transform: scale(1.1);
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`
+
+const glowButtonKeyframes = `
+  @keyframes glowPulse {
+    0% {
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+  }
+`
+
+const smokeOverlayKeyframes = `
+  @keyframes smokeOverlay {
+    0% {
+      opacity: 1;
+      background-position: left center;
+      backdrop-filter: blur(10px);
+    }
+    100% {
+      opacity: 0;
+      background-position: right center;
+      backdrop-filter: blur(0);
+    }
+  }
+`
+
+
+
+// Add new animation for champions background
+const championsBackgroundKeyframes = `
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes floatingParticles {
+    0% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-100px) translateX(100px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulseGlow {
+    0% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  @keyframes subtleWave {
+    0% {
+      transform: translateX(-50%) translateY(0) rotate(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(15px) rotate(1deg);
+    }
+    100% {
+      transform: translateX(-50%) translateY(0) rotate(0);
+    }
+  }
+`
 
 export default function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [particles, setParticles] = useState<
+    Array<{ id: number; size: number; delay: number; duration: number; left: string }>
+  >([])
 
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Coach of the Week data
-  const coaches = [
-    {
-      name: "Coach Paiton Rey Gaitan",
-      rank: "5th Dan Black Belt",
-      image: "/pictures/payton gaitan.jpg",
-      bio: "With over 20 years of competitive experience and 15 years of coaching, Master Vasquez has produced multiple national and international champions in Brazilian Jiu-Jitsu and MMA.",
-      specialties: "BJJ, MMA, Grappling",
-      classes: "Advanced BJJ, Competition Training",
-    },
-    {
-      name: "Coach Zoey Jan Alejandra",
-      rank: "4th Dan Black Belt",
-      image: "/pictures/zoey alejandra.jpg",
-      bio: "A former national team member with Olympic experience, Sensei Reyes brings world-class striking techniques and competition strategies to her students.",
-      specialties: "Muay Thai, Boxing, Kickboxing",
-      classes: "Women's Self-Defense, Advanced Striking",
-    },
-    {
-      name: "Coach Jeffrey Punzalan",
-      rank: "Black Belt",
-      image: "/pictures/jeffrey punzalan.jpg",
-      bio: "Known for his technical precision and innovative training methods, Coach Santos specializes in developing competition-ready athletes with a focus on modern grappling techniques.",
-      specialties: "No-Gi Grappling, Wrestling",
-      classes: "Competition Team, Takedown Specialists",
-    },
-    {
-      name: "Coach Rho Fajutrao",
-      rank: "6th Dan Black Belt",
-      image: "/placeholder.svg?height=600&width=400&text=Master+Chen",
-      bio: "With over 30 years of traditional martial arts experience, Master Chen combines ancient wisdom with modern training methodologies to develop well-rounded martial artists.",
-      specialties: "Traditional Martial Arts, Kata, Forms",
-      classes: "Youth Program, Traditional Forms",
-    },
-  ]
+  const [coaches, setCoaches] = useState<
+    Array<{
+      id: string
+      name: string
+      specialization: string
+      imageUrl: string
+      bio?: string
+      experience?: string
+      certifications?: string[]
+      contact?: string
+      age?: number
+      [key: string]: unknown 
+    }>
+  >([])
+  const [isLoadingCoach, setIsLoadingCoach] = useState(true)
+  const [coachError, setCoachError] = useState<string | null>(null)
 
-  // Add useEffect to automatically set coach based on current week of the year
 
   useEffect(() => {
-    const now = new Date()
-    const weekNumber = getISOWeek(now)
-    setCurrentCoachIndex(weekNumber % coaches.length)
+    const newParticles = []
+    for (let i = 0; i < 20; i++) {
+      newParticles.push({
+        id: i,
+        size: Math.floor(Math.random() * 6) + 2, // 2-7px
+        delay: Math.random() * 5, // 0-5s delay
+        duration: Math.random() * 10 + 10, // 10-20s duration
+        left: `${Math.random() * 100}%`,
+      })
+    }
+    setParticles(newParticles)
+  }, [])
+
+ 
+  useEffect(() => {
+    const fetchCoaches = async () => {
+      setIsLoadingCoach(true)
+      setCoachError(null)
+
+      try {
+        const response = await fetch("/api/coaches")
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch coaches: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.error) {
+          throw new Error(data.error)
+        }
+
+        console.log("Coaches data from API:", data)
+        setCoaches(data)
+
+        // Set current coach based on week of year
+        const now = new Date()
+        const weekNumber = getISOWeek(now)
+        setCurrentCoachIndex(weekNumber % data.length)
+      } catch (error) {
+        console.error("Error fetching coaches:", error)
+        setCoachError(error instanceof Error ? error.message : "Failed to fetch coaches")
+      } finally {
+        setIsLoadingCoach(false)
+      }
+    }
+
+    fetchCoaches()
   }, [])
 
   useEffect(() => {
     const handleScroll = () => {
-      // Check if we've scrolled enough to show the content overlay
       setScrolled(window.scrollY > 100)
       setScrollY(window.scrollY)
     }
@@ -121,10 +276,10 @@ export default function HomePage() {
           video.requestFullscreen()
         } else if ("webkitRequestFullscreen" in video) {
           /* Safari */
-          (video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
+          ;(video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
         } else if ("msRequestFullscreen" in video) {
           /* IE11 */
-          (video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
+          ;(video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
         }
 
         // Ensure controls are visible in fullscreen
@@ -160,6 +315,79 @@ export default function HomePage() {
     }
   }, [])
 
+  // Inject custom animations
+  useEffect(() => {
+    // Create style element
+    const style = document.createElement("style")
+
+    // Add keyframes
+    style.textContent = `
+    ${smokeRevealKeyframes}
+    ${comingSoonKeyframes}
+    ${glowButtonKeyframes}
+    ${smokeOverlayKeyframes}
+    ${championsBackgroundKeyframes}
+    
+    .animate-smoke-reveal {
+      animation: smokeReveal 2s forwards;
+    }
+    
+    .animate-coming-soon {
+      animation: comingSoon 3.5s forwards;
+    }
+    
+    .glow-button {
+      animation: glowPulse 2s infinite;
+    }
+    
+    .animate-gradient-shift {
+      animation: gradientShift 15s ease infinite;
+    }
+    
+    .animate-floating-particle {
+      animation: floatingParticles var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    
+    .animate-pulse-glow {
+      animation: pulseGlow 4s ease-in-out infinite;
+    }
+    
+    .animate-subtle-wave {
+      animation: subtleWave 8s ease-in-out infinite;
+    }
+  `
+
+    // Append to head
+    document.head.appendChild(style)
+
+    // Clean up
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Only run in browser environment
+    if (typeof window !== "undefined") {
+      try {
+        // Preload smoke image with error handling
+        const smokeImage = new window.Image(1, 1)
+        smokeImage.crossOrigin = "anonymous"
+        smokeImage.onload = () => {
+          console.log("Smoke texture loaded successfully")
+        }
+        smokeImage.onerror = () => {
+          console.warn("Could not load smoke texture, using fallback")
+        }
+        smokeImage.src =
+          "https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748"
+      } catch (error) {
+        console.error("Error in smoke image preloading:", error)
+      }
+    }
+  }, [])
+
   return (
     <main className="bg-white text-gray-900 overflow-x-hidden">
       {/* Main Section with Promotional Video - Fixed */}
@@ -167,37 +395,61 @@ export default function HomePage() {
         <div className="relative h-full w-full overflow-hidden">
           {/* Video Background */}
           <video autoPlay muted loop className="absolute inset-0 w-full h-full object-cover">
-            <source src="/pictures/sample video.mp4" type="video/mp4" />
+            <source src="/videos/imaa promo.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
+          {/* Smoke Overlay - Full page transition */}
+          <div
+            className="absolute inset-0 z-30 pointer-events-none"
+            style={{
+              backgroundImage:
+                'url("https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748")',
+              backgroundSize: "200% 100%",
+              animation: "smokeOverlay 3s forwards",
+              backgroundRepeat: "no-repeat",
+              backgroundColor: "rgba(0,0,0,0.85)", // Darker fallback if image fails to load
+              mixBlendMode: "multiply",
+            }}
+          ></div>
+
           {/* Parallax Overlay */}
           <div
-            className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center"
+            className="absolute inset-0 bg-black/70 hover:bg-black/40 transition-all duration-700 flex items-center justify-center z-20"
             style={{
               transform: `translateY(${scrollY * 0.2}px)`,
               opacity: Math.max(0.3, 1 - scrollY * 0.001),
             }}
           >
-            <div className="text-center px-4 max-w-4xl mx-auto">
+            <div className="text-center px-4 max-w-4xl mx-auto relative z-40">
               <h1
-                className="text-5xl md:text-7xl font-bold text-white mb-6 animate-flying-kick"
+                className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"
                 style={{
-                  textShadow: "0 0 20px rgba(0, 0, 0, 0.7)",
+                  textShadow: `
+                    0 0 4px rgb(255, 255, 255),
+                    0 0 8px rgba(255, 255, 255, 0.4)
+                  `,
                   transform: `translateY(${scrollY * -0.3}px)`,
+                  animation: "smokeReveal 2s forwards",
                 }}
               >
                 ILOILO MARTIAL ARTIST ASSOCIATION
               </h1>
+
+
               <p
-                className="text-xl md:text-2xl text-white mb-8 animate-fade-in delay-150"
-                style={{ transform: `translateY(${scrollY * -0.2}px)` }}
+                className="text-xl md:text-2xl text-white mb-8 py-5"
+                style={{
+                  transform: `translateY(${scrollY * -0.2}px)`,
+                  animation: "comingSoon 2s forwards",
+                }}
               >
-                A Premier Training Ground for World Class Ilonggo Martial Artist.
+                A premier training ground for world-class Ilonggo martial artists.
               </p>
               <Button
                 size="lg"
-                className="bg-white text-black relative overflow-hidden group font-bold animate-fade-in delay-300 transition-all duration-500"
+                className="bg-white text-black relative overflow-hidden group font-bold transition-all duration-500"
+                style={{ animation: "glowPulse 2s infinite" }}
                 onClick={() => {
                   const advertisementSection = document.querySelector(".advertisement-section")
                   if (advertisementSection) {
@@ -258,8 +510,8 @@ export default function HomePage() {
                     <span className="relative z-10 group-hover:text-white transition-colors duration-500">
                       <Link href="/sports-classes">Explore Classes</Link>
                     </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                    <span className="absolute -inset-[3px] bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                    <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
                   </Button>
                 </div>
               </div>
@@ -268,17 +520,54 @@ export default function HomePage() {
         </section>
 
         {/* Meet the Champions! */}
-        <section
-          className="py-24 bg-white relative overflow-hidden"
-          style={{
-            backgroundImage: 'url("/pictures/IMAA Official no-bg.png")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-          }}
-        >
-          {/* Overlay for parallax background */}
-          <div className="absolute inset-0 bg-white/90"></div>
+        <section className="py-24 bg-white relative overflow-hidden">
+          {/* Animated Background */}
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"
+            style={{ backgroundSize: "400% 400%" }}
+          ></div>
+
+          {/* Geometric Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute left-1/2 top-1/4 w-[800px] h-[800px] border border-gray-400 rounded-full animate-subtle-wave"></div>
+            <div
+              className="absolute left-1/2 top-1/4 w-[600px] h-[600px] border border-gray-500 rounded-full animate-subtle-wave"
+              style={{ animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute left-1/2 top-1/4 w-[400px] h-[400px] border border-gray-600 rounded-full animate-subtle-wave"
+              style={{ animationDelay: "2s" }}
+            ></div>
+          </div>
+
+          {/* Floating Particles */}
+          {particles.map((particle) => (
+            <div
+              key={particle.id}
+              className="absolute bottom-0 rounded-full bg-gray-500 animate-floating-particle"
+              style={
+                {
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
+                  left: particle.left,
+                  opacity: 0,
+                  "--delay": `${particle.delay}s`,
+                  "--duration": `${particle.duration}s`,
+                } as React.CSSProperties
+              }
+            ></div>
+          ))}
+
+          {/* Glowing Orbs */}
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow"></div>
+          <div
+            className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow"
+            style={{ animationDelay: "2s" }}
+          ></div>
+          <div
+            className="absolute top-3/4 left-2/3 w-24 h-24 rounded-full bg-white/5 blur-xl animate-pulse-glow"
+            style={{ animationDelay: "1s" }}
+          ></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
@@ -300,12 +589,7 @@ export default function HomePage() {
                   data-aos-duration="1000"
                   data-aos-delay={index * 100}
                 >
-                  <ChampionCard
-                    name={champion.name}
-                    age={champion.age}
-                    image={champion.image}
-                    achievement={champion.achievement}
-                  />
+                  <ChampionCard name={champion.name} image={champion.image} achievement={champion.achievement} />
                 </div>
               ))}
             </div>
@@ -380,9 +664,9 @@ export default function HomePage() {
               </div>
               <div className="lg:w-1/3" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya, Antique</h3>
+                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya Antique</h3>
                   <p className="text-gray-300">
-                    Our team recently conducted a special martial arts workshop for students in Semirara, Caluya,
+                    Our team recently conducted a special martial arts workshop for students in Semirara, Caluya
                     Antique. This initiative aims to introduce martial arts disciplines to communities, promoting
                     physical fitness, discipline, and self-confidence among the youth.
                   </p>
@@ -404,74 +688,98 @@ export default function HomePage() {
           }}
         >
           {/* Overlay for background */}
-          <div className="absolute inset-0 bg-gray-50/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
-              <div className="inline-flex items-center justify-center mb-4">
-                <div className="h-[2px] w-12 bg-black"></div>
-                <Medal className="mx-4 text-black h-8 w-8" />
-                <div className="h-[2px] w-12 bg-black"></div>
-              </div>
               <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 Coach of the Week
               </h2>
               <p className="text-xl text-gray-600">Recognizing excellence in our coaching staff</p>
             </div>
 
-            <Card
-              className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
-              data-aos="zoom-in"
-              data-aos-duration="1000"
-              data-aos-delay="200"
-            >
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-1/3 relative overflow-hidden">
-                  <Image
-                    src={coaches[currentCoachIndex]?.image || "/placeholder.svg"}
-                    alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
-                    width={400}
-                    height={600}
-                    className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
-                  />
+            {isLoadingCoach ? (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-32 w-32 bg-gray-200 rounded-full mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
-                <div className="md:w-2/3 p-8">
-                  <div className="flex items-center mb-4">
-                    <h3 className="text-2xl font-bold text-black relative group">
-                      {coaches[currentCoachIndex]?.name || "Unknown Coach"}
-                      <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all group-hover:w-full"></span>
-                    </h3>
-                    <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
-                      {coaches[currentCoachIndex]?.rank || "Rank not available"}
-                    </span>
+              </Card>
+            ) : coachError ? (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <div className="text-red-500">
+                  <p>Unable to load coach data: {coachError}</p>
+                  <Button onClick={() => window.location.reload()} className="mt-4 bg-black text-white">
+                    Try Again
+                  </Button>
+                </div>
+              </Card>
+            ) : coaches.length > 0 ? (
+              <Card
+                className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
+                data-aos="zoom-in"
+                data-aos-duration="1000"
+                data-aos-delay="200"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 relative overflow-hidden">
+                    <Image
+                      src={coaches[currentCoachIndex]?.imageUrl || "/placeholder.svg?height=600&width=400&text=Coach"}
+                      alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
+                      width={400}
+                      height={600}
+                      className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
+                    />
                   </div>
-                  <p className="text-gray-600 mb-4">{coaches[currentCoachIndex]?.bio || "Bio not available"}</p>
-                  <div className="mb-6">
-                    <div className="flex items-center mb-2">
-                      <span className="font-bold text-black mr-2">Specialties:</span>
-                      <span className="text-gray-600">
-                        {coaches[currentCoachIndex]?.specialties || "Specialties not available"}
+                  <div className="md:w-2/3 p-8">
+                    <div className="flex items-center mb-4">
+                      <h3 className="text-2xl font-bold text-black relative group">
+                        {coaches[currentCoachIndex]?.name || "Unknown Coach"}
+                        <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all group-hover:w-full"></span>
+                      </h3>
+                      <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
+                        {coaches[currentCoachIndex]?.experience
+                          ? `${coaches[currentCoachIndex].experience} Experience`
+                          : "Experience not available"}
                       </span>
                     </div>
-                    <div className="flex items-center">
-                      <span className="font-bold text-black mr-2">Classes:</span>
-                      <span className="text-gray-600">
-                        {coaches[currentCoachIndex]?.classes || "Classes not available"}
-                      </span>
+                    <p className="text-gray-600 mb-4">{coaches[currentCoachIndex]?.bio || "Bio not available"}</p>
+                    <div className="mb-6">
+                      <div className="flex items-center mb-2">
+                        <span className="font-bold text-black mr-2">Specialization:</span>
+                        <span className="text-gray-600">
+                          {coaches[currentCoachIndex]?.specialization || "Specialization not available"}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-bold text-black mr-2">Certifications:</span>
+                        <span className="text-gray-600">
+                          {coaches[currentCoachIndex]?.certifications
+                            ? coaches[currentCoachIndex].certifications.join(", ")
+                            : "Certifications not available"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Link href={`/coaches/profile/${coaches[currentCoachIndex]?.id || 0}`} passHref>
+                        <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
+                          <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                            View Coach
+                          </span>
+                          <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                          <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
-                      <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                        View Coach
-                      </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                      <span className="absolute -inset-[3px] bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            ) : (
+              <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
+                <p>No coaches available at this time.</p>
+              </Card>
+            )}
           </div>
         </section>
 
@@ -490,11 +798,6 @@ export default function HomePage() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-16" data-aos="fade-up" data-aos-duration="1000">
-              <div className="inline-flex items-center justify-center mb-4">
-                <div className="h-[2px] w-12 bg-black"></div>
-                <Star className="mx-4 text-black h-8 w-8" />
-                <div className="h-[2px] w-12 bg-black"></div>
-              </div>
               <h2 className="text-4xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
                 What Our Members Say
               </h2>
@@ -528,7 +831,7 @@ export default function HomePage() {
         <section
           className="py-16 bg-gray-50 relative"
           style={{
-            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000&text=Headquarters")',
+            //backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
@@ -542,7 +845,7 @@ export default function HomePage() {
               <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
                 <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
                   <Image
-                    src="/placeholder.svg?height=500&width=700"
+                    src="/pictures/Second Part Picture.jpg"
                     alt="IMAA Headquarters"
                     width={700}
                     height={500}
@@ -582,15 +885,7 @@ export default function HomePage() {
 
                   {/* Google Map Embed */}
                   <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.22417813355!2d122.5683143152608!3d10.72001839236564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33aee5306c5c9c3d%3A0x5e9e72ce7349828c!2sIloilo%20City%2C%20Iloilo!5e0!3m2!1sen!2sph!4v1629876543210!5m2!1sen!2sph"
-                      width="100%"
-                      height="300"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      title="IMAA Location"
-                    />
+                    <iframe src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sph!4v1747768845833!5m2!1sen!2sph!6m8!1m7!1sWcYMQsJ9GoU4fu7KfMMAuQ!2m2!1d10.70443302427233!2d122.5528555203559!3f255.23038086380515!4f-5.281414180810728!5f0.7820865974627469" width="800" height="600" style={{ border: 0 }} allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
                   </div>
                 </Card>
               </div>
@@ -598,11 +893,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Footer */}
         <Footer />
       </div>
-
-      {/* Scroll indicator */}
       <div
         className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`}
       >
@@ -813,16 +1105,19 @@ function PhotoCarousel() {
 // Helper Components
 interface ChampionCardProps {
   name: string
-  age: number
+  age?: number 
   image: string
   achievement: string
   delay?: number
 }
 
-function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
+function ChampionCard({ name, image, achievement }: ChampionCardProps) {
   return (
-    <Card className="bg-white rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
-      <div className="relative h-64 w-full overflow-hidden">
+    <Card className="relative bg-white/10 backdrop-blur-md rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 transition-all duration-700 border border-white/20">
+      {/* Change to monochromatic gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>
+
+      <div className="relative h-64 w-full overflow-hidden z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
           <span className="text-white font-bold text-lg">{achievement}</span>
         </div>
@@ -838,10 +1133,7 @@ function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
           </div>
         </div>
       </div>
-      <CardContent className="p-6 relative">
-        <div className="absolute -top-6 left-4 bg-black text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-          Age: {age}
-        </div>
+      <CardContent className="p-6 relative z-10">
         <h3 className="text-xl font-bold text-black mb-2 relative group">
           {name}
           <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
@@ -849,6 +1141,9 @@ function ChampionCard({ name, age, image, achievement }: ChampionCardProps) {
         <p className="text-gray-600 mb-3 font-medium">{achievement}</p>
         <div className="mt-4 flex justify-end"></div>
       </CardContent>
+
+      {/* Change to monochromatic glow */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-600 to-white rounded-lg blur opacity-0 group-hover:opacity-70 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
     </Card>
   )
 }
@@ -895,26 +1190,22 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
 const champions = [
   {
     name: "Juan Dela Cruz",
-    age: 24,
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 1.jpeg",
     achievement: "Gold Medalist - SEA Games 2023",
   },
   {
     name: "Maria Santos",
-    age: 22,
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 2.jpeg",
     achievement: "Silver Medalist - Asian Championships 2023",
   },
   {
     name: "Carlos Reyes",
-    age: 26,
-    image: "/placeholder.svg?height=500&width=400",
-    achievement: "National Champion 2022",
+    image: "/pictures/advert pic 3.jpeg",
+    achievement: "National Champion 2022 of Palarong Pambansa",
   },
   {
     name: "Andrea Gomez",
-    age: 19,
-    image: "/placeholder.svg?height=500&width=400",
+    image: "/pictures/advert pic 1.jpeg",
     achievement: "Gold Medalist - Youth World Championships 2023",
   },
 ]
