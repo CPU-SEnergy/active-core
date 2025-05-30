@@ -149,7 +149,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
         setOpen(false);
         toast.success(result.message || "Coach updated successfully!");
         reset();
-        await mutate("/api/coaches");
+        mutate("/api/coaches", undefined, true);
       } else {
         toast.error(result.message || "Error updating coach.");
       }

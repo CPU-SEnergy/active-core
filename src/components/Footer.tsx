@@ -17,7 +17,7 @@ export default function Footer() {
               <div className="flex items-center mb-6">
                 <div className="bg-white p-2 rounded-lg shadow-lg hover:shadow-white/20 transition-all duration-300 mr-4">
                   <Image
-                    src="/pictures/IMMAA official-nobg.png"
+                    src="/pictures/IMAA Official no-bg.png"
                     alt="IMAA Logo"
                     width={100}
                     height={100}

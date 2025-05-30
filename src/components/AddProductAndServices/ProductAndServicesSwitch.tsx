@@ -21,7 +21,7 @@ export default function ProductAndServicesSwitch({
   const handleToggle = (checked: boolean) => {
     startTransition(async () => {
       const result = await updateIsActiveStatus(collectionName, id, checked);
-      await mutate(`/api/${collectionName}`);
+      mutate(`/api/${collectionName}`);
 
       if (result.success) {
         console.log("RESUUUUUUUULT" + result.success);

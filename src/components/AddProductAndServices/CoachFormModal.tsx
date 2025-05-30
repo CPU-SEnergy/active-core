@@ -92,7 +92,7 @@ export function CoachForm() {
 
         reset();
         setPreview(null);
-        await mutate("/api/coaches");
+        mutate("/api/coaches");
         setOpen(false);
       } else {
         toast.error(result.message || "Error creating a coach.");

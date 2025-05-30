@@ -5,15 +5,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { useAuth } from "@/auth/AuthProvider"
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
 import LogoutButton from "./LogoutButton"
 import { usePathname } from "next/navigation"
+import { useAuth } from "@/auth/AuthContext"
 
 export default function Navbar() {
-  const { user, loading } = useAuth()
+  const { user } = useAuth()
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
 
@@ -28,10 +28,6 @@ export default function Navbar() {
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
     return null
-  }
-
-  if (loading) {
-    return <div className="h-20 bg-transparent animate-pulse"></div>
   }
 
   const navLinks = {
