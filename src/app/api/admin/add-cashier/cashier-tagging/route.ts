@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     });
 
     await db.cashier.set(targetUid, {
-      userId: targetUid,
+      uid: targetUid,
       createdAt: new Date(),
     }, {as: 'server'});
 
