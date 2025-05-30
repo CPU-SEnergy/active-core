@@ -3,6 +3,7 @@ import { refreshNextResponseCookies } from "next-firebase-auth-edge/lib/next/coo
 import { getFirebaseAuth, getTokens } from "next-firebase-auth-edge";
 import { serverConfig } from "@/lib/config";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { db } from "@/lib/schema/firestore";
 
 const { setCustomUserClaims, getUser } = getFirebaseAuth({
   serviceAccount: serverConfig.serviceAccount,
@@ -11,7 +12,7 @@ const { setCustomUserClaims, getUser } = getFirebaseAuth({
 
 export async function POST(request: NextRequest) {
   try {
-    const db = getFirebaseAdminApp().firestore();
+    getFirebaseAdminApp();
 
     const tokens = await getTokens(request.cookies, serverConfig);
     if (!tokens) {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     await setCustomUserClaims(targetUid, { role: undefined });
 
     // Remove cashier doc from Firestore
-    await db.collection("cashier").doc(targetUid).delete();
+    await db.cashier.remove(targetUid);
 
     const user = await getUser(targetUid);
     console.log("User custom claims updated", user!.customClaims);
