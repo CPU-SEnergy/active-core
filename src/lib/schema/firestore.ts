@@ -145,6 +145,6 @@ interface WalkInCustomer {
 }
 
 interface Cashier {
-  userId: string;
+  uid: string;
   createdAt: Typesaurus.ServerDate;
 }
