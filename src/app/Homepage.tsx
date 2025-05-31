@@ -610,7 +610,7 @@ export default function HomePage() {
         </section>
 
         {/* Outreach Workshop Section */}
-        <section className="py-16 bg-black text-white relative overflow-hidden">
+        <section className="py-16 bg-black/90 backdrop-blur-sm text-white relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
               <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">

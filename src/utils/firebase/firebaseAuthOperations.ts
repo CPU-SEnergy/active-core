@@ -66,3 +66,34 @@ export const sendVerificationEmail = async (user: User) => {
     console.error("Error sending verification email: ", error);
   }
 };
+import { fetchSignInMethodsForEmail, getAuth } from "firebase/auth"
+
+export async function checkEmailExists(email: string): Promise<{ exists: boolean; error?: string }> {
+  try {
+    const auth = getAuth();
+    
+    // Check if auth is properly initialized
+    if (!auth) {
+      console.error('Firebase auth not initialized');
+      return { exists: false, error: 'Authentication service unavailable' };
+    }
+
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    return { 
+      exists: Array.isArray(methods) && methods.length > 0,
+      error: undefined 
+    };
+  } catch (error: any) {
+    console.error("Error checking email:", error);
+    
+    // Handle specific Firebase errors
+    if (error.code === 'auth/invalid-email') {
+      return { exists: false, error: 'Invalid email format' };
+    }
+    if (error.code === 'auth/configuration-not-found') {
+      return { exists: false, error: 'Authentication service unavailable' };
+    }
+    
+    return { exists: false, error: error.message };
+  }
+}

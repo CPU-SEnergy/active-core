@@ -97,7 +97,7 @@ export default function FinishSignup() {
         {step === 1 && (
           <form onSubmit={handleNextStep} className="space-y-4 flex flex-col">
             <h2 className="text-center text-xl font-semibold">
-              Sign up to Sports and Fitness
+              Sign up to IMAA
             </h2>
             <InputText
               id="email"

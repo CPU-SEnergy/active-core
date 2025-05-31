@@ -14,62 +14,194 @@ import { ArrowLeft } from "lucide-react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRedirectParam } from "@/app/shared/useRedirectParam"
 import { appendRedirectParam } from "@/app/shared/redirect"
+import { registerSchema } from "@/lib/zod/schemas/register"
+import { z } from "zod"
+import { checkEmailExists } from "@/utils/firebase/firebaseAuthOperations"
 
 export default function RegisterPageClient() {
   const { toast } = useToast()
   const [loading, setLoading] = React.useState(false)
   const router = useRouter()
-  const { step, formState, error, handleChange, handleNextStep, handleSignUp } = useRegisterForm()
+  const { step, formState, handleChange, handleNextStep: formHandleNextStep } = useRegisterForm()
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const redirect = useRedirectParam();
+  const [step1Error, setStep1Error] = React.useState<string | null>(null);
+  const [step2Error, setStep2Error] = React.useState<string | null>(null);
 
-  // Simplified back button handler
-  const handleBackStep = (e: React.MouseEvent) => {
-    e.preventDefault()
 
-    // Directly call handleNextStep with a back action indicator
-    handleNextStep(e, { backAction: true })
+  function setError(message: string, step: number) {
+    if (step === 1) {
+      setStep1Error(message);
+      setStep2Error(null); 
+    } else {
+      setStep2Error(message);
+      setStep1Error(null); 
+    }
   }
 
-  // Update the back button to use handleBackStep
-  const backButtonRef = React.useRef<HTMLButtonElement>(null)
+
+  const handleBackStep = (e: React.MouseEvent) => {
+    e.preventDefault()
+    formHandleNextStep(e, { backAction: true })
+  }
+
+
   const handleSignUpSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-
-    const result = await handleSignUp(event)
-    if (!result) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      })
-      return
-    }
-    const { formState: formResult } = result
-
-    setLoading(true)
+    event.preventDefault();
+    setLoading(true);
 
     try {
-      const res = await createFirebaseUser(formResult)
+      // Final email existence check before submission
+      const { exists, error } = await checkEmailExists(formState.email);
+      
+      if (error) {
+        setError(error, 2);
+        setLoading(false);
+        return;
+      }
+      
+      if (exists) {
+        setError("This email is already registered. Please use a different email.", 2);
+        setLoading(false);
+        return;
+      }
+
+      // Validate all form data
+      try {
+        await registerSchema.parseAsync(formState)
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          setError(error.errors[0]?.message || "Validation error", 2)
+        } else {
+          setError("Validation error", 2)
+        }
+        setLoading(false)
+        return
+      }
+      
+      // Create user if all validations pass
+      const res = await createFirebaseUser({
+        ...formState,
+        phoneNumber: formState.phoneNumber || "",
+        dob: formState.dob,
+      })
 
       if (!res.success) {
         throw new Error("An error occurred during sign-up.")
       }
 
+      router.push(redirect ?? "/")
+      router.refresh()
+    } catch (error) {
       setLoading(false)
-
-      router.push(redirect ?? "/");
-      router.refresh();
-    } catch (e) {
-      setLoading(false)
-      toast({
-        title: "Error",
-        description: e instanceof Error ? e.message : "An unexpected error occurred",
-        variant: "destructive",
-      })
+      console.error('Signup error:', error);
+      
+      if (error instanceof Error && error.message.includes("auth/email-already-in-use")) {
+        setError("This email is already registered. Please use a different email.", 2)
+      } else {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred during sign-up",
+          variant: "destructive",
+        })
+      }
+    } finally {
+      setLoading(false);
     }
   }
+
+  // Update localHandleNextStep to store email validation result
+  const localHandleNextStep = async (event: React.FormEvent, options?: { backAction?: boolean }) => {
+    event.preventDefault();
+    
+    if (options?.backAction) {
+      formHandleNextStep(event, { backAction: true });
+      return;
+    }
+
+    try {
+      // First validate email format
+      const emailSchema = z.object({
+        email: z.string().email("Please enter a valid email address"),
+      });
+
+      const emailResult = emailSchema.safeParse({ email: formState.email });
+      if (!emailResult.success) {
+        setError("Please enter a valid email address", 1);
+        return;
+      }
+
+      // Double check if email exists before proceeding
+      const emailCheck = await checkEmailExists(formState.email);
+      if (emailCheck.exists === true) { // Explicit check for true
+        setError("This email is already registered. Please use a different email.", 1);
+        return;
+      }
+
+      // Validate password fields
+      const passwordValidation = z.object({
+        password: z.string()
+          .min(8, "Password must be at least 8 characters")
+          .regex(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+            "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+          ),
+        confirmation: z.string()
+      }).refine((data) => data.password === data.confirmation, {
+        message: "Passwords do not match",
+        path: ["confirmation"],
+      });
+
+      const passwordResult = passwordValidation.safeParse(formState);
+      if (!passwordResult.success) {
+        setError(passwordResult.error.errors[0]?.message || "Invalid password", 1);
+        return;
+      }
+
+      // If all validations pass, proceed to next step
+      formHandleNextStep(event);
+    } catch (error) {
+      console.error("Validation error:", error);
+      setError("An unexpected error occurred. Please try again.", 1);
+    }
+  }
+
+  // Update the handleInputChange function for correct email validation
+  const handleInputChange = (field: string) => async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const value = e.target.value;
+    handleChange(field)(e);
+
+    // Clear errors when input changes
+    if (step === 1) {
+      setStep1Error(null);
+    } else {
+      setStep2Error(null);
+    }
+
+    // Only validate email when the field is email and has a valid format
+    if (field === 'email' && value) {
+      try {
+        const emailSchema = z.string().email("Please enter a valid email address");
+        const emailResult = emailSchema.safeParse(value);
+        
+        if (emailResult.success) {
+          const { exists, error } = await checkEmailExists(value);
+          
+          if (error) {
+            console.error('Email check error:', error);
+            return;
+          }
+          
+          if (exists) {
+            setStep1Error("This email is already registered. Please use a different email.");
+          }
+        }
+      } catch (error) {
+        console.error('Email validation error:', error);
+      }
+    }
+  };
 
   return (
     <div
@@ -85,7 +217,6 @@ export default function RegisterPageClient() {
               <Button
                 type="button"
                 variant="ghost"
-                ref={backButtonRef}
                 onClick={handleBackStep}
                 className="mb-2 p-0 h-auto flex items-center text-gray-500 hover:text-gray-700"
               >
@@ -99,41 +230,44 @@ export default function RegisterPageClient() {
             </h1>
 
             {step === 1 && (
-              <form onSubmit={handleNextStep} className="space-y-4 flex flex-col">
-                <div className="space-y-2 mb-6">
+              <form onSubmit={localHandleNextStep} className="space-y-4 flex flex-col">
+                {/* Email field */}
+                <div className="space-y-2">
                   <InputText
                     id="email"
                     label="Email"
                     type="email"
                     value={formState.email}
-                    onChange={handleChange("email")}
+                    onChange={handleInputChange("email")}
+                    error={step1Error?.includes("registered") || step1Error?.includes("email") ? step1Error! : ""}
                   />
                 </div>
 
-                <div className="space-y-2 mb-6">
+                {/* Password field */}
+                <div className="space-y-2">
                   <div className="relative">
                     <InputText
                       id="password"
                       label="Password"
                       type={showPassword ? "text" : "password"}
                       value={formState.password}
-                      onChange={handleChange("password")}
+                      onChange={handleInputChange("password")}
+                      error={step1Error?.includes("least") || step1Error?.includes("uppercase") ? step1Error! : ""}
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-[38px] -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setShowPassword(!showPassword)
+                      }}
+                      className="absolute right-3 top-11 -translate-y-1 text-gray-500 hover:text-gray-700 z-10"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )
-                      }
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
 
+                {/* Confirm Password field */}
                 <div className="space-y-2 mb-6">
                   <div className="relative">
                     <InputText
@@ -141,23 +275,21 @@ export default function RegisterPageClient() {
                       label="Confirm Password"
                       type={showConfirmPassword ? "text" : "password"}
                       value={formState.confirmation}
-                      onChange={handleChange("confirmation")}
+                      onChange={handleInputChange("confirmation")}
+                      error={step1Error?.includes("match") ? step1Error! : ""}
                     />
-                    <button 
+                    <button
                       type="button"
-                      className="absolute right-3 top-[38px] -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }}
+                      className="absolute right-3 top-12 -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10"
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
-
-                {error && <p className="text-sm text-red-500">{error}</p>}
 
                 <Button type="submit" disabled={loading} className="w-full py-3 md:py-6">
                   {loading ? (
@@ -212,6 +344,7 @@ export default function RegisterPageClient() {
                     id="phoneNumber"
                     label="Phone Number"
                     type="tel"
+                    placeholder="+1234567890"
                     value={formState.phoneNumber || ""}
                     onChange={handleChange("phoneNumber")}
                   />
@@ -244,7 +377,7 @@ export default function RegisterPageClient() {
                   </select>
                 </div>
 
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {step2Error && <p className="text-sm text-red-500">{step2Error}</p>}
 
                 <Button type="submit" disabled={loading} className="w-full py-3 md:py-6">
                   {loading ? (
@@ -300,3 +433,4 @@ export default function RegisterPageClient() {
     </div>
   )
 }
+

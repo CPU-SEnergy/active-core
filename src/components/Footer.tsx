@@ -8,7 +8,7 @@ import { Facebook, MapPin, Phone, Mail } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white pt-16 pb-1.5 w-full">
+    <footer className="bg-black/90 backdrop-blur-sm text-white pt-16 pb-1.5 w-full">
       <div className="max-w-9xl mx-auto px-10 sm:px-10 lg:px-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-16">
           {/* Logo and About */}
@@ -17,7 +17,7 @@ export default function Footer() {
               <div className="flex items-center mb-6">
                 <div className="bg-white p-2 rounded-lg shadow-lg hover:shadow-white/20 transition-all duration-300 mr-4">
                   <Image
-                    src="/pictures/IMMAA official-nobg.png"
+                    src="/pictures/IMAA Official no-bg.png"
                     alt="IMAA Logo"
                     width={100}
                     height={100}
