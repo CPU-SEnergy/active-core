@@ -64,7 +64,11 @@ export default function LoginPageClient() {
       handleLogin(credential);
     } catch (e) {
       console.log(e);
-      setError((e as Error).message);
+      setError(
+        (e as Error).message.includes("auth/invalid-credential")
+          ? "Please enter a valid email and password"
+          : "An error occurred during login"
+      );
     } finally {
       setLoading(false);
     }

@@ -1,22 +1,26 @@
 import { Input } from "./ui/input";
 
-export const InputText = ({
+interface InputTextProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  error?: string;
+  showError?: boolean; // Add this prop to control error display
+}
+
+export const InputText: React.FC<InputTextProps> = ({
   id,
   label,
   type = "text",
   value,
+  placeholder,
   onChange,
-}: {
-  id: string;
-  label: string;
-  type?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error,
+  showError = true, // Default to true for backward compatibility
+  ...props
 }) => {
   const autocompleteType = type === "password" ? "new-password" : type === "email" ? "email" : "off";
 
   return (
-    <div>
+    <div className="space-y-2">
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
@@ -25,11 +29,13 @@ export const InputText = ({
         type={type}
         value={value}
         onChange={onChange}
-        placeholder={`Enter your ${label.toLowerCase()}`}
-        className="w-full rounded-md border p-2"
+        placeholder={placeholder ?? `Enter your ${label.toLowerCase()}`}
+        className={`w-full rounded-md border p-2 h-10 ${error ? 'border-red-500' : ''}`}
         required
         autoComplete={autocompleteType}
+        {...props}
       />
+      {showError && error && <p className="text-red-500 text-xs italic">{error}</p>}
     </div>
   );
 };
