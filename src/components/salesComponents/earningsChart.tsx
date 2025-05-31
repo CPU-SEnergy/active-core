@@ -1,49 +1,84 @@
-import * as React from "react";
+"use client";
+
 import {
   Bar,
   BarChart,
   ResponsiveContainer,
   XAxis,
-  YAxis,
   CartesianGrid,
+  YAxis,
 } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 interface EarningsChartProps {
   earnings: number[];
 }
 
 const months = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 export default function EarningsChart({ earnings }: EarningsChartProps) {
-  // Transform the earnings array into the format needed for the chart
+  const [selectedYear, setSelectedYear] = useState("2024");
   const chartData = earnings.map((earning, index) => ({
     month: months[index],
-    earnings: earning
+    earnings: earning,
   }));
 
+  const formatCurrency = (amount: number) => {
+    return `₱${amount.toLocaleString()}`;
+  };
+
   return (
-    <Card className="max-w-lg bg-background/50 shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          Earnings
-        </CardTitle>
+    <Card className="w-full bg-white shadow-sm border border-gray-200">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-lg lg:text-xl font-semibold text-gray-900">
+              Monthly Earnings
+            </CardTitle>
+            <p className="text-sm text-gray-500">
+              Revenue performance over the year
+            </p>
+          </div>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-20 h-8 text-xs border-gray-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2024">2024</SelectItem>
+              <SelectItem value="2023">2023</SelectItem>
+              <SelectItem value="2022">2022</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
-      <CardContent className="px-4 pb-4">
-        <div className="h-[200px]">
+      <CardContent className="pb-6">
+        <div className="h-[300px] sm:h-[350px] lg:h-[400px]">
           <ChartContainer
             config={{
               earnings: {
-                label: "earnings",
+                label: "Earnings",
                 color: "#9095a0",
               },
             }}
@@ -51,36 +86,41 @@ export default function EarningsChart({ earnings }: EarningsChartProps) {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
               >
                 <CartesianGrid
-                  strokeDasharray="2 2"
+                  strokeDasharray="3 3"
                   vertical={false}
-                  stroke="#e0e0e0"
+                  stroke="#f1f5f9"
                 />
                 <XAxis
                   dataKey="month"
-                  stroke="#888888"
-                  fontSize={8}
+                  stroke="#64748b"
+                  fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ dy: 5 }}
+                  tick={{ fill: "#64748b" }}
                 />
                 <YAxis hide={true} />
-                <Bar dataKey="earnings" fill="var(--color-earnings)" />
+                <Bar
+                  dataKey="earnings"
+                  fill="var(--color-earnings)"
+                  radius={[4, 4, 0, 0]}
+                  className="hover:opacity-80 transition-opacity"
+                />
                 <ChartTooltip
-                  cursor={false}
-                  content={({ active, payload }) => {
+                  cursor={{ fill: "rgba(59, 130, 246, 0.1)", radius: 4 }}
+                  content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
-                      const data = payload?.[0]?.payload;
+                      const data = payload[0]?.payload;
                       return (
-                        <div className="rounded-md border bg-background p-1 shadow-sm">
-                          <div className="flex flex-col">
-                            <span className="text-[0.60rem] uppercase text-muted-foreground">
-                              Earnings
+                        <div className="rounded-lg border bg-white p-3 shadow-lg">
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-sm font-medium text-gray-900">
+                              {label}
                             </span>
-                            <span className="text-xs font-bold text-muted-foreground">
-                              ₱{data.earnings.toLocaleString()}
+                            <span className="text-lg font-bold text-blue-600">
+                              {formatCurrency(data.earnings)}
                             </span>
                           </div>
                         </div>
