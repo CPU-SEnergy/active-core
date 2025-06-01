@@ -32,8 +32,42 @@ const audiowide = Audiowide({
 });
 
 export const metadata: Metadata = {
-  title: "Sport and Fitness",
-  description: "Sport and Fitness Registration",
+  title: "IMAA - Iloilo Martial Arts Association",
+  description:
+    "A platform for martial arts enthusiasts in Iloilo City - Ilonggo Martial Artists Association",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32", type: "image/x-icon" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.ico",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "IMAA",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "IMAA - Iloilo Martial Arts Association",
+    title: "IMAA - Iloilo Martial Arts Association",
+    description:
+      "A platform for martial arts enthusiasts in Iloilo City - Ilonggo Martial Artists Association",
+  },
+  twitter: {
+    card: "summary",
+    title: "IMAA - Iloilo Martial Arts Association",
+    description:
+      "A platform for martial arts enthusiasts in Iloilo City - Ilonggo Martial Artists Association",
+  },
 };
 
 export default async function RootLayout({
@@ -41,10 +75,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const tokens = await getTokens(await cookies(), {
+  const tokens = await getTokens(cookies(), {
     ...serverConfig,
     apiKey: clientConfig.apiKey,
-    headers: await headers(),
+    headers: headers(),
   });
   /* eslint-disable @typescript-eslint/no-unused-vars */
 
