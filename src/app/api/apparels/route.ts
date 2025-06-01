@@ -23,6 +23,11 @@ export async function GET(request: NextRequest) {
         $.field("createdAt").order(dir);
       }
     }
+
+    if (!sort && !c && !dir) {
+      $.field("isDeleted").not(true);
+    }
+
     const results = await $.run();
 
     if (results.length === 0) {
