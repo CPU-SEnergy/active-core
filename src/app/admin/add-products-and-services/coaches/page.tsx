@@ -8,7 +8,7 @@ import fetcher from "@/lib/fetcher";
 import useSWR from "swr";
 import { COACHDATA } from "@/lib/types/product-services";
 import { EditCoach } from "@/components/AddProductAndServices/EditCoachModal";
-import { convertTimestampToDate } from "@/utils/firebase/helpers/convertTimestampToDate";
+import { convertTimestampToDate } from "@/utils/helpers/convertTimestampToDate";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 import { Skeleton } from "@/components/ui/skeleton";
 import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
