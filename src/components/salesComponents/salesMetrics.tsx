@@ -1,3 +1,7 @@
+"use client";
+
+import type React from "react";
+
 import { useState } from "react";
 import {
   Select,
@@ -6,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SalesMetricsProps {
   data: {
@@ -23,12 +27,7 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
   const [period, setPeriod] = useState("monthly");
 
   const formatCurrency = (amount: number) => {
-    if (amount >= 1000000) {
-      return `₱ ${(amount / 1000000).toFixed(1)}M`;
-    } else if (amount >= 1000) {
-      return `₱ ${(amount / 1000).toFixed(1)}k`;
-    }
-    return `₱ ${amount.toFixed(2)}`;
+    return `₱ ${amount.toLocaleString()}`;
   };
 
   const formatNumber = (num: number) => {
@@ -36,7 +35,7 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
   };
 
   const formatPercentage = (value: number) => {
-    return `${value.toFixed(2)}%`;
+    return `${value.toFixed(1)}%`;
   };
 
   const calculateGrowth = (current: number, previous: number) => {
@@ -55,9 +54,9 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
   const getPreviousValue = () => {
     if (period === "monthly") {
       const currentMonth = new Date().getMonth();
-      return currentMonth > 0 ? (data?.earnings[currentMonth - 1] || 0) : 0;
+      return currentMonth > 0 ? data?.earnings[currentMonth - 1] || 0 : 0;
     }
-    return 0; // No previous year data available
+    return 0;
   };
 
   if (!data || !data.earnings || !data.memberships) {
@@ -85,22 +84,20 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
       );
     } else {
       return (
-        <span className="text-gray-500 text-sm font-medium">
-          No Change
-        </span>
+        <span className="text-gray-500 text-sm font-medium">No Change</span>
       );
     }
   }
 
   return (
-    <Card>
-      <div className="p-6 bg-white rounded-lg shadow-sm max-w-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold mr-10 text-gray-900">
+    <Card className="w-full h-full bg-white shadow-sm border border-gray-200">
+      <CardHeader className="pb-4">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg font-semibold text-gray-900">
             {period === "monthly" ? "This Month Sales" : "This Year Sales"}
-          </h2>
+          </CardTitle>
           <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="text-xs font-medium w-20 bg-[#E9EAEC]">
+            <SelectTrigger className="text-xs font-medium w-20 h-8 bg-gray-100 border-gray-200">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -109,38 +106,55 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
             </SelectContent>
           </Select>
         </div>
-
-        <div className="space-y-6">
-          <div>
-            <div className="text-sm text-gray-500 mb-1">Revenue</div>
+      </CardHeader>
+      <CardContent className="pb-6">
+        <div className="space-y-4">
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="text-sm text-gray-500 mb-2">Revenue</div>
             <div className="flex justify-between items-center">
-              <span className="text-2xl font-semibold">
+              <span className="text-xl lg:text-2xl font-semibold text-gray-900">
                 {formatCurrency(getCurrentValue())}
               </span>
               {renderGrowthIndicator()}
             </div>
           </div>
 
-          <div>
-            <div className="text-sm text-gray-500 mb-1">Total Members</div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="text-sm text-gray-500 mb-2">Total Members</div>
             <div className="flex justify-between items-center">
-              <span className="text-2xl font-semibold">
+              <span className="text-xl lg:text-2xl font-semibold text-gray-900">
                 {formatNumber(totalCustomers)}
               </span>
             </div>
           </div>
 
-          <div>
-            <div className="text-sm text-gray-500 mb-1">Membership Distribution</div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">
-                Regular: {formatNumber(data.memberships.regular)} <br />
-                Student: {formatNumber(data.memberships.student)}
-              </span>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="text-sm text-gray-500 mb-3">
+              Membership Distribution
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-[#E74C78]" />
+                <span className="text-sm text-gray-700">
+                  Regular:{" "}
+                  <span className="font-medium">
+                    {formatNumber(data.memberships.regular)}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-[#9095a0]" />
+                <span className="text-sm text-gray-700">
+                  Student:{" "}
+                  <span className="font-medium">
+                    {formatNumber(data.memberships.student)}
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 }

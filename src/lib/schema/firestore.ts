@@ -12,6 +12,7 @@ export const db = schema(
     classes: $.collection<Classes>(),
     customer: $.collection<Customer>(),
     walkInCustomers: $.collection<WalkInCustomer>(),
+    cashier: $.collection<Cashier>(),
   }),
   { server: { preferRest: true } }
 );
@@ -141,4 +142,9 @@ interface WalkInCustomer {
   type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
   userId?: Schema["users"]["Id"];
+}
+
+interface Cashier {
+  uid: string;
+  createdAt: Typesaurus.ServerDate;
 }
