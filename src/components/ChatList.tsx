@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ref, getDatabase, get, onValue } from "firebase/database";
 import { app } from "@/lib/firebaseClient";
 import type { User } from "firebase/auth";
@@ -33,36 +33,39 @@ export default function UserChatList({ user, isAdmin }: Props) {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const fetchUserDetail = async (roomId: string) => {
-    try {
-      const userDocRef = doc(firestore, "users", roomId);
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        const name =
-          userData.firstName && userData.lastName
-            ? `${userData.firstName} ${userData.lastName}`
-            : "Unknown User";
-        setChatUsers((prev) =>
-          prev.map((chatUser) =>
-            chatUser.id === roomId
-              ? { ...chatUser, name, email: userData.email }
-              : chatUser
-          )
-        );
-      } else {
-        setChatUsers((prev) =>
-          prev.map((chatUser) =>
-            chatUser.id === roomId
-              ? { ...chatUser, name: "Unknown User" }
-              : chatUser
-          )
-        );
+  const fetchUserDetail = useCallback(
+    async (roomId: string) => {
+      try {
+        const userDocRef = doc(firestore, "users", roomId);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          const name =
+            userData.firstName && userData.lastName
+              ? `${userData.firstName} ${userData.lastName}`
+              : "Unknown User";
+          setChatUsers((prev) =>
+            prev.map((chatUser) =>
+              chatUser.id === roomId
+                ? { ...chatUser, name, email: userData.email }
+                : chatUser
+            )
+          );
+        } else {
+          setChatUsers((prev) =>
+            prev.map((chatUser) =>
+              chatUser.id === roomId
+                ? { ...chatUser, name: "Unknown User" }
+                : chatUser
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching Firestore user data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching Firestore user data:", error);
-    }
-  };
+    },
+    [firestore]
+  );
 
   useEffect(() => {
     const unsubscribeFunctions: Array<() => void> = [];
@@ -124,7 +127,7 @@ export default function UserChatList({ user, isAdmin }: Props) {
     return () => {
       unsubscribeFunctions.forEach((unsub) => unsub());
     };
-  }, [database, user.uid, isAdmin, firestore]);
+  }, [database, user.uid, isAdmin, firestore, fetchUserDetail]);
 
   useEffect(() => {
     if (isMobile && selectedChatId) {

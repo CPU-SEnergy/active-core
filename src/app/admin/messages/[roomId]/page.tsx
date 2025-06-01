@@ -6,13 +6,14 @@ import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useState, useEffect } from "react";
 
-interface ChatRoomPageParams {
+interface PageProps {
   params: {
     roomId: string;
   };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default function ChatRoomPage({ params }: ChatRoomPageParams) {
+export default function ChatRoomPage({ params }: PageProps) {
   const auth = getFirebaseAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

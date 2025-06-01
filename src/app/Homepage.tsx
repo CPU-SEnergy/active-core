@@ -227,6 +227,7 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // Video player functionality
   useEffect(() => {
     const videoContainer = document.getElementById("workshop-video-container")
     const video = document.getElementById("workshop-video") as HTMLVideoElement
@@ -234,11 +235,13 @@ export default function HomePage() {
     const videoOverlay = document.getElementById("video-overlay")
 
     if (video && playButton && videoContainer && videoOverlay) {
+      // Auto-play without sound when in view
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               video.play().catch(() => {
+                // Autoplay might be blocked, that's okay
               })
             } else {
               video.pause()
@@ -250,38 +253,53 @@ export default function HomePage() {
 
       observer.observe(videoContainer)
 
+      // Handle hover to show controls in normal state
       videoContainer.addEventListener("mouseenter", () => {
         video.controls = true
-        videoOverlay.style.opacity = "0.3" 
+        videoOverlay.style.opacity = "0.3" // Make overlay more transparent on hover
       })
 
       videoContainer.addEventListener("mouseleave", () => {
         video.controls = false
         videoOverlay.style.opacity = "1"
       })
+
+      // Handle play button click to enter fullscreen
       playButton.addEventListener("click", (e) => {
         e.stopPropagation()
+
+        // Unmute the video
         video.muted = false
 
+        // Request fullscreen
         if (video.requestFullscreen) {
           video.requestFullscreen()
         } else if ("webkitRequestFullscreen" in video) {
+          /* Safari */
           ;(video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
         } else if ("msRequestFullscreen" in video) {
+          /* IE11 */
           ;(video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
         }
+
+        // Ensure controls are visible in fullscreen
         video.controls = true
+
+        // Play the video
         video.play()
       })
 
+      // Handle fullscreen change
       document.addEventListener("fullscreenchange", () => {
         if (!document.fullscreenElement) {
+          // Exited fullscreen
           video.muted = true
         }
       })
 
       document.addEventListener("webkitfullscreenchange", () => {
         if (!(document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement) {
+          // Exited fullscreen in Safari
           video.muted = true
         }
       })
@@ -297,8 +315,12 @@ export default function HomePage() {
     }
   }, [])
 
+  // Inject custom animations
   useEffect(() => {
+    // Create style element
     const style = document.createElement("style")
+
+    // Add keyframes
     style.textContent = `
     ${smokeRevealKeyframes}
     ${comingSoonKeyframes}
@@ -335,15 +357,21 @@ export default function HomePage() {
       animation: subtleWave 8s ease-in-out infinite;
     }
   `
+
+    // Append to head
     document.head.appendChild(style)
+
+    // Clean up
     return () => {
       document.head.removeChild(style)
     }
   }, [])
 
   useEffect(() => {
+    // Only run in browser environment
     if (typeof window !== "undefined") {
       try {
+        // Preload smoke image with error handling
         const smokeImage = new window.Image(1, 1)
         smokeImage.crossOrigin = "anonymous"
         smokeImage.onload = () => {
@@ -380,7 +408,7 @@ export default function HomePage() {
               backgroundSize: "200% 100%",
               animation: "smokeOverlay 3s forwards",
               backgroundRepeat: "no-repeat",
-              backgroundColor: "rgba(0,0,0,0.85)",
+              backgroundColor: "rgba(0,0,0,0.85)", // Darker fallback if image fails to load
               mixBlendMode: "multiply",
             }}
           ></div>
@@ -564,6 +592,19 @@ export default function HomePage() {
                   <ChampionCard name={champion.name} image={champion.image} achievement={champion.achievement} />
                 </div>
               ))}
+            </div>
+
+            <div className="text-center mt-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+              <Button
+                variant="outline"
+                className="border-2 border-black text-black font-bold relative overflow-hidden group transition-all duration-500"
+              >
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                  View All Champions
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
+              </Button>
             </div>
           </div>
         </section>
@@ -840,11 +881,26 @@ export default function HomePage() {
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Operating Hours</h4>
                     <p className="text-gray-600">Monday-Saturday: 7AM - 12PM and 3PM to 9PM</p>
-                  </div>
-
-                  {/* Google Map Embed */}
-                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <iframe src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sph!4v1747768845833!5m2!1sen!2sph!6m8!1m7!1sWcYMQsJ9GoU4fu7KfMMAuQ!2m2!1d10.70443302427233!2d122.5528555203559!3f255.23038086380515!4f-5.281414180810728!5f0.7820865974627469" width="800" height="600" style={{ border: 0 }} allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                  </div>                  {/* Location Map */}                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                    <a
+                      href="https://www.google.com/maps?q=10.70443302427233,122.5528555203559"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block relative group"
+                    >
+                      <Image 
+                        src="/pictures/imma map.png"
+                        alt="IMAA Location Map - Click to open in Google Maps"
+                        width={800}
+                        height={600}
+                        className="w-full h-auto object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                        <div className="bg-white/90 text-black px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                          Open in Google Maps
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </Card>
               </div>
@@ -888,18 +944,21 @@ function PhotoCarousel() {
     { src: "/pictures/advert pic 10.jpg", alt: "IMAA Training 10" },
   ]
 
-
+  // Auto-rotation effect
   useEffect(() => {
+    // Clear any existing timer
     if (timerRef.current) {
       clearInterval(timerRef.current)
     }
 
+    // Don't auto-rotate if paused or if an image is expanded
     if (!isPaused && !expandedImage) {
       timerRef.current = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex === photos.length - 1 ? 0 : prevIndex + 1))
-      }, 3000) 
+      }, 3000) // Change photo every 3 seconds
     }
 
+    // Cleanup function to clear the interval when component unmounts or dependencies change
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current)
@@ -908,24 +967,33 @@ function PhotoCarousel() {
   }, [currentIndex, isPaused, expandedImage, photos.length])
 
   const goToPrevious = () => {
+    // Temporarily pause auto-rotation when user manually navigates
     setIsPaused(true)
     const isFirstSlide = currentIndex === 0
     const newIndex = isFirstSlide ? photos.length - 1 : currentIndex - 1
     setCurrentIndex(newIndex)
+
+    // Resume auto-rotation after a short delay
     setTimeout(() => setIsPaused(false), 5000)
   }
 
   const goToNext = () => {
+    // Temporarily pause auto-rotation when user manually navigates
     setIsPaused(true)
     const isLastSlide = currentIndex === photos.length - 1
     const newIndex = isLastSlide ? 0 : currentIndex + 1
     setCurrentIndex(newIndex)
+
+    // Resume auto-rotation after a short delay
     setTimeout(() => setIsPaused(false), 5000)
   }
 
   const handleDotClick = (index: number) => {
+    // Temporarily pause auto-rotation when user manually navigates
     setIsPaused(true)
     setCurrentIndex(index)
+
+    // Resume auto-rotation after a short delay
     setTimeout(() => setIsPaused(false), 5000)
   }
 
