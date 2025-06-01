@@ -10,6 +10,8 @@ import { APPARELDATA } from "@/lib/types/product-services";
 import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
+import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
+import { removeItem } from "@/app/actions/admin/products-services/removeItem";
 
 function ApparelsSkeleton() {
   return (
@@ -71,6 +73,11 @@ export default function ApparelsPage() {
             data.length > 0 &&
             data.map((apparel) => (
               <Card key={apparel.id} className="relative group">
+                <DeleteButton
+                  id={apparel.id}
+                  collectionName="apparels"
+                  onDelete={removeItem}
+                />
                 <div className="relative aspect-square rounded-t-lg overflow-hidden">
                   <Image
                     src={apparel.imageUrl || "/placeholder.svg"}
