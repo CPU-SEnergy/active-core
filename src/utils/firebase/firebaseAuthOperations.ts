@@ -1,29 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  User,
-} from "firebase/auth";
-import { app, getFirebaseAuth } from "@/lib/firebaseClient";
-import { RegisterFormProps } from "@/lib/types/registerForm";
-import {
+  getFirestore,
   collection,
   doc,
-  getFirestore,
-  Timestamp,
   setDoc,
+  Timestamp,
 } from "firebase/firestore";
+import { app, getFirebaseAuth as authClient } from "@/lib/firebaseClient";
+import type { RegisterFormProps } from "@/lib/types/registerForm";
 import { addUserToAlgolia } from "@/app/actions/AddUserToAlgolia";
 import { loginWithCredential } from "../../../not-api";
+import { checkAndAssignAdminRole } from "./checkAndAssignAdmin";
 
 export const createFirebaseUser = async (formResult: RegisterFormProps) => {
+  console.log("Starting user creation for email:", formResult.email);
+
   try {
-    const auth = getFirebaseAuth();
+    const auth = authClient();
 
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       formResult.email,
       formResult.password
     );
+    console.log("Firebase user created successfully:", userCredential.user.uid);
 
     const firestore = getFirestore(app);
     const userRef = doc(
@@ -34,35 +35,65 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     await setDoc(userRef, {
       uid: userCredential.user.uid,
       email: formResult.email,
-      phoneNumber: formResult.phoneNumber || null,
+      phone: formResult.phoneNumber,
       firstName: formResult.firstName,
       lastName: formResult.lastName,
       dob: formResult.dob,
       sex: formResult.sex,
       createdAt: Timestamp.now(),
     });
+    console.log("User document created in Firestore");
 
-    await addUserToAlgolia({
+    await checkAndAssignAdminRole(userCredential.user.uid, formResult.email);
+
+    console.log("Adding user to Algolia...");
+    const algoliaResult = await addUserToAlgolia({
       uuid: userCredential.user.uid,
       firstName: formResult.firstName,
       lastName: formResult.lastName,
       email: formResult.email,
     });
 
-    await loginWithCredential(userCredential);
-    // await sendVerificationEmail(userCredential.user);
+    if (!algoliaResult.success) {
+      console.warn("Failed to add user to Algolia:", algoliaResult.error);
+    } else {
+      console.log("User added to Algolia successfully");
+    }
 
-    return { success: true };
-  } catch (error) {
+    console.log("Logging in user...");
+    try {
+      await loginWithCredential(userCredential);
+      console.log("User logged in successfully");
+    } catch (loginError) {
+      console.error("Login error (but user was created):", loginError);
+    }
+
+    console.log("User creation process completed successfully");
+
+    return {
+      success: true,
+      userId: userCredential.user.uid,
+      email: formResult.email,
+    };
+  } catch (error: any) {
     console.error("Error creating user: ", error);
-    return { success: false, error: (error as Error).message || error };
-  }
-};
 
-export const sendVerificationEmail = async (user: User) => {
-  try {
-    await sendEmailVerification(user);
-  } catch (error) {
-    console.error("Error sending verification email: ", error);
+    let errorMessage = "An unexpected error occurred";
+
+    if (error.code === "auth/email-already-in-use") {
+      errorMessage =
+        "This email address is already registered. Please use a different email or try signing in.";
+    } else if (error.code === "auth/weak-password") {
+      errorMessage = "Password is too weak. Please choose a stronger password.";
+    } else if (error.code === "auth/invalid-email") {
+      errorMessage = "Please enter a valid email address.";
+    } else if (error.code === "auth/operation-not-allowed") {
+      errorMessage =
+        "Email/password accounts are not enabled. Please contact support.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return { success: false, error: errorMessage };
   }
 };

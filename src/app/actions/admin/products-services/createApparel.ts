@@ -75,6 +75,7 @@ export async function createApparel(formData: FormData) {
       createdAt: Date;
       updatedAt: Date;
       isActive: boolean;
+      isDeleted: boolean;
       discount?: number;
     } = {
       name: data.name,
@@ -83,6 +84,7 @@ export async function createApparel(formData: FormData) {
       description: data.description,
       imageUrl: fileUrl.url,
       isActive: true,
+      isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
