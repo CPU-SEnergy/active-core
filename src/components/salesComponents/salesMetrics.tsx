@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import {
   Select,
@@ -11,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SalesMetricsProps {
   data: {
@@ -21,10 +21,61 @@ interface SalesMetricsProps {
     };
     monthlyEarnings?: number;
   } | null;
+  isLoading?: boolean;
 }
 
-export default function SalesMetrics({ data }: SalesMetricsProps) {
+export function SalesMetricsSkeleton() {
+  return (
+    <Card className="w-full h-full bg-white shadow-sm border border-gray-200">
+      <CardHeader className="pb-4">
+        <div className="flex justify-between items-start">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-8 w-20" />
+        </div>
+      </CardHeader>
+      <CardContent className="pb-6">
+        <div className="space-y-4">
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <Skeleton className="h-4 w-16 mb-2" />
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <Skeleton className="h-4 w-24 mb-2" />
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-8 w-20" />
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <Skeleton className="h-4 w-36 mb-3" />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-3 w-3 rounded-full" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-3 w-3 rounded-full" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function SalesMetrics({
+  data,
+  isLoading = false,
+}: SalesMetricsProps) {
   const [period, setPeriod] = useState("monthly");
+
+  if (isLoading) {
+    return <SalesMetricsSkeleton />;
+  }
 
   const formatCurrency = (amount: number) => {
     return `₱ ${amount.toLocaleString()}`;
@@ -47,7 +98,7 @@ export default function SalesMetrics({ data }: SalesMetricsProps) {
     if (period === "monthly") {
       return data?.monthlyEarnings || 0;
     }
-    // Sum up yearly earnings
+
     return data?.earnings.reduce((sum, val) => sum + val, 0) || 0;
   };
 
