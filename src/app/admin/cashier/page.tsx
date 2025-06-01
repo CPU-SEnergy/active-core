@@ -102,6 +102,9 @@ export default function CashierManagement() {
     dedupingInterval: 60000,
   });
 
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+
   const cashiers: Cashier[] = data
     ? data.map((c) => ({
         id: c.uid,
@@ -226,6 +229,7 @@ export default function CashierManagement() {
         })),
         false
       );
+      setRemoveDialogOpen(false);
     } catch (err: unknown) {
       setRemoveError(
         err instanceof Error ? err.message : "Something went wrong"
@@ -233,6 +237,11 @@ export default function CashierManagement() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRemoveClick = (id: string) => {
+    setConfirmRemoveId(id);
+    setRemoveDialogOpen(true);
   };
 
   return (
@@ -349,7 +358,7 @@ export default function CashierManagement() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleRemove(cashier.id)}
+                      onClick={() => handleRemoveClick(cashier.id)}
                       disabled={loading}
                     >
                       Remove
@@ -368,6 +377,36 @@ export default function CashierManagement() {
           </TableBody>
         </Table>
       </div>
+      <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Cashier</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Are you sure you want to remove this cashier?</p>
+            <p className="text-sm text-gray-500">
+              This action cannot be undone. The user will lose their cashier privileges.
+            </p>
+            {removeError && <p className="text-red-600">{removeError}</p>}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setRemoveDialogOpen(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => confirmRemoveId && handleRemove(confirmRemoveId)}
+              disabled={loading}
+            >
+              {loading ? "Removing..." : "Remove"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

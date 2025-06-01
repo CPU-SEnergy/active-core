@@ -77,6 +77,7 @@ export async function createCoach(formData: FormData) {
       contactInfo: data.contactInfo,
       certifications: data.certifications ?? [],
       isActive: true,
+      isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
