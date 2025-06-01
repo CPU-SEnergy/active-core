@@ -4,9 +4,13 @@ import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 export async function GET() {
   try {
     getFirebaseAdminApp();
-    const membershipPlans = await db.membershipPlans.all();
+    const $ = db.membershipPlans.query.build();
+    
+    $.field("isDeleted").not(true);
 
-    const formattedPlans = membershipPlans.map((plan) => ({
+    const results = await $.run();
+
+    const formattedPlans = results.map((plan) => ({
       id: plan.ref.id,
       ...plan.data,
     }));
