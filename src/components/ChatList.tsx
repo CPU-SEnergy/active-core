@@ -33,6 +33,7 @@ export default function UserChatList({ user, isAdmin }: Props) {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchUserDetail = async (roomId: string) => {
     try {
       const userDocRef = doc(firestore, "users", roomId);
@@ -124,7 +125,7 @@ export default function UserChatList({ user, isAdmin }: Props) {
     return () => {
       unsubscribeFunctions.forEach((unsub) => unsub());
     };
-  }, [database, user.uid, isAdmin, firestore]);
+  }, [database, user.uid, isAdmin, firestore, fetchUserDetail]);
 
   useEffect(() => {
     if (isMobile && selectedChatId) {

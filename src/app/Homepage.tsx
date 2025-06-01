@@ -593,19 +593,6 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-
-            <div className="text-center mt-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
-              <Button
-                variant="outline"
-                className="border-2 border-black text-black font-bold relative overflow-hidden group transition-all duration-500"
-              >
-                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                  View All Champions
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
-              </Button>
-            </div>
           </div>
         </section>
 

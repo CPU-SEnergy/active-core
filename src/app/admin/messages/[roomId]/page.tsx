@@ -1,18 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import ChatRoom from "@/components/ChatRoom";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
+import { notFound } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useState, useEffect } from "react";
 
-interface ChatRoomPageParams {
+type PageProps = {
   params: {
     roomId: string;
   };
-}
+};
 
-export default function ChatRoomPage({ params }: ChatRoomPageParams) {
+export default function ChatRoomPage(props: PageProps) {
+  const { params } = props;
   const auth = getFirebaseAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,18 +35,17 @@ export default function ChatRoomPage({ params }: ChatRoomPageParams) {
     return () => unsubscribe();
   }, [auth]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!user)
-    return (
-      <h2 className="h-screen w-screen text-center flex justify-center items-center">
-        No Chats Selected
-      </h2>
-    );
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error || !user || params.roomId !== user.uid) {
+    notFound();
+  }
 
   return (
-    <div className="flex-grow h-full bg-gray-50 ">
-      {user && <ChatRoom roomId={params.roomId} user={user} />}
+    <div className="min-h-screen bg-gray-100 py-20">
+      <ChatRoom roomId={user.uid} user={user} />
     </div>
   );
 }
