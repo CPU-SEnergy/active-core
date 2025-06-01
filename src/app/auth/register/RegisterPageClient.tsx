@@ -14,6 +14,7 @@ import { ArrowLeft } from "lucide-react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRedirectParam } from "@/app/shared/useRedirectParam"
 import { appendRedirectParam } from "@/app/shared/redirect"
+import { Home } from "lucide-react"
 
 export default function RegisterPageClient() {
   const { toast } = useToast()
@@ -24,15 +25,12 @@ export default function RegisterPageClient() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const redirect = useRedirectParam();
 
-  // Simplified back button handler
   const handleBackStep = (e: React.MouseEvent) => {
     e.preventDefault()
 
-    // Directly call handleNextStep with a back action indicator
     handleNextStep(e, { backAction: true })
   }
 
-  // Update the back button to use handleBackStep
   const backButtonRef = React.useRef<HTMLButtonElement>(null)
   const handleSignUpSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -81,6 +79,17 @@ export default function RegisterPageClient() {
       <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
         <CardContent className="flex-1 p-6">
           <div className="w-full max-w-sm mx-auto space-y-6">
+            {/* Add Back to Home button */}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => router.push('/')}
+              className="mb-2 p-2 h-auto flex items-center gap-2 text-gray-500 hover:text-gray-700"
+            >
+              <Home className="h-4 w-4" />
+              <span>Back to Home</span>
+            </Button>
+
             {step === 2 && (
               <Button
                 type="button"
@@ -89,8 +98,7 @@ export default function RegisterPageClient() {
                 onClick={handleBackStep}
                 className="mb-2 p-0 h-auto flex items-center text-gray-500 hover:text-gray-700"
               >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                <span>Back</span>
+                <ArrowLeft className="h-12 w-12" />
               </Button>
             )}
 
@@ -100,7 +108,7 @@ export default function RegisterPageClient() {
 
             {step === 1 && (
               <form onSubmit={handleNextStep} className="space-y-4 flex flex-col">
-                <div className="space-y-2 mb-6">
+                <div className="space-y-2">
                   <InputText
                     id="email"
                     label="Email"
@@ -128,8 +136,7 @@ export default function RegisterPageClient() {
                         <EyeOff className="h-5 w-5" />
                       ) : (
                         <Eye className="h-5 w-5" />
-                      )
-                      }
+                      )}
                     </button>
                   </div>
                 </div>

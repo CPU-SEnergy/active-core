@@ -227,7 +227,6 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Video player functionality
   useEffect(() => {
     const videoContainer = document.getElementById("workshop-video-container")
     const video = document.getElementById("workshop-video") as HTMLVideoElement
@@ -235,13 +234,11 @@ export default function HomePage() {
     const videoOverlay = document.getElementById("video-overlay")
 
     if (video && playButton && videoContainer && videoOverlay) {
-      // Auto-play without sound when in view
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               video.play().catch(() => {
-                // Autoplay might be blocked, that's okay
               })
             } else {
               video.pause()
@@ -253,53 +250,38 @@ export default function HomePage() {
 
       observer.observe(videoContainer)
 
-      // Handle hover to show controls in normal state
       videoContainer.addEventListener("mouseenter", () => {
         video.controls = true
-        videoOverlay.style.opacity = "0.3" // Make overlay more transparent on hover
+        videoOverlay.style.opacity = "0.3" 
       })
 
       videoContainer.addEventListener("mouseleave", () => {
         video.controls = false
         videoOverlay.style.opacity = "1"
       })
-
-      // Handle play button click to enter fullscreen
       playButton.addEventListener("click", (e) => {
         e.stopPropagation()
-
-        // Unmute the video
         video.muted = false
 
-        // Request fullscreen
         if (video.requestFullscreen) {
           video.requestFullscreen()
         } else if ("webkitRequestFullscreen" in video) {
-          /* Safari */
           ;(video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
         } else if ("msRequestFullscreen" in video) {
-          /* IE11 */
           ;(video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
         }
-
-        // Ensure controls are visible in fullscreen
         video.controls = true
-
-        // Play the video
         video.play()
       })
 
-      // Handle fullscreen change
       document.addEventListener("fullscreenchange", () => {
         if (!document.fullscreenElement) {
-          // Exited fullscreen
           video.muted = true
         }
       })
 
       document.addEventListener("webkitfullscreenchange", () => {
         if (!(document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement) {
-          // Exited fullscreen in Safari
           video.muted = true
         }
       })
@@ -315,12 +297,8 @@ export default function HomePage() {
     }
   }, [])
 
-  // Inject custom animations
   useEffect(() => {
-    // Create style element
     const style = document.createElement("style")
-
-    // Add keyframes
     style.textContent = `
     ${smokeRevealKeyframes}
     ${comingSoonKeyframes}
@@ -357,21 +335,15 @@ export default function HomePage() {
       animation: subtleWave 8s ease-in-out infinite;
     }
   `
-
-    // Append to head
     document.head.appendChild(style)
-
-    // Clean up
     return () => {
       document.head.removeChild(style)
     }
   }, [])
 
   useEffect(() => {
-    // Only run in browser environment
     if (typeof window !== "undefined") {
       try {
-        // Preload smoke image with error handling
         const smokeImage = new window.Image(1, 1)
         smokeImage.crossOrigin = "anonymous"
         smokeImage.onload = () => {
@@ -408,7 +380,7 @@ export default function HomePage() {
               backgroundSize: "200% 100%",
               animation: "smokeOverlay 3s forwards",
               backgroundRepeat: "no-repeat",
-              backgroundColor: "rgba(0,0,0,0.85)", // Darker fallback if image fails to load
+              backgroundColor: "rgba(0,0,0,0.85)",
               mixBlendMode: "multiply",
             }}
           ></div>
@@ -592,19 +564,6 @@ export default function HomePage() {
                   <ChampionCard name={champion.name} image={champion.image} achievement={champion.achievement} />
                 </div>
               ))}
-            </div>
-
-            <div className="text-center mt-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
-              <Button
-                variant="outline"
-                className="border-2 border-black text-black font-bold relative overflow-hidden group transition-all duration-500"
-              >
-                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                  View All Champions
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
-              </Button>
             </div>
           </div>
         </section>
@@ -929,21 +888,18 @@ function PhotoCarousel() {
     { src: "/pictures/advert pic 10.jpg", alt: "IMAA Training 10" },
   ]
 
-  // Auto-rotation effect
+
   useEffect(() => {
-    // Clear any existing timer
     if (timerRef.current) {
       clearInterval(timerRef.current)
     }
 
-    // Don't auto-rotate if paused or if an image is expanded
     if (!isPaused && !expandedImage) {
       timerRef.current = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex === photos.length - 1 ? 0 : prevIndex + 1))
-      }, 3000) // Change photo every 3 seconds
+      }, 3000) 
     }
 
-    // Cleanup function to clear the interval when component unmounts or dependencies change
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current)
@@ -952,33 +908,24 @@ function PhotoCarousel() {
   }, [currentIndex, isPaused, expandedImage, photos.length])
 
   const goToPrevious = () => {
-    // Temporarily pause auto-rotation when user manually navigates
     setIsPaused(true)
     const isFirstSlide = currentIndex === 0
     const newIndex = isFirstSlide ? photos.length - 1 : currentIndex - 1
     setCurrentIndex(newIndex)
-
-    // Resume auto-rotation after a short delay
     setTimeout(() => setIsPaused(false), 5000)
   }
 
   const goToNext = () => {
-    // Temporarily pause auto-rotation when user manually navigates
     setIsPaused(true)
     const isLastSlide = currentIndex === photos.length - 1
     const newIndex = isLastSlide ? 0 : currentIndex + 1
     setCurrentIndex(newIndex)
-
-    // Resume auto-rotation after a short delay
     setTimeout(() => setIsPaused(false), 5000)
   }
 
   const handleDotClick = (index: number) => {
-    // Temporarily pause auto-rotation when user manually navigates
     setIsPaused(true)
     setCurrentIndex(index)
-
-    // Resume auto-rotation after a short delay
     setTimeout(() => setIsPaused(false), 5000)
   }
 
