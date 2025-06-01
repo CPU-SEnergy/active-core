@@ -57,6 +57,7 @@ export async function createMembershipPlan(formData: FormData) {
       duration: data.duration,
       price: data.price,
       isActive: true,
+      isDeleted: false,
       planType: data.planType,
       createdAt: new Date(),
       updatedAt: new Date(),
