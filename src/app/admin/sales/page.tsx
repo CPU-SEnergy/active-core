@@ -7,8 +7,9 @@ import DonutCharts from "@/components/salesComponents/donutChart";
 
 const sampleData = {
   memberships: {
-    regular: 150,
-    student: 80,
+    package: 100,
+    individual: 85,
+    walkIn: 45,
   },
   earnings: [
     45000, 52000, 48000, 61000, 55000, 67000, 72000, 58000, 63000, 69000, 74000,
@@ -20,7 +21,11 @@ const sampleData = {
 export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<{
-    memberships: { regular: number; student: number };
+    memberships: {
+      package: number;
+      individual: number;
+      walkIn: number;
+    };
     earnings: number[];
     monthlyEarnings: number;
   } | null>(null);
