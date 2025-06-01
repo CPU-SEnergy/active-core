@@ -41,20 +41,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const tokens = await getTokens(cookies(), {
+  const tokens = await getTokens(await cookies(), {
     ...serverConfig,
     apiKey: clientConfig.apiKey,
-    headers: headers(),
+    headers: await headers(),
   });
   /* eslint-disable @typescript-eslint/no-unused-vars */
 
   const user = tokens ? toUser(tokens) : null;
-
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} antialiased`}
         style={{ fontFamily: "var(--font-geist-sans), sans-serif" }}
+        suppressHydrationWarning
       >
         <AuthProvider user={user}>
           <Navbar />

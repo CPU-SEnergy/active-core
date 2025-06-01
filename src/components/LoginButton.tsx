@@ -9,9 +9,9 @@ export default function LoginButton() {
 
   return (
     <Button
-      variant={"default"}
+      variant="ghost"
       onClick={() => router.push("/auth/login")}
-      className="text-black-600 bg-white border border-gray-900 px-5 text-lg md:text-base hover:bg-black hover:text-white transition-colors duration-300"
+      className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-black transition-colors duration-300 px-6 py-2 text-lg font-medium"
     >
       Login
     </Button>

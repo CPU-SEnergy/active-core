@@ -126,7 +126,6 @@ export default function RegisterPageClient() {
             <div className="flex-shrink-0 my-3 sm:my-4">
               <Stepper steps={steps} currentStep={step} />
             </div>
-
             {/* Form Container - Different layout for each step */}
             {step === 1 ? (
               /* Step 1 - Centered form */

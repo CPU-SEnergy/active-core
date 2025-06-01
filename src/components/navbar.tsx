@@ -44,13 +44,10 @@ export default function Navbar() {
   const isAdmin = user?.customClaims?.role === "admin" || user?.customClaims?.role === "cashier";
   const semiTransparentStyle = "bg-black/80 backdrop-blur-sm"
 
-  // Determine the navbar style based on the current page and scroll position
   let navbarStyle = ""
   if (pathname === "/") {
-    // Home page: transparent when not scrolled, semi-transparent when scrolled
     navbarStyle = scrolled ? semiTransparentStyle : "bg-transparent"
   } else {
-    // Other pages: always semi-transparent regardless of scroll position
     navbarStyle = semiTransparentStyle
   }
 

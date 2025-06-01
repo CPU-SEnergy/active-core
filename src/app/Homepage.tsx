@@ -593,19 +593,6 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-
-            <div className="text-center mt-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
-              <Button
-                variant="outline"
-                className="border-2 border-black text-black font-bold relative overflow-hidden group transition-all duration-500"
-              >
-                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                  View All Champions
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-black to-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
-                <span className="absolute -inset-[3px] bg-gradient-to-r from-black to-gray-800 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
-              </Button>
-            </div>
           </div>
         </section>
 
@@ -881,11 +868,26 @@ export default function HomePage() {
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Operating Hours</h4>
                     <p className="text-gray-600">Monday-Saturday: 7AM - 12PM and 3PM to 9PM</p>
-                  </div>
-
-                  {/* Google Map Embed */}
-                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <iframe src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sph!4v1747768845833!5m2!1sen!2sph!6m8!1m7!1sWcYMQsJ9GoU4fu7KfMMAuQ!2m2!1d10.70443302427233!2d122.5528555203559!3f255.23038086380515!4f-5.281414180810728!5f0.7820865974627469" width="800" height="600" style={{ border: 0 }} allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                  </div>                  {/* Location Map */}                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                    <a
+                      href="https://www.google.com/maps?q=10.70443302427233,122.5528555203559"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block relative group"
+                    >
+                      <Image 
+                        src="/pictures/imma map.png"
+                        alt="IMAA Location Map - Click to open in Google Maps"
+                        width={800}
+                        height={600}
+                        className="w-full h-auto object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                        <div className="bg-white/90 text-black px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                          Open in Google Maps
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </Card>
               </div>
