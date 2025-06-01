@@ -1,5 +1,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DonutChartsProps {
   data: {
@@ -8,6 +9,59 @@ interface DonutChartsProps {
       student: number;
     };
   } | null;
+  isLoading?: boolean;
+}
+
+export function DonutChartsSkeleton() {
+  return (
+    <Card className="w-full h-full bg-white shadow-sm border border-gray-200">
+      <CardHeader className="pb-4">
+        <Skeleton className="h-6 w-24" />
+      </CardHeader>
+      <CardContent className="pb-6">
+        <div className="grid gap-4">
+          <div className="flex items-center gap-4 border border-gray-100 p-4 rounded-lg bg-gray-50/30">
+            <div className="h-[100px] w-[100px] sm:h-[120px] sm:w-[120px] flex-shrink-0">
+              <Skeleton className="h-full w-full rounded-full" />
+            </div>
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <Skeleton className="h-5 w-16" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-2 w-2 rounded-full" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-2 w-2 rounded-full" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              </div>
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+          <div className="flex items-center gap-4 border border-gray-100 p-4 rounded-lg bg-gray-50/30">
+            <div className="h-[100px] w-[100px] sm:h-[120px] sm:w-[120px] flex-shrink-0">
+              <Skeleton className="h-full w-full rounded-full" />
+            </div>
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <Skeleton className="h-5 w-16" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-2 w-2 rounded-full" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-2 w-2 rounded-full" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              </div>
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 const COLORS = {
@@ -21,7 +75,14 @@ const COLORS = {
   },
 };
 
-export default function DonutCharts({ data }: DonutChartsProps) {
+export default function DonutCharts({
+  data,
+  isLoading = false,
+}: DonutChartsProps) {
+  if (isLoading) {
+    return <DonutChartsSkeleton />;
+  }
+
   if (!data || !data.memberships) {
     return null;
   }
