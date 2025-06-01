@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
+import type React from "react"
+
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,6 +24,7 @@ import { app } from "@/lib/firebaseClient"
 import useGetUserById from "@/utils/helpers/getUserById"
 import type { Schema } from "@/lib/schema/firestore"
 import { usePathname } from "next/navigation"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface Message {
   id: string
@@ -29,22 +32,65 @@ interface Message {
   senderName: string
   text: string
   timestamp: number
+  isBot?: boolean
 }
 
 interface ChatWidgetProps {
-  userId: string
+  userId?: string | null
+  role?: "admin" | "cashier" | undefined
+}
+
+interface FAQ {
+  question: string
+  answer: string
+  keywords: string[]
 }
 
 const PAGE_SIZE = 15
 
-const ChatWidget = ({ userId }: ChatWidgetProps) => {
+const faqs: FAQ[] = [
+  {
+    question: "What is your location?",
+    answer:
+      "We are located at 123 Main Street, Downtown City. Our store is open Monday to Friday from 9 AM to 6 PM, and weekends from 10 AM to 4 PM.",
+    keywords: ["location", "address", "where", "store", "office"],
+  },
+  {
+    question: "What are your business hours?",
+    answer:
+      "Our business hours are Monday to Friday: 9 AM - 6 PM, and weekends: 10 AM - 4 PM. We're closed on major holidays.",
+    keywords: ["hours", "time", "open", "close", "schedule", "when"],
+  },
+  {
+    question: "How can I contact you?",
+    answer:
+      "You can contact us via phone at (555) 123-4567, email at info@company.com, or visit our store during business hours.",
+    keywords: ["contact", "phone", "email", "call", "reach"],
+  },
+  {
+    question: "What services do you offer?",
+    answer:
+      "We offer a wide range of services including product sales, customer support, technical assistance, and consultation services.",
+    keywords: ["services", "offer", "provide", "what", "do"],
+  },
+  {
+    question: "Do you offer delivery?",
+    answer:
+      "Yes, we offer delivery services within the city. Delivery usually takes 2-3 business days and costs $10 for orders under $50.",
+    keywords: ["delivery", "shipping", "deliver", "send"],
+  },
+]
+
+const ChatWidget = ({ userId, role }: ChatWidgetProps) => {
   const pathname = usePathname()
+  const isMobile = useIsMobile()
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
   const [user, setUser] = useState<Schema["users"]["Data"] | null>(null)
+  const [isConnectedToAdmin, setIsConnectedToAdmin] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const roomId = userId
+  const roomId = userId || "anonymous"
   const [hasMore, setHasMore] = useState<boolean>(true)
   const [loadingMore, setLoadingMore] = useState<boolean>(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -54,6 +100,7 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
   const initialLoadCompleteRef = useRef<boolean>(false)
   const shouldScrollToBottomRef = useRef<boolean>(true)
   const isLoadingOlderRef = useRef<boolean>(false)
+  const messagesRef = useRef<Message[]>([]); // Ref to store messages for comparison
 
   const {
     user: fetchedUser,
@@ -63,12 +110,17 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     user: Schema["users"]["Data"]
     isError: unknown
     isLoading: boolean
-  } = useGetUserById(userId)
+  } = userId ? useGetUserById(userId) : { user: null, isLoading: false, isError: null }
 
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp)
     const hours = date.getHours().toString().padStart(2, "0")
     const minutes = date.getMinutes().toString().padStart(2, "0")
+
+    if (isMobile) {
+      return `${hours}:${minutes}`
+    }
+
     const day = date.getDate().toString().padStart(2, "0")
     const month = (date.getMonth() + 1).toString().padStart(2, "0")
     const year = date.getFullYear()
@@ -96,8 +148,92 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     }
   }, [fetchedUser])
 
+  const findBestFAQ = (userInput: string): FAQ | null => {
+    const input = userInput.toLowerCase()
+    let bestMatch: FAQ | null = null
+    let maxMatches = 0
+
+    for (const faq of faqs) {
+      const matches = faq.keywords.filter((keyword) => input.includes(keyword.toLowerCase())).length
+      if (matches > maxMatches) {
+        maxMatches = matches
+        bestMatch = faq
+      }
+    }
+
+    return maxMatches > 0 ? bestMatch : null
+  }
+
+  const addBotMessage = (text: string, showAdminOption = false) => {
+    const botMessage: Message = {
+      id: `bot-${Date.now()}`,
+      senderId: "bot",
+      senderName: "Assistant",
+      text,
+      timestamp: Date.now(),
+      isBot: true,
+    }
+
+    setMessages((prev) => [...prev, botMessage])
+    setTimeout(scrollToBottom, 100)
+  }
+
+  const connectToAdmin = async () => {
+    // Redirect to login page if user is not logged in
+    if (!user) {
+      addBotMessage("You need to be logged in to chat with an admin. Redirecting you to the login page...")
+
+      // Give user time to read the message before redirecting
+      setTimeout(() => {
+        window.location.href = "/auth/login"
+      }, 2000)
+      return
+    }
+
+    // If user is logged in, proceed with connecting to admin
+    setIsConnectedToAdmin(true)
+    addBotMessage("Connecting you to an admin. Please wait a moment...")
+
+    // Create user session for admin chat
+    const database = getDatabase(app)
+    const roomRef = ref(database, `systemChats/${roomId}`)
+
+    await set(roomRef, {
+      createdAt: Date.now(),
+      createdBy: user.uid,
+      isAnonymous: false,
+    })
+
+    const participantRef = ref(database, `systemChats/${roomId}/participants/${user.uid}`)
+    await set(participantRef, {
+      uid: user.uid,
+      name: `${user.firstName} ${user.lastName}`,
+      joinedAt: Date.now(),
+    })
+
+    setTimeout(() => {
+      addBotMessage("You are now connected to our admin team. They will respond shortly!")
+    }, 2000)
+  }
+
+  const handleFAQResponse = (userInput: string) => {
+    const faq = findBestFAQ(userInput)
+
+    if (faq) {
+      setTimeout(() => {
+        addBotMessage(faq.answer, true)
+      }, 500)
+    } else {
+      setTimeout(() => {
+        addBotMessage(
+          "I'm not sure about that. Here are some common questions I can help with:\n\n• Location and business hours\n• Contact information\n• Services we offer\n• Delivery options\n\nOr would you like to chat with an admin directly?",
+          true,
+        )
+      }, 500)
+    }
+  }
+
   const loadInitialMessages = async () => {
-    if (!user) return
     try {
       const database = getDatabase(app)
       const messagesRef = ref(database, `systemChats/${roomId}/messages`)
@@ -128,7 +264,7 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
   }
 
   const loadOlderMessages = async () => {
-    if (messages.length === 0 || loadingMore || !hasMore) {
+    if (!user || messages.length === 0 || loadingMore || !hasMore) {
       return
     }
     shouldScrollToBottomRef.current = false
@@ -191,27 +327,30 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
         loadInitialMessages()
       }
       const database = getDatabase(app)
-      const messagesRef = ref(database, `systemChats/${roomId}/messages`)
-      const lastTimestamp = messages.length > 0 ? (messages[messages.length - 1]?.timestamp ?? 0) : 0
-      const newMessagesQuery = query(messagesRef, orderByChild("timestamp"), limitToLast(1))
+      const messagesRefDB = ref(database, `systemChats/${roomId}/messages`)
+      const newMessagesQuery = query(messagesRefDB, orderByChild("timestamp"), limitToLast(1))
       const unsubscribe = onChildAdded(newMessagesQuery, (snapshot) => {
         const newMsg = snapshot.val() as Message
         const newMessageId = snapshot.key || ""
-        if (newMsg.timestamp > lastTimestamp) {
-          setMessages((prev) => {
-            if (prev.find((m) => m.id === newMessageId)) return prev
-            return [...prev, { ...newMsg, id: newMessageId }]
-          })
-          if (!isLoadingOlderRef.current && shouldScrollToBottomRef.current) {
-            setTimeout(scrollToBottom, 100)
-          }
+
+        // Ensure the message is not already in the state
+        setMessages((prev) => {
+          if (messagesRef.current.find((m) => m.id === newMessageId)) return prev
+          const updatedMessages = [...prev, { ...newMsg, id: newMessageId }]
+          messagesRef.current = updatedMessages; // Update the ref
+          return updatedMessages
+        })
+
+        if (!isLoadingOlderRef.current && shouldScrollToBottomRef.current) {
+          setTimeout(scrollToBottom, 100)
         }
       })
       return () => unsubscribe()
     }
-  }, [roomId, user, messages])
+  }, [roomId, user]) // Removed messages from dependencies
 
   useEffect(() => {
+    if (!user) return
     const container = containerRef.current
     if (!container) return
     const handleScroll = () => {
@@ -230,10 +369,10 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     }
     container.addEventListener("scroll", handleScroll)
     return () => container.removeEventListener("scroll", handleScroll)
-  }, [hasMore, loadingMore])
+  }, [hasMore, loadingMore, user])
 
   useEffect(() => {
-    if (isOpen && initialLoadCompleteRef.current && hasMore && !loadingMore && !isLoadingOlderRef.current) {
+    if (isOpen && user && initialLoadCompleteRef.current && hasMore && !loadingMore && !isLoadingOlderRef.current) {
       const timer = setTimeout(() => {
         if (hasMore && !loadingMore && !isLoadingOlderRef.current) {
           const wasScrollingToBottom = shouldScrollToBottomRef.current
@@ -246,7 +385,7 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
       }, 1000)
       return () => clearTimeout(timer)
     }
-  }, [isOpen, initialLoadCompleteRef.current, hasMore, loadingMore])
+  }, [isOpen, initialLoadCompleteRef.current, hasMore, loadingMore, user])
 
   useEffect(() => {
     if (isOpen && messages.length > 0 && !isLoadingOlderRef.current && shouldScrollToBottomRef.current) {
@@ -254,102 +393,133 @@ const ChatWidget = ({ userId }: ChatWidgetProps) => {
     }
   }, [isOpen])
 
-  if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
+  // Show welcome message for non-logged-in users
+  useEffect(() => {
+    if (isOpen && !user && messages.length === 0) {
+      setTimeout(() => {
+        addBotMessage(
+          "Hello! Welcome to our support chat. I can help answer some frequently asked questions, or connect you with an admin for personalized assistance. What would you like to know?",
+        )
+      }, 500)
+    }
+  }, [isOpen, user])
+
+  // Don't render if on auth/admin pages or if user is admin/cashier
+  if (pathname.startsWith("/auth") || pathname.startsWith("/admin") || role === "admin" || role === "cashier") {
     return null
   }
 
-const sendMessage = async () => {
-  if (!input.trim()) return;
-  if (!user) return;
-
-  const database = getDatabase(app);
-  const roomRef = ref(database, `systemChats/${roomId}`);
-  const roomSnapshot = await get(roomRef);
-
-  if (!roomSnapshot.exists()) {
-    await set(roomRef, {
-      createdAt: Date.now(),
-      createdBy: user.uid,
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Limit input to 260 characters
+    if (e.target.value.length <= 260) {
+      setInput(e.target.value)
+    }
   }
 
-  const participantRef = ref(database, `systemChats/${roomId}/participants/${user.uid}`);
-  const participantSnapshot = await get(participantRef);
+  const sendMessage = async () => {
+    if (!input.trim() || input.length > 260) return
 
-  if (!participantSnapshot.exists()) {
-    await set(participantRef, {
-      uid: user.uid,
-      name: `${user.firstName} ${user.lastName}`,
-      joinedAt: Date.now(),
-    });
+    // Add user message to chat
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      senderId: user?.uid || "anonymous",
+      senderName: user ? `${user.firstName} ${user.lastName}` : "You",
+      text: input.slice(0, 260),
+      timestamp: Date.now(),
+    }
+
+    setMessages((prev) => [...prev, userMessage])
+
+    const currentInput = input
+    setInput("")
+
+    // Handle different scenarios
+    if (!user && !isConnectedToAdmin) {
+      // Non-logged-in user - handle FAQ
+      if (
+        currentInput.toLowerCase().includes("admin") ||
+        currentInput.toLowerCase().includes("connect") ||
+        currentInput.toLowerCase().includes("human")
+      ) {
+        connectToAdmin()
+      } else {
+        handleFAQResponse(currentInput)
+      }
+    } else if (user) {
+      // Logged-in user - send to Firebase
+      const database = getDatabase(app)
+      const roomRef = ref(database, `systemChats/${roomId}`)
+      const roomSnapshot = await get(roomRef)
+
+      if (!roomSnapshot.exists()) {
+        await set(roomRef, {
+          createdAt: Date.now(),
+          createdBy: user.uid,
+        })
+      }
+
+      const participantRef = ref(database, `systemChats/${roomId}/participants/${user.uid}`)
+      const participantSnapshot = await get(participantRef)
+
+      if (!participantSnapshot.exists()) {
+        await set(participantRef, {
+          uid: user.uid,
+          name: `${user.firstName} ${user.lastName}`,
+          joinedAt: Date.now(),
+        })
+      }
+
+      const messageRef = push(ref(database, `systemChats/${roomId}/messages`))
+      await set(messageRef, {
+        senderId: user.uid,
+        senderName: `${user.firstName} ${user.lastName}`,
+        text: currentInput.slice(0, 260),
+        timestamp: Date.now(),
+      })
+    }
+
+    shouldScrollToBottomRef.current = true
+    setTimeout(scrollToBottom, 100)
   }
-
-  const messageRef = push(ref(database, `systemChats/${roomId}/messages`));
-  await set(messageRef, {
-    senderId: user.uid,
-    senderName: `${user.firstName} ${user.lastName}`,
-    text: input,
-    timestamp: Date.now(),
-  });
-
-  setInput("");
-  shouldScrollToBottomRef.current = true;
-};
-
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-5 right-5 z-50">
-        <Button onClick={() => setIsOpen(true)} className="p-8 rounded-full shadow-xl">
-          <MessageSquare className="w-16 h-16" />
+      <div className={`fixed ${isMobile ? "bottom-4 right-4" : "bottom-5 right-5"} z-50`}>
+        <Button onClick={() => setIsOpen(true)} className={`${isMobile ? "p-4" : "p-8"} rounded-full shadow-xl`}>
+          <MessageSquare className={`${isMobile ? "w-8 h-8" : "w-16 h-16"}`} />
         </Button>
       </div>
     )
   }
 
-  if (!user) {
-    return (
-      <div className="fixed bottom-5 right-5 w-80 shadow-xl rounded-2xl bg-white border border-gray-300 z-50">
-        <CardContent className="p-4">
-          <p className="text-center">Please log in to chat.</p>
-        </CardContent>
-      </div>
-    )
-  }
-
-  if (isLoading) {
-    return (
-      <div className="fixed bottom-5 right-5 w-80 shadow-xl rounded-2xl bg-white border border-gray-300 z-50">
-        <CardContent className="p-4">
-          <p className="text-center">Loading...</p>
-        </CardContent>
-      </div>
-    )
-  }
-
-  if (isError) {
-    return (
-      <div className="fixed bottom-5 right-5 w-80 shadow-xl rounded-2xl bg-white border border-gray-300 z-50">
-        <CardContent className="p-4">
-          <p className="text-center">Error loading chat</p>
-        </CardContent>
-      </div>
-    )
-  }
-
   return (
-    <Card className="z-50 fixed bottom-5 right-5 h-[60%] w-96 shadow-xl rounded-2xl bg-white border border-gray-300">
+    <Card
+      className={`z-50 fixed ${
+        isMobile ? "bottom-2 left-2 right-2 top-20 h-auto" : "bottom-5 right-5 h-[60%] w-96"
+      } shadow-xl rounded-2xl bg-white border border-gray-300`}
+    >
       <CardContent className="p-4 h-full flex flex-col">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold">Chat with us Now!</h3>
+          <h3 className={`${isMobile ? "text-base" : "text-lg"} font-semibold`}>
+            {user ? "Chat with us Now!" : "Support Chat"}
+          </h3>
           <Button variant="ghost" onClick={() => setIsOpen(false)}>
             <X className="w-4 h-4" />
           </Button>
         </div>
-        <div ref={containerRef} className="bg-gray-100 overflow-y-auto flex-grow rounded-lg px-2 py-1 space-y-3 w-full">
-          {loadingMore && (
+        <div
+          ref={containerRef}
+          className={`bg-gray-100 overflow-y-auto flex-grow rounded-lg ${
+            isMobile ? "px-2 py-1" : "px-2 py-1"
+          } space-y-3 w-full`}
+        >
+          {user && loadingMore && (
             <div className="flex justify-center items-center py-1 w-full sticky top-0 z-10 bg-gray-100/80 backdrop-blur-sm">
-              <div className="flex items-center gap-1 text-xs text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm">
+              <div
+                className={`flex items-center gap-1 ${
+                  isMobile ? "text-xs" : "text-xs"
+                } text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm`}
+              >
                 <svg
                   className="animate-spin h-3 w-3 text-gray-500"
                   xmlns="http://www.w3.org/2000/svg"
@@ -363,7 +533,7 @@ const sendMessage = async () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Loading previous messages...
+                {isMobile ? "Loading..." : "Loading previous messages..."}
               </div>
             </div>
           )}
@@ -379,7 +549,7 @@ const sendMessage = async () => {
             <p className="text-gray-500 text-center w-full">No messages yet...</p>
           ) : (
             <>
-              {!hasMore && messages.length > 0 && (
+              {user && !hasMore && messages.length > 0 && (
                 <div className="text-center py-1 mb-2 w-full">
                   <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
                     Beginning of conversation
@@ -387,18 +557,25 @@ const sendMessage = async () => {
                 </div>
               )}
               {messages.map((msg) => {
-                const isUser = msg.senderId === user.uid
+                const isUser = msg.senderId === (user?.uid || "anonymous") && !msg.isBot
+                const isBot = msg.isBot || msg.senderId === "bot"
                 return (
                   <div key={msg.id} className={`flex ${isUser ? "justify-end" : "justify-start"} w-full`}>
-                    <div className="flex flex-col max-w-[75%]">
+                    <div className={`flex flex-col ${isMobile ? "max-w-[85%]" : "max-w-[75%]"}`}>
                       <div
-                        className={`px-3 py-2 rounded-3xl break-words ${
-                          isUser ? "bg-black text-white rounded-br-none" : "bg-white text-black border rounded-bl-none"
+                        className={`${isMobile ? "px-3 py-2" : "px-3 py-2"} rounded-3xl break-words ${
+                          isUser
+                            ? "bg-black text-white rounded-br-none"
+                            : isBot
+                              ? "bg-blue-100 text-blue-900 border border-blue-200 rounded-bl-none"
+                              : "bg-white text-black border rounded-bl-none"
                         }`}
                       >
-                        {msg.text}
+                        <div className={`${isMobile ? "text-sm" : ""} whitespace-pre-line`}>{msg.text}</div>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1 px-2">{formatTimestamp(msg.timestamp)}</div>
+                      <div className={`text-xs text-gray-500 mt-1 ${isMobile ? "px-1" : "px-2"}`}>
+                        {formatTimestamp(msg.timestamp)} • {isBot ? "Assistant" : isUser ? "You" : msg.senderName}
+                      </div>
                     </div>
                   </div>
                 )
@@ -407,21 +584,95 @@ const sendMessage = async () => {
             </>
           )}
         </div>
-        <div className="flex items-center space-x-2 text-black pt-4 w-full">
-          <Input
-            type="text"
-            placeholder="Type a message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault()
-                sendMessage()
+
+        {/* Quick FAQ buttons for non-logged-in users */}
+        {!user && !isConnectedToAdmin && (
+          <div className="flex flex-wrap gap-1 py-2 border-t border-gray-200">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => {
+                const userMessage = {
+                  id: `user-${Date.now()}`,
+                  senderId: "anonymous",
+                  senderName: "You",
+                  text: "What is your location?",
+                  timestamp: Date.now(),
+                };
+                setMessages((prev) => [...prev, userMessage]);
+                handleFAQResponse("What is your location?");
+                scrollToBottom();
+              }}
+            >
+              Location?
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => {
+                const userMessage = {
+                  id: `user-${Date.now()}`,
+                  senderId: "anonymous",
+                  senderName: "You",
+                  text: "What are your business hours?",
+                  timestamp: Date.now(),
+                };
+                setMessages((prev) => [...prev, userMessage]);
+                handleFAQResponse("What are your business hours?");
+                scrollToBottom();
+              }}
+            >
+              Hours?
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => {
+                const userMessage = {
+                  id: `user-${Date.now()}`,
+                  senderId: "anonymous",
+                  senderName: "You",
+                  text: "Connect me to admin",
+                  timestamp: Date.now(),
+                };
+                setMessages((prev) => [...prev, userMessage]);
+                connectToAdmin();
+                scrollToBottom();
+              }}
+            >
+              Talk to Admin
+            </Button>
+          </div>
+        )}
+
+        <div className={`flex items-center space-x-2 text-black ${isMobile ? "pt-2" : "pt-4"} w-full`}>
+          <div className="relative flex items-center w-full">
+            <Input
+              type="text"
+              placeholder={
+                user ? "Type a message (max 260 characters)" : "Ask a question or type 'admin' to connect..."
               }
-            }}
-          />
-          <Button onClick={sendMessage} disabled={!input.trim()}>
+              value={input}
+              onChange={handleInputChange}
+              maxLength={260}
+              className={`flex-1 ${isMobile ? "text-sm" : ""}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
+            />
+            {input.length > 0 && (
+              <span className={`absolute right-12 ${isMobile ? "text-xs" : "text-xs"} text-gray-500`}>
+                {input.length}/260
+              </span>
+            )}
+          </div>
+          <Button onClick={sendMessage} disabled={!input.trim()} className={isMobile ? "px-3" : ""}>
             <Send className="w-4 h-4" />
           </Button>
         </div>

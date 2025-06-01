@@ -19,7 +19,7 @@ import {
   getDatabase,
   orderByKey,
 } from "firebase/database";
-import { app, getFirebaseAuth } from "@/lib/firebaseClient";
+import { app } from "@/lib/firebaseClient";
 import { User } from "@/auth/AuthContext";
 import { useRead } from "@typesaurus/react";
 import { db, type Schema } from "@/lib/schema/firestore";
@@ -52,7 +52,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const auth = getFirebaseAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | undefined>(false);
   const lastScrollHeightRef = useRef<number>(0);
   const lastScrollTopRef = useRef<number>(0);
@@ -63,7 +62,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [, setIsNearTop] = useState(false);
   const firstMessageKeyRef = useRef<string | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [participants, setParticipants] = useState<Record<string, any>>({});
@@ -76,14 +74,11 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       : "Anonymous";
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      const idTokenResult = await auth.currentUser?.getIdTokenResult(true);
-      const role = idTokenResult?.claims.role;
-      setIsAdmin(role === "admin" || role === "cashier");
-    };
-
-    checkAdminStatus();
-  }, [auth]);
+    setIsAdmin(
+      user?.customClaims?.role === "admin" ||
+        user?.customClaims?.role === "cashier"
+    );  
+  }, [user?.customClaims?.role]);
 
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -430,18 +425,11 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
 
-    // Update typing status
-    if (!isTyping) {
-      setIsTyping(true);
-      updateTypingStatus(true);
-    }
-
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
       updateTypingStatus(false);
     }, 2000);
   };
@@ -450,7 +438,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     if (!input.trim()) return;
 
     try {
-      setIsTyping(false);
       updateTypingStatus(false);
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -627,27 +614,27 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
                 : msg.senderName
               : msg.senderName;
 
-          return (
+            return (
             <div key={msg.id} className={`w-full flex ${alignmentClass} mb-2`}>
               <div
-                className={`flex flex-col ${isMobile ? "max-w-[85%]" : "max-w-[75%]"}`}
+              className={`flex flex-col ${isMobile ? "max-w-60" : "max-w-80"} overflow-hidden`}
               >
-                <div
-                  className={`${isMobile ? "px-3 py-2" : "px-4 py-2"} rounded-3xl break-words ${bubbleColorClass}`}
-                >
-                  <div className={`${isMobile ? "text-sm" : ""}`}>
-                    {msg.text}
-                  </div>
-                </div>
-                <div
-                  className={`flex items-center gap-1 text-xs text-gray-500 mt-1 ${isMobile ? "px-1" : "px-2"}`}
-                >
-                  <span>{formatTimestamp(msg.timestamp)}</span>
-                  <span>{senderLabel}</span>
+              <div
+                className={`${isMobile ? "px-3 py-2" : "px-4 py-2"} rounded-3xl break-words ${bubbleColorClass}`}
+              >
+                <div className={`text-wrap overflow-hidden ${isMobile ? "text-sm" : ""}`}>
+                {msg.text}
                 </div>
               </div>
+              <div
+                className={`flex items-center gap-1 text-xs text-gray-500 mt-1 ${isMobile ? "px-1" : "px-2"}`}
+              >
+                <span>{formatTimestamp(msg.timestamp)}</span>
+                <span>{senderLabel}</span>
+              </div>
+              </div>
             </div>
-          );
+            );
         })}
 
         <div ref={messagesEndRef} />
@@ -669,26 +656,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       <div
         className={`${isMobile ? "p-2 mx-2" : "p-2 mx-4"} border-t border-gray-300 bg-white rounded shadow-sm`}
       >
-        {isTyping && (
-          <div className="text-xs text-gray-500 mb-1 ml-2">
-            <span className="inline-flex items-center">
-              <span className="animate-pulse mr-1">●</span>
-              <span
-                className="animate-pulse mr-1"
-                style={{ animationDelay: "0.2s" }}
-              >
-                ●
-              </span>
-              <span
-                className="animate-pulse mr-1"
-                style={{ animationDelay: "0.4s" }}
-              >
-                ●
-              </span>
-              Typing...
-            </span>
-          </div>
-        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -714,6 +681,25 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             <Send className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} />
           </button>
         </form>
+      </div>
+
+      {/* Add a section for frequently asked questions (FAQ) buttons below the chat messages */}
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold mb-2">Frequently Asked Questions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
+            What are your operating hours?
+          </button>
+          <button className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
+            How can I enroll in a class?
+          </button>
+          <button className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
+            What are the membership fees?
+          </button>
+          <button className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
+            Do you offer personal training?
+          </button>
+        </div>
       </div>
     </div>
   );
