@@ -22,7 +22,7 @@ export async function addCustomerWithPayment(
 ) {
   try {
     getFirebaseAdminApp();
-    
+
     const user = await getCurrentUserCustomClaims();
     if (
       !user ||
@@ -62,7 +62,6 @@ export async function addCustomerWithPayment(
       });
       customerId = customerRef.id;
     } else {
-
       const customerDataForFirestore = {
         firstName: customerData.firstName,
         lastName: customerData.lastName,
