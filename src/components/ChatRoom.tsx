@@ -20,7 +20,7 @@ import {
   orderByKey,
 } from "firebase/database";
 import { app, getFirebaseAuth } from "@/lib/firebaseClient";
-import type { User } from "firebase/auth";
+import { User } from "@/auth/AuthContext";
 import { useRead } from "@typesaurus/react";
 import { db, type Schema } from "@/lib/schema/firestore";
 import { Send, ArrowDown, ArrowUp, Menu } from "lucide-react";
