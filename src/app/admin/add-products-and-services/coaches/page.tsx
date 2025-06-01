@@ -11,6 +11,8 @@ import { EditCoach } from "@/components/AddProductAndServices/EditCoachModal";
 import { convertTimestampToDate } from "@/utils/firebase/helpers/convertTimestampToDate";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 import { Skeleton } from "@/components/ui/skeleton";
+import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
+import { removeItem } from "@/app/actions/admin/products-services/removeItem";
 
 function CoachesSkeleton() {
   return (
@@ -79,7 +81,12 @@ export default function CoachesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {coaches.map((coach) => (
-                <Card key={coach.id} className="group">
+                <Card key={coach.id} className="relative group">
+                  <DeleteButton
+                    id={coach.id}
+                    collectionName="coaches"
+                    onDelete={(id) => removeItem("coaches", id)}
+                  />
                   <div className="p-4">
                     <div className="relative aspect-square mb-4 rounded overflow-hidden">
                       <Image
