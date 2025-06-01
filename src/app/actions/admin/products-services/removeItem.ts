@@ -5,7 +5,17 @@ import { db } from "@/lib/schema/firestore";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
-export async function removeItem(id: string) {
+const updateMap = {
+  classes: db.classes.update,
+  membershipPlans: db.membershipPlans.update,
+  apparels: db.apparels.update,
+  coaches: db.coaches.update,
+} as const;
+
+export async function removeItem(
+  collection: AllowedCollections, 
+  id: string,
+) {
   const user = await getCurrentUserCustomClaims();
   if (!user || user?.customClaims?.role !== "admin") {
     return { success: false, error: "Unauthorized. You are not an admin." };
@@ -13,8 +23,19 @@ export async function removeItem(id: string) {
 
   try {
     getFirebaseAdminApp();
+ 
+    const removeFn = updateMap[collection] as unknown as (
+      id: string,
+      data: { 
+        deletedAt: Date,
+        isDeleted: boolean
+      }
+    ) => Promise<void>;
 
-    await db.apparels.remove(db.apparels.id(id));
+    await removeFn(id, { 
+      deletedAt: new Date(),
+      isDeleted: true, 
+    });
 
     revalidatePath("/");
 

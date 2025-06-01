@@ -76,7 +76,7 @@ export default function ApparelsPage() {
                 <DeleteButton
                   id={apparel.id}
                   collectionName="apparels"
-                  onDelete={removeItem}
+                  onDelete={(id) => removeItem("apparels", id)}
                 />
                 <div className="relative aspect-square rounded-t-lg overflow-hidden">
                   <Image
