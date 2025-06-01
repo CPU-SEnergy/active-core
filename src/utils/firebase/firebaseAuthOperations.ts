@@ -1,17 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  getAuth as getFirebaseAuth,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
-  User,
 } from "firebase/auth";
-import { app, getFirebaseAuth } from "@/lib/firebaseClient";
-import { RegisterFormProps } from "@/lib/types/registerForm";
 import {
+  getFirestore,
   collection,
   doc,
-  getFirestore,
-  Timestamp,
   setDoc,
+  Timestamp,
 } from "firebase/firestore";
+import { app } from "@/lib/firebaseClient";
+import type { RegisterFormProps } from "@/lib/types/registerForm";
 import { addUserToAlgolia } from "@/app/actions/AddUserToAlgolia";
 import { loginWithCredential } from "../../../not-api";
 
@@ -34,7 +34,7 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     await setDoc(userRef, {
       uid: userCredential.user.uid,
       email: formResult.email,
-      phoneNumber: formResult.phoneNumber || null,
+      phoneNumber: formResult.phoneNumber,
       firstName: formResult.firstName,
       lastName: formResult.lastName,
       dob: formResult.dob,
@@ -53,16 +53,24 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     // await sendVerificationEmail(userCredential.user);
 
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating user: ", error);
-    return { success: false, error: (error as Error).message || error };
-  }
-};
+    let errorMessage = "An unexpected error occurred";
 
-export const sendVerificationEmail = async (user: User) => {
-  try {
-    await sendEmailVerification(user);
-  } catch (error) {
-    console.error("Error sending verification email: ", error);
+    if (error.code === "auth/email-already-in-use") {
+      errorMessage =
+        "This email address is already registered. Please use a different email or try signing in.";
+    } else if (error.code === "auth/weak-password") {
+      errorMessage = "Password is too weak. Please choose a stronger password.";
+    } else if (error.code === "auth/invalid-email") {
+      errorMessage = "Please enter a valid email address.";
+    } else if (error.code === "auth/operation-not-allowed") {
+      errorMessage =
+        "Email/password accounts are not enabled. Please contact support.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return { success: false, error: errorMessage };
   }
 };
