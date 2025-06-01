@@ -15,14 +15,23 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import LogoutButton from "./LogoutButton";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/auth/AuthContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Handle scroll effect
   useEffect(() => {
@@ -32,6 +41,10 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    setShowLogoutModal(false);
+  };
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
     return null;
@@ -127,7 +140,9 @@ export default function Navbar() {
                 Admin Page
               </Link>
             )}
-            <LogoutButton user={user} />
+            <div onClick={() => (user ? setShowLogoutModal(true) : null)}>
+              <LogoutButton user={user} />
+            </div>
           </motion.div>
 
           {/* Mobile menu button */}
@@ -169,7 +184,10 @@ export default function Navbar() {
                   ))}
                   <div className="pt-6 border-t border-zinc-700">
                     <SheetClose asChild>
-                      <div className="flex justify-center">
+                      <div
+                        className="flex justify-center"
+                        onClick={() => (user ? setShowLogoutModal(true) : null)}
+                      >
                         <LogoutButton user={user} />
                       </div>
                     </SheetClose>
@@ -180,6 +198,25 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      {/* Logout Confirmation Modal */}
+      <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to log out of your account?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleLogout}>
+              Logout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.nav>
   );
 }
