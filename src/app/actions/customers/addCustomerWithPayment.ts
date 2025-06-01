@@ -22,7 +22,7 @@ export async function addCustomerWithPayment(
 ) {
   try {
     getFirebaseAdminApp();
-    
+
     const user = await getCurrentUserCustomClaims();
     if (
       !user ||
@@ -62,7 +62,6 @@ export async function addCustomerWithPayment(
       });
       customerId = customerRef.id;
     } else {
-
       const customerDataForFirestore = {
         firstName: customerData.firstName,
         lastName: customerData.lastName,
@@ -104,6 +103,47 @@ export async function addCustomerWithPayment(
     };
 
     await db.payments.add(paymentData, { as: "server" });
+
+    const currentDate = new Date();
+    const year = currentDate.getFullYear().toString();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+
+    const yearDoc = await db.kpis.get(db.kpis.id(year));
+    if (!yearDoc) {
+      await db.kpis.set(db.kpis.id(year), { year }, { as: "server" });
+    }
+
+    const monthRef = db.kpis(db.kpis.id(year)).months;
+    const monthDoc = await monthRef.get(monthRef.id(month));
+
+    if (monthDoc) {
+      await monthRef.update(monthRef.id(month), {
+        revenue: monthDoc.data.revenue + membershipPlan.price,
+        customers: monthDoc.data.customers + 1,
+      }, { as: "server" });
+    } else {
+      await monthRef.set(monthRef.id(month), {
+        revenue: membershipPlan.price,
+        customers: 1,
+      }, { as: "server" });
+    }
+
+    const customersDoc = await db.customers.get(db.customers.id('stats'));
+    if (customersDoc) {
+      await db.customers.update(db.customers.id('stats'), {
+        totalCustomers: !isWalkIn 
+          ? (customersDoc.data.totalCustomers || 0) + 1 
+          : (customersDoc.data.totalCustomers || 0),
+        totalWalkInCustomers: isWalkIn 
+          ? (customersDoc.data.totalWalkInCustomers || 0) + 1 
+          : (customersDoc.data.totalWalkInCustomers || 0)
+      }, { as: "server" });
+    } else {
+      await db.customers.set(db.customers.id('stats'), {
+        totalCustomers: !isWalkIn ? 1 : 0,
+        totalWalkInCustomers: isWalkIn ? 1 : 0
+      }, { as: "server" });
+    }
 
     return {
       success: true,

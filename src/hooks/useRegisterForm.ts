@@ -1,72 +1,112 @@
-import { useState } from "react";
-import { z } from "zod";
-import { step1Schema, step2Schema } from "@/lib/schema/auth/register-info";
-import { RegisterFormProps } from "@/lib/types/registerForm";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 
-export const useRegisterForm = () => {
+import type React from "react";
+
+import { useState } from "react";
+import { step1Schema, step2Schema } from "@/lib/schema/auth/registerSchema";
+import type { RegisterFormProps } from "@/lib/types/registerForm";
+
+export function useRegisterForm() {
   const [step, setStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
   const [formState, setFormState] = useState<RegisterFormProps>({
     email: "",
     password: "",
     confirmation: "",
     firstName: "",
     lastName: "",
+    phoneNumber: "",
     dob: "",
     sex: "",
-    phoneNumber: "", // Added missing phoneNumber property
   });
-  const [error, setError] = useState("");
 
   const handleChange =
-    (field: string) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setFormState((prev) => ({ ...prev, [field]: e.target.value }));
+    (field: keyof RegisterFormProps) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | string) => {
+      // Clear error when user starts typing
+      if (error) setError(null);
+
+      const value = typeof e === "string" ? e : e.target.value;
+      setFormState((prev) => ({ ...prev, [field]: value }));
     };
 
-  const handleNextStep = (
-    event: React.FormEvent,
+  const handleNextStep = async (
+    e: React.FormEvent,
     options?: { backAction?: boolean }
   ) => {
-    event.preventDefault();
+    e.preventDefault();
 
     if (options?.backAction) {
-      setStep((prevStep) => Math.max(prevStep - 1, 1));
+      setStep(1);
       return;
     }
 
     try {
-      step1Schema.parse({
-        email: formState.email,
-        password: formState.password,
-        confirmation: formState.confirmation,
-      });
-      setError("");
-      setStep(2);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        setError(e.errors[0]?.message || "Validation error");
+      // Validate step 1 data
+      const result = step1Schema.safeParse(formState);
+      if (!result.success) {
+        const formattedErrors = result.error.format();
+
+        // Get the first error message
+        const firstError =
+          formattedErrors.email?._errors?.[0] ||
+          formattedErrors.password?._errors?.[0] ||
+          formattedErrors.confirmation?._errors?.[0] ||
+          "Please check your form inputs";
+
+        setError(firstError);
+        return;
       }
+
+      // If validation passes, move to step 2
+      setStep(2);
+    } catch (err) {
+      setError("An error occurred. Please check your inputs.");
     }
   };
 
   const handleSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
+
     try {
-      step2Schema.parse({
+      // Validate step 2 data
+      const step2Data = {
         firstName: formState.firstName,
         lastName: formState.lastName,
         dob: formState.dob,
         sex: formState.sex,
-      });
-      setError("");
-      return { formState };
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        setError(e.errors[0]?.message || "Validation error");
-      } else {
-        setError("An error occurred during sign-up.");
+        phone: formState.phoneNumber || "",
+      };
+
+      const result = step2Schema.safeParse(step2Data);
+      if (!result.success) {
+        const formattedErrors = result.error.format();
+
+        // Get the first error message
+        const firstError =
+          formattedErrors.firstName?._errors?.[0] ||
+          formattedErrors.lastName?._errors?.[0] ||
+          formattedErrors.dob?._errors?.[0] ||
+          formattedErrors.sex?._errors?.[0] ||
+          formattedErrors.phone?._errors?.[0] ||
+          "Please check your form inputs";
+
+        setError(firstError);
+        return null;
       }
+
+      // Return the validated form data
+      return { formState };
+    } catch (err) {
+      setError("An error occurred. Please check your inputs.");
+      return null;
     }
+  };
+
+  // Add a method to set external errors (like from Firebase)
+  const setExternalError = (errorMessage: string) => {
+    setError(errorMessage);
   };
 
   return {
@@ -76,5 +116,6 @@ export const useRegisterForm = () => {
     handleChange,
     handleNextStep,
     handleSignUp,
+    setExternalError,
   };
-};
+}

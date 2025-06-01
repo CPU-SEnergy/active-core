@@ -12,6 +12,7 @@ export const db = schema(
     classes: $.collection<Classes>(),
     customer: $.collection<Customer>(),
     walkInCustomers: $.collection<WalkInCustomer>(),
+    cashier: $.collection<Cashier>(),
   }),
   { server: { preferRest: true } }
 );
@@ -30,7 +31,7 @@ interface User {
   type: "regular" | "student" | "senior";
   isCustomer: boolean;
   planExpiry?: Date;
-  phone?: string;
+  phone: string;
 }
 
 interface MembershipPlan {
@@ -42,6 +43,8 @@ interface MembershipPlan {
   planType: "individual" | "package" | "walk-in";
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
+  isDeleted?: boolean;
+  deletedAt?: Typesaurus.ServerDate;
 }
 
 interface AvailedPlan {
@@ -83,6 +86,7 @@ interface MonthKPI {
 
 interface Customers {
   totalCustomers: number;
+  totalWalkInCustomers: number;
 }
 
 export interface Apparels {
@@ -95,6 +99,8 @@ export interface Apparels {
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
+  isDeleted?: boolean;
+  deletedAt?: Typesaurus.ServerDate;
 }
 
 interface Coaches {
@@ -109,6 +115,8 @@ interface Coaches {
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
+  isDeleted?: boolean;
+  deletedAt?: Typesaurus.ServerDate;
 }
 
 interface Classes {
@@ -120,6 +128,8 @@ interface Classes {
   isActive: boolean;
   createdAt: Typesaurus.ServerDate;
   updatedAt: Typesaurus.ServerDate;
+  isDeleted?: boolean;
+  deletedAt?: Typesaurus.ServerDate;
 }
 
 interface Customer {
@@ -141,4 +151,9 @@ interface WalkInCustomer {
   type: "regular" | "student" | "senior";
   createdAt: Typesaurus.ServerDate;
   userId?: Schema["users"]["Id"];
+}
+
+interface Cashier {
+  uid: string;
+  createdAt: Typesaurus.ServerDate;
 }
