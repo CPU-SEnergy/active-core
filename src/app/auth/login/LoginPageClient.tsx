@@ -16,6 +16,7 @@ import { useRedirectParam } from "@/app/shared/useRedirectParam";
 import { appendRedirectParam } from "@/app/shared/redirect";
 import { loginWithCredential } from "../../../../not-api";
 import { useRouter } from "next/navigation";
+import { Home } from "lucide-react"; // Add this import at the top
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
@@ -87,11 +88,22 @@ export default function LoginPageClient() {
         <Card className="w-full max-w-sm md:max-w-5xl h-auto flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-xl">
           <CardContent className="flex-1 p-6">
             <div className="w-full max-w-sm mx-auto space-y-6">
+              {/* Add Back to Home button */}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => router.push('/')}
+                className="mb-2 p-2 h-auto flex items-center gap-2 text-gray-500 hover:text-gray-700"
+              >
+                <Home className="h-4 w-4" />
+                <span>Back to Home</span>
+              </Button>
+
               <h1 className="text-center text-2xl md:text-4xl font-bold tracking-tighter md:my-6">
                 Login
               </h1>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2 mb-6 md:mb-8">
+                <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -108,7 +120,7 @@ export default function LoginPageClient() {
                     </div>
                   )}
                 </div>
-                <div className="space-y-2 mb-8 md:mb-10">
+                <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
                     <Input
