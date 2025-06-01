@@ -18,9 +18,48 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EarningsChartProps {
-  earnings: number[];
+  earnings?: number[];
+  isLoading?: boolean;
+}
+
+export function EarningsChartSkeleton() {
+  return (
+    <Card className="w-full bg-white shadow-sm border border-gray-200">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div className="min-w-0 flex-1">
+            <Skeleton className="h-6 w-36 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-8 w-20" />
+        </div>
+      </CardHeader>
+      <CardContent className="pb-6">
+        <div className="h-[300px] sm:h-[350px] lg:h-[400px]">
+          <div className="h-full w-full flex items-end justify-between gap-2 px-4">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center gap-2 flex-1"
+              >
+                <Skeleton
+                  className="w-full rounded-t-md"
+                  style={{
+                    height: `${Math.random() * 60 + 40}%`,
+                    minHeight: "20px",
+                  }}
+                />
+                <Skeleton className="h-3 w-6" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 const months = [
@@ -38,8 +77,16 @@ const months = [
   "Dec",
 ];
 
-export default function EarningsChart({ earnings }: EarningsChartProps) {
+export default function EarningsChart({
+  earnings = [],
+  isLoading = false,
+}: EarningsChartProps) {
   const [selectedYear, setSelectedYear] = useState("2024");
+
+  if (isLoading) {
+    return <EarningsChartSkeleton />;
+  }
+
   const chartData = earnings.map((earning, index) => ({
     month: months[index],
     earnings: earning,
