@@ -84,6 +84,7 @@ interface MonthKPI {
 
 interface Customers {
   totalCustomers: number;
+  totalWalkInCustomers: number;
 }
 
 export interface Apparels {
