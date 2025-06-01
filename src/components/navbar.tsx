@@ -1,33 +1,40 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
-import LogoutButton from "./LogoutButton"
-import { usePathname } from "next/navigation"
-import { useAuth } from "@/auth/AuthContext"
+import type React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import LogoutButton from "./LogoutButton";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/auth/AuthContext";
 
 export default function Navbar() {
-  const { user } = useAuth()
-  const pathname = usePathname()
-  const [scrolled, setScrolled] = useState(false)
+  const { user } = useAuth();
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
 
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   if (pathname.startsWith("/auth") || pathname.startsWith("/admin")) {
-    return null
+    return null;
   }
 
   const navLinks = {
@@ -36,24 +43,25 @@ export default function Navbar() {
     Apparels: "/apparels",
     Coaches: "/coaches",
     "My Profile": "/user-profile",
-  }
+  };
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
 
-  const isAdmin = user?.customClaims?.role === "admin" || user?.customClaims?.role === "cashier";
-  const semiTransparentStyle = "bg-black/80 backdrop-blur-sm"
+  const isAdmin =
+    user?.customClaims?.role === "admin" ||
+    user?.customClaims?.role === "cashier";
+  const semiTransparentStyle = "bg-black/80 backdrop-blur-sm";
 
   // Determine the navbar style based on the current page and scroll position
-  let navbarStyle = ""
+  let navbarStyle = "";
   if (pathname === "/") {
     // Home page: transparent when not scrolled, semi-transparent when scrolled
-    navbarStyle = scrolled ? semiTransparentStyle : "bg-transparent"
+    navbarStyle = scrolled ? semiTransparentStyle : "bg-transparent";
   } else {
     // Other pages: always semi-transparent regardless of scroll position
-    navbarStyle = semiTransparentStyle
+    navbarStyle = semiTransparentStyle;
   }
-
 
   return (
     <motion.nav
@@ -71,7 +79,10 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <Link href="/" className="flex items-center group transition-transform hover:scale-110">
+            <Link
+              href="/"
+              className="flex items-center group transition-transform hover:scale-110"
+            >
               <Image
                 src="/pictures/IMAA Official no-bg.png"
                 alt="Iloilo Martial Arts Association"
@@ -79,7 +90,9 @@ export default function Navbar() {
                 height={60}
                 className="rounded-full mr-2"
               />
-              <span className="text-xl font-bold text-white hidden sm:block">IMAA</span>
+              <span className="text-xl font-bold text-white hidden sm:block">
+                IMAA
+              </span>
             </Link>
           </motion.div>
 
@@ -109,7 +122,7 @@ export default function Navbar() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="text-white hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
+                className="text-white hover:bg-gray-100 hover:text-black px-5 py-2 rounded-md text-lg md:text-base"
               >
                 Admin Page
               </Link>
@@ -121,14 +134,23 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white focus:outline-none">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-300 hover:text-white focus:outline-none"
+                >
                   <span className="sr-only">Open menu</span>
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] bg-zinc-900 border-zinc-800 text-white">
+              <SheetContent
+                side="right"
+                className="w-[300px] bg-zinc-900 border-zinc-800 text-white"
+              >
                 <SheetHeader className="mb-6">
-                  <SheetTitle className="text-center text-2xl font-bold text-white">Menu</SheetTitle>
+                  <SheetTitle className="text-center text-2xl font-bold text-white">
+                    Menu
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col space-y-6 py-4">
                   {Object.entries(navLinks).map(([name, href]) => (
@@ -159,11 +181,19 @@ export default function Navbar() {
         </div>
       </div>
     </motion.nav>
-  )
+  );
 }
 
 // Helper Component
-function NavLink({ href, children, active = false }: { href: string; children: React.ReactNode; active?: boolean }) {
+function NavLink({
+  href,
+  children,
+  active = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  active?: boolean;
+}) {
   return (
     <Link
       href={href}
@@ -178,5 +208,5 @@ function NavLink({ href, children, active = false }: { href: string; children: R
         }`}
       ></span>
     </Link>
-  )
+  );
 }
