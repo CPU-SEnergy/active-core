@@ -31,7 +31,7 @@ interface User {
   type: "regular" | "student" | "senior";
   isCustomer: boolean;
   planExpiry?: Date;
-  phone?: string;
+  phone: string;
 }
 
 interface MembershipPlan {
