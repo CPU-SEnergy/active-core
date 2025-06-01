@@ -34,7 +34,7 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     await setDoc(userRef, {
       uid: userCredential.user.uid,
       email: formResult.email,
-      phoneNumber: formResult.phoneNumber,
+      phone: formResult.phoneNumber,
       firstName: formResult.firstName,
       lastName: formResult.lastName,
       dob: formResult.dob,
@@ -42,12 +42,16 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
       createdAt: Timestamp.now(),
     });
 
-    await addUserToAlgolia({
+    const algoliaResult = await addUserToAlgolia({
       uuid: userCredential.user.uid,
       firstName: formResult.firstName,
       lastName: formResult.lastName,
       email: formResult.email,
     });
+
+    if (!algoliaResult.success) {
+      console.warn("Failed to add user to Algolia:", algoliaResult.error);
+    }
 
     await loginWithCredential(userCredential);
     // await sendVerificationEmail(userCredential.user);
@@ -55,6 +59,7 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
     return { success: true };
   } catch (error: any) {
     console.error("Error creating user: ", error);
+
     let errorMessage = "An unexpected error occurred";
 
     if (error.code === "auth/email-already-in-use") {

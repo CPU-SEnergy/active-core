@@ -1,13 +1,13 @@
 import { z } from "zod";
 import parsePhoneNumber from "libphonenumber-js";
 
-const today = new Date();
-const hundredYearsAgo = new Date(
+export const today = new Date();
+export const hundredYearsAgo = new Date(
   today.getFullYear() - 100,
   today.getMonth(),
   today.getDate()
 );
-const oneYearAgo = new Date(
+export const oneYearAgo = new Date(
   today.getFullYear() - 1,
   today.getMonth(),
   today.getDate()
