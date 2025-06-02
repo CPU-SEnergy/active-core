@@ -6,9 +6,13 @@ export async function GET() {
   try {
     getFirebaseAdminApp();
 
-    const coachCollection = await db.coaches.all();
+    const $ = db.coaches.query.build();
 
-    const coaches = coachCollection.map((data) => ({
+    $.field("isDeleted").not(true);
+
+    const results = await $.run();
+
+    const coaches = results.map((data) => ({
       id: data.ref.id,
       ...data.data,
     }));

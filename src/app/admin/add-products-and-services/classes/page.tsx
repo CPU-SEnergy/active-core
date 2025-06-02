@@ -11,6 +11,8 @@ import EditClassModal from "@/components/AddProductAndServices/EditClassModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 import CoachList from "@/components/CoachList";
+import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
+import { removeItem } from "@/app/actions/admin/products-services/removeItem";
 
 function ClassesSkeleton() {
   return (
@@ -80,6 +82,11 @@ export default function ClassesPage() {
             ) : (
               classes.map((cls) => (
                 <Card key={cls.id} className="relative group">
+                  <DeleteButton
+                    id={cls.id}
+                    collectionName="classes"
+                    onDelete={(id) => removeItem("classes", id)}
+                  />
                   <div className="relative aspect-square rounded-t-lg overflow-hidden">
                     <Image
                       src={cls.imageUrl || "/placeholder.svg"}

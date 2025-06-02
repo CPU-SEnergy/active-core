@@ -70,6 +70,7 @@ export async function createClass(formData: FormData) {
         (coach) => coach.coachId
       ) as unknown as Schema["coaches"]["Id"][],
       isActive: true,
+      isDeleted: false,
       imageUrl: fileUrl.url,
       createdAt: new Date(),
       updatedAt: new Date(),
