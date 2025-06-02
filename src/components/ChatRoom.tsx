@@ -456,6 +456,14 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   };
 
+  const breakLongWords = (text: string, maxLength: number = 20): string => {
+    return text.split(' ').map(word => {
+      if (word.length > maxLength) {
+        return word.match(new RegExp(`.{1,${maxLength}}`, 'g'))?.join(' ') || word;
+      }
+      return word;
+    }).join(' ');
+  }; // Added utility function to break long words
 
 
   return (
@@ -606,7 +614,7 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
                   className={`${isMobile ? "px-3 py-2" : "px-4 py-2"} rounded-3xl break-words ${bubbleColorClass}`}
                 >
                   <div className={`text ${isMobile ? "text-sm" : ""}`}>
-                    {msg.text}
+                    {breakLongWords(msg.text)}
                   </div>
                 </div>
                 <div

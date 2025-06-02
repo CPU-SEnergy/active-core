@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import type React from "react"
@@ -100,17 +99,13 @@ const ChatWidget = ({ userId, role }: ChatWidgetProps) => {
   const initialLoadCompleteRef = useRef<boolean>(false)
   const shouldScrollToBottomRef = useRef<boolean>(true)
   const isLoadingOlderRef = useRef<boolean>(false)
-  const messagesRef = useRef<Message[]>([]); // Ref to store messages for comparison
+  const messagesRef = useRef<Message[]>([])
 
   const {
-    user: fetchedUser,
-    isLoading,
-    isError,
-  }: {
-    user: Schema["users"]["Data"]
-    isError: unknown
-    isLoading: boolean
-  } = userId ? useGetUserById(userId) : { user: null, isLoading: false, isError: null }
+    user: fetchedUser
+  } = useGetUserById(userId || "")
+  
+  const effectiveUser = userId ? fetchedUser : null
 
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp)
@@ -141,12 +136,12 @@ const ChatWidget = ({ userId, role }: ChatWidgetProps) => {
       })
     }
   }
-
+  
   useEffect(() => {
-    if (fetchedUser) {
-      setUser(fetchedUser)
+    if (effectiveUser) {
+      setUser(effectiveUser)
     }
-  }, [fetchedUser])
+  }, [effectiveUser])
 
   const findBestFAQ = (userInput: string): FAQ | null => {
     const input = userInput.toLowerCase()
@@ -165,11 +160,15 @@ const ChatWidget = ({ userId, role }: ChatWidgetProps) => {
   }
 
   const addBotMessage = (text: string, showAdminOption = false) => {
+    const messageText = showAdminOption 
+      ? `${text}\n\nWould you like to connect with an admin for more assistance?` 
+      : text;
+      
     const botMessage: Message = {
       id: `bot-${Date.now()}`,
       senderId: "bot",
       senderName: "Assistant",
-      text,
+      text: messageText,
       timestamp: Date.now(),
       isBot: true,
     }
@@ -666,11 +665,7 @@ const ChatWidget = ({ userId, role }: ChatWidgetProps) => {
                 }
               }}
             />
-            {input.length > 0 && (
-              <span className={`absolute right-12 ${isMobile ? "text-xs" : "text-xs"} text-gray-500`}>
-                {input.length}/260
-              </span>
-            )}
+
           </div>
           <Button onClick={sendMessage} disabled={!input.trim()} className={isMobile ? "px-3" : ""}>
             <Send className="w-4 h-4" />
