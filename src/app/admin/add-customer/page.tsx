@@ -64,16 +64,14 @@ const AddCustomerPage = () => {
     data: customers,
     error: customersError,
     isLoading: customersLoading,
-  } = useSWR<Customer[]>("/api/admin/active-customers", fetcher, {
-    dedupingInterval: 5000,
-  });
+  } = useSWR<Customer[]>("/api/admin/active-customers", fetcher);
 
   const {
     data: membershipPlans,
     error: plansError,
     isLoading: plansLoading,
   } = useSWR("/api/membershipPlans", fetcher, {
-    dedupingInterval: 60 * 60 * 24,
+    dedupingInterval: 1000 * 60 * 60 * 24,
   });
 
   if (customersError) {
