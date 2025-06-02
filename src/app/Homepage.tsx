@@ -1077,12 +1077,7 @@ function ChampionCard({ name, image, achievement }: ChampionCardProps) {
   return (
     <Card className="relative bg-white/10 backdrop-blur-md rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 transition-all duration-700 border border-white/20">
       {/* Change to monochromatic gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>
-
-      <div className="relative h-64 w-full overflow-hidden z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
-          <span className="text-white font-bold text-lg whitespace-pre-line">{achievement}</span>
-        </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>      <div className="relative h-64 w-full overflow-hidden z-10">
         <Image
           src={image || ""}
           alt={name}
