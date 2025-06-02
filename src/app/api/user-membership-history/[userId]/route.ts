@@ -9,6 +9,10 @@ interface UserHistoryProps {
   startDate: Date;
   expiryDate: Date;
   amount: number;
+  paymentMethod: string;
+  isWalkIn: boolean;
+  createdAt: Date | null;
+  paymentReference: string;
 }
 
 export async function GET(
@@ -25,29 +29,39 @@ export async function GET(
       );
     }
 
+    getFirebaseAdminApp();
+
+    if (!params?.userId) {
+      return NextResponse.json(
+        { error: "User ID is required to fetch membership history." },
+        { status: 400 }
+      );
+    }
+
     const userId = db.users.id(params.userId);
 
     const payments = await db.payments.query(($) => [
       $.field("customer", "customerId").eq(userId),
     ]);
 
-    if (payments.length === 0) {
-      return NextResponse.json(
-        { error: "No membership history found for the provided user ID." },
-        { status: 404 }
-      );
-    }
-
-    const data: UserHistoryProps[] = payments.map(({ data }) => ({
+    const membershipHistory: UserHistoryProps[] = payments.map(({ data }) => ({
       id: data.id,
       name: data.availedPlan.name,
       duration: data.availedPlan.duration,
       startDate: data.availedPlan.startDate,
       expiryDate: data.availedPlan.expiryDate,
       amount: data.availedPlan.amount,
+      paymentMethod: data.paymentMethod,
+      isWalkIn: data.isWalkIn,
+      createdAt: data.createdAt,
+      paymentReference: data.id,
     }));
 
-    return NextResponse.json({ data });
+    const sortedHistory = membershipHistory.sort(
+      (a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+    );
+
+    return NextResponse.json({ data: sortedHistory });
   } catch (error) {
     console.error("Error fetching membership history:", error);
 

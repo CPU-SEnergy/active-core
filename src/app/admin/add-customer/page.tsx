@@ -64,16 +64,14 @@ const AddCustomerPage = () => {
     data: customers,
     error: customersError,
     isLoading: customersLoading,
-  } = useSWR<Customer[]>("/api/admin/active-customers", fetcher, {
-    dedupingInterval: 5000,
-  });
+  } = useSWR<Customer[]>("/api/admin/active-customers", fetcher);
 
   const {
     data: membershipPlans,
     error: plansError,
     isLoading: plansLoading,
   } = useSWR("/api/membershipPlans", fetcher, {
-    dedupingInterval: 60 * 60 * 24,
+    dedupingInterval: 1000 * 60 * 60 * 24,
   });
 
   if (customersError) {
@@ -83,6 +81,12 @@ const AddCustomerPage = () => {
   if (plansError) {
     console.error("Error fetching membership plans:", plansError);
   }
+
+  const sortedCustomers = customers?.sort((a, b) => {
+    const dateA = new Date(a.timeApproved);
+    const dateB = new Date(b.timeApproved);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -184,7 +188,7 @@ const AddCustomerPage = () => {
             <div className="p-4 text-center text-red-500">
               Error loading customers
             </div>
-          ) : !customers || customers.length === 0 ? (
+          ) : !sortedCustomers || sortedCustomers.length === 0 ? (
             <div className="p-4 text-center">No customers found</div>
           ) : (
             <Table className="min-w-full">
@@ -199,7 +203,7 @@ const AddCustomerPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
+                {sortedCustomers.map((customer) => (
                   <TableRow key={customer.id} className="text-sm">
                     <TableCell>
                       <div className="font-medium">

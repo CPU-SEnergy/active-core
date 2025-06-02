@@ -418,9 +418,6 @@ export default function CustomerTable() {
                     )}
                   </div>
                 </TableHead>
-                <TableHead className="font-semibold text-black text-right">
-                  Actions
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -464,11 +461,6 @@ export default function CustomerTable() {
                       <Clock size={14} className="text-gray-400" />
                       {customer.remainingTime}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

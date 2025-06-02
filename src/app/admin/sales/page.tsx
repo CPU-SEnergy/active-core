@@ -43,17 +43,17 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-4 py-2 lg:px-6 lg:py-3">
-        <div className="mt-5">
+      <div className="bg-white border-b border-gray-200 px-3 sm:px-4 lg:px-6 py-2 lg:py-3">
+        <div className="mt-3 sm:mt-5">
           <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
             Sales Dashboard
           </h1>
         </div>
       </div>
 
-      <div className="p-4 lg:p-8 bg-white">
-        <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="p-3 sm:p-4 lg:p-8 bg-white">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             <div className="w-full flex justify-center">
               <SalesMetrics data={data} isLoading={isLoading} />
             </div>
@@ -61,13 +61,11 @@ export default function Page() {
               <DonutCharts data={data} isLoading={isLoading} />
             </div>
           </div>
-          <div className="w-full flex justify-center">
-            <div className="w-full max-w-4xl">
-              <EarningsChart
-                earnings={data?.earnings ?? []}
-                isLoading={isLoading}
-              />
-            </div>
+          <div className="w-full">
+            <EarningsChart
+              earnings={data?.earnings ?? []}
+              isLoading={isLoading}
+            />
           </div>
         </div>
       </div>

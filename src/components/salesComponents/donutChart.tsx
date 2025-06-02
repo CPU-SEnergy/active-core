@@ -25,7 +25,6 @@ export function DonutChartsSkeleton() {
             <div className="h-[220px] mx-auto flex items-center justify-center">
               <div className="relative">
                 <Skeleton className="h-[180px] w-[180px] rounded-full" />
-                <Skeleton className="h-[100px] w-[100px] rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
               </div>
             </div>
           </div>

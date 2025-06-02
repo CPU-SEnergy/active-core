@@ -540,14 +540,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>        
-        
-        {/* Outreach Workshop Section */}
-        <section className="py-32 bg-black/95 backdrop-blur-sm text-white relative overflow-hidden">
-          {/* Diagonal top cut */}
-          <div className="absolute top-0 left-0 w-[150%] h-40 bg-white transform -skew-y-3 origin-top-left -translate-y-20 -translate-x-8"></div>
-
-          {/* Diagonal bottom cut */}
-          <div className="absolute bottom-0 left-0 w-[150%] h-40 bg-white transform skew-y-2 origin-bottom-left translate-y-20 -translate-x-8"></div>
+          {/* Outreach Workshop Section */}
+        <section className="py-48 bg-black/95 backdrop-blur-sm text-white relative overflow-hidden">          {/* Diagonal top cut */}
+          <div className="absolute top-0 left-0 w-[150%] h-40 bg-white transform -skew-y-3 origin-top-left -translate-y-12 -translate-x-8"></div>          {/* Diagonal bottom cut - opposite direction */}          <div className="absolute bottom-0 left-0 w-[150%] h-96 bg-white transform -skew-y-3 origin-bottom-left translate-y-96 -translate-x-8"></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">              <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg"
@@ -565,13 +560,11 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 items-center">
-              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">
-                <div className="relative rounded-lg overflow-hidden cursor-pointer" id="workshop-video-container">
+            <div className="flex flex-col lg:flex-row gap-8 items-center">              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">                <div className="relative rounded-lg overflow-hidden cursor-pointer h-[450px]" id="workshop-video-container">
                   <video
                     id="workshop-video"
                     ref={videoRef}
-                    className="w-full rounded-lg"
+                    className="w-full h-full object-cover rounded-lg"
                     poster="/placeholder.svg?height=500&width=800&text=Workshop+Video"
                     muted
                     loop
@@ -608,7 +601,7 @@ export default function HomePage() {
               </div>
               <div className="lg:w-1/3" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya Antique</h3>
+                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya, Antique</h3>
                   <p className="text-gray-300">
                     Our team recently conducted a special martial arts workshop for students in Semirara, Caluya
                     Antique. This initiative aims to introduce martial arts disciplines to communities, promoting
@@ -773,7 +766,7 @@ export default function HomePage() {
         <section
           className="py-16 bg-gray-50 relative"
           style={{
-            //backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
+            //backgroundImage: 'url("/pictures/facility.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
@@ -787,7 +780,7 @@ export default function HomePage() {
               <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
                 <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
                   <Image
-                    src="/pictures/Second Part Picture.jpg"
+                    src="/pictures/facility.jpg"
                     alt="IMAA Headquarters"
                     width={700}
                     height={500}
@@ -805,7 +798,7 @@ export default function HomePage() {
                   <h3 className="text-2xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[3px] after:bottom-[-4px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all hover:after:w-full">
                     IMAA Main Facility
                   </h3>
-                  <p className="text-gray-600 mb-6">Our 5,000 sq ft facility features:</p>
+                  <p className="text-gray-600 mb-6">Our facility features:</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {facilities.map((facility, index) => (
                       <div key={index} className="flex items-center">
@@ -816,7 +809,7 @@ export default function HomePage() {
                   </div>
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Location</h4>
-                    <p className="text-gray-600">Diversion Rd, Iloilo City 5000</p>
+                    <p className="text-gray-600">Uncle Toms bldg. Diversion Road, Iloilo City 5000</p>
                   </div>
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Operating Hours</h4>
@@ -1199,7 +1192,7 @@ const testimonials = [
     role: "Student",
     image: "/pictures/holleza.jpg",
     quote:
-      "“I started to train because my goal is to be fit and healthy. I then got hooked with muaythai and Brazilian Jiu Jitsu. Now I am competing and improving my skills in tournaments. Not only that, I also got fit and healthier than ever, also my self confidence went up in dealing with life struggles.",
+      "I started to train because my goal is to be fit and healthy. I then got hooked with muaythai and Brazilian Jiu Jitsu. Now I am competing and improving my skills in tournaments. Not only that, I also got fit and healthier than ever, also my self confidence went up in dealing with life struggles.",
   },
   {
     name: "Justin Laguda",
@@ -1211,14 +1204,9 @@ const testimonials = [
 ]
 
 const facilities = [
-  "Professional Boxing Ring",
-  "Brazilian Jiu-Jitsu Mats",
-  "Weight Training Area",
-  "Cardio Equipment Zone",
-  "Heavy Bag Station",
-  "Speed Bag Area",
-  "Locker Rooms",
-  "Recovery Area",
-  "Pro Shop",
-  "Student Lounge",
+  "Striking Area",
+  "Brazilian Jiu-Jitsu Area",
+  "Strength and Conditioning Area",
+  "Boxing Area",
+  "Equipment Area",
 ]

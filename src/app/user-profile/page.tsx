@@ -17,8 +17,8 @@ export default async function UserProfile() {
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <UserDashboard uid={tokens?.decodedToken.uid} />
-    </>
+    </div>
   );
 }

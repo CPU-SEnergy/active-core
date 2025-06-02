@@ -65,7 +65,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin className="mt-1 mr-3 h-5 w-5 text-white" />
-                <span className="text-gray-300">Diversion Rd, Iloilo City, 5000</span>
+                <span className="text-gray-300">Uncle Toms bldg. Diversion Road, Iloilo City 5000</span>
               </li>
               <li className="flex items-center justify-center md:justify-start">
                 <Phone className="mr-3 h-5 w-5 text-white" />
