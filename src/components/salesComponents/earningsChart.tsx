@@ -31,28 +31,28 @@ export function EarningsChartSkeleton() {
       <CardHeader className="pb-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div className="min-w-0 flex-1">
-            <Skeleton className="h-6 w-36 mb-2" />
-            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-5 sm:h-6 w-32 sm:w-36 mb-2" />
+            <Skeleton className="h-3 sm:h-4 w-40 sm:w-48" />
           </div>
-          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-16 sm:w-20" />
         </div>
       </CardHeader>
-      <CardContent className="pb-6">
-        <div className="h-[300px] sm:h-[350px] lg:h-[400px]">
-          <div className="h-full w-full flex items-end justify-between gap-2 px-4">
+      <CardContent className="pb-4 sm:pb-6">
+        <div className="h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] xl:h-[400px]">
+          <div className="h-full w-full flex items-end justify-between gap-0.5 sm:gap-1 md:gap-2 px-1 sm:px-2 md:px-4">
             {Array.from({ length: 12 }).map((_, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center gap-2 flex-1"
+                className="flex flex-col items-center gap-1 sm:gap-2 flex-1"
               >
                 <Skeleton
                   className="w-full rounded-t-md"
                   style={{
                     height: `${Math.random() * 60 + 40}%`,
-                    minHeight: "20px",
+                    minHeight: "15px",
                   }}
                 />
-                <Skeleton className="h-3 w-6" />
+                <Skeleton className="h-2 sm:h-3 w-3 sm:w-4 md:w-6" />
               </div>
             ))}
           </div>
@@ -92,24 +92,24 @@ export default function EarningsChart({
     earnings: earning,
   }));
 
-  const formatCurrency = (amount: number) => {
+  const formatTooltipCurrency = (amount: number) => {
     return `₱${amount.toLocaleString()}`;
   };
 
   return (
     <Card className="w-full bg-white shadow-sm border border-gray-200">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+      <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-4 lg:px-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-lg lg:text-xl font-semibold text-gray-900">
+            <CardTitle className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">
               Monthly Earnings
             </CardTitle>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
               Revenue performance over the year
             </p>
           </div>
           <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-20 h-8 text-xs border-gray-200">
+            <SelectTrigger className="w-16 sm:w-20 h-7 sm:h-8 text-xs border-gray-200">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -120,8 +120,8 @@ export default function EarningsChart({
           </Select>
         </div>
       </CardHeader>
-      <CardContent className="pb-6">
-        <div className="h-[300px] sm:h-[350px] lg:h-[400px]">
+      <CardContent className="pb-4 sm:pb-6 px-3 sm:px-4 lg:px-6">
+        <div className="h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] xl:h-[400px] w-full">
           <ChartContainer
             config={{
               earnings: {
@@ -129,11 +129,18 @@ export default function EarningsChart({
                 color: "#9095a0",
               },
             }}
+            className="w-full h-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+                margin={{
+                  top: 10,
+                  right: 5,
+                  left: 5,
+                  bottom: 10,
+                }}
+                barCategoryGap="10%"
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -143,31 +150,39 @@ export default function EarningsChart({
                 <XAxis
                   dataKey="month"
                   stroke="#64748b"
-                  fontSize={12}
+                  fontSize={10}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: "#64748b" }}
+                  tick={{
+                    fill: "#64748b",
+                    fontSize: "10px",
+                  }}
+                  interval={0}
+                  angle={0}
+                  textAnchor="middle"
+                  height={30}
                 />
-                <YAxis hide={true} />
+                <YAxis hide={true} domain={[0, "dataMax + 10000"]} />
                 <Bar
                   dataKey="earnings"
                   fill="var(--color-earnings)"
-                  radius={[4, 4, 0, 0]}
+                  radius={[2, 2, 0, 0]}
                   className="hover:opacity-80 transition-opacity"
+                  maxBarSize={60}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "rgba(59, 130, 246, 0.1)", radius: 4 }}
+                  cursor={{ fill: "rgba(59, 130, 246, 0.1)", radius: 2 }}
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       const data = payload[0]?.payload;
                       return (
-                        <div className="rounded-lg border bg-white p-3 shadow-lg">
+                        <div className="rounded-lg border bg-white p-2 sm:p-3 shadow-lg max-w-[200px]">
                           <div className="flex flex-col space-y-1">
-                            <span className="text-sm font-medium text-gray-900">
-                              {label}
+                            <span className="text-xs sm:text-sm font-medium text-gray-900">
+                              {label} {selectedYear}
                             </span>
-                            <span className="text-lg font-bold text-blue-600">
-                              {formatCurrency(data.earnings)}
+                            <span className="text-sm sm:text-lg font-bold text-blue-600">
+                              {formatTooltipCurrency(data.earnings)}
                             </span>
                           </div>
                         </div>

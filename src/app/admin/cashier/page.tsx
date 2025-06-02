@@ -378,35 +378,35 @@ export default function CashierManagement() {
         </Table>
       </div>
       <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Remove Cashier</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p>Are you sure you want to remove this cashier?</p>
-          <p className="text-sm text-gray-500">
-            This action cannot be undone. The user will lose their cashier privileges.
-          </p>
-          {removeError && <p className="text-red-600">{removeError}</p>}
-        </div>
-        <DialogFooter>
-          <Button
-            variant="ghost"
-            onClick={() => setRemoveDialogOpen(false)}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => confirmRemoveId && handleRemove(confirmRemoveId)}
-            disabled={loading}
-          >
-            {loading ? "Removing..." : "Remove"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Cashier</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Are you sure you want to remove this cashier?</p>
+            <p className="text-sm text-gray-500">
+              This action cannot be undone. The user will lose their cashier privileges.
+            </p>
+            {removeError && <p className="text-red-600">{removeError}</p>}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setRemoveDialogOpen(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => confirmRemoveId && handleRemove(confirmRemoveId)}
+              disabled={loading}
+            >
+              {loading ? "Removing..." : "Remove"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

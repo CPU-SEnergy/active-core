@@ -9,6 +9,8 @@ import fetcher from "@/lib/fetcher";
 import { EditMembershipPlanModal } from "@/components/AddProductAndServices/EditMemberShipPlanModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
+import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
+import { removeItem } from "@/app/actions/admin/products-services/removeItem";
 
 function MembershipPlanSkeleton() {
   return (
@@ -87,7 +89,7 @@ export default function MembershipPlansPage() {
                 membershipPlans?.map((plan) => (
                   <Card key={plan.id} className="relative group">
                     <div className="p-4">
-                      <div className="absolute top-2 right-2 flex gap-2 z-10">
+                      <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                         <ProductAndServicesSwitch
                           collectionName="membershipPlans"
                           id={plan.id}
@@ -96,6 +98,13 @@ export default function MembershipPlansPage() {
                         <EditMembershipPlanModal
                           data={{ ...plan, id: plan.id.toString() }}
                         />
+                        <div className="absolute top-5 bottom-2">
+                          <DeleteButton
+                            id={plan.id}
+                            collectionName="membershipPlans"
+                            onDelete={(id) => removeItem("membershipPlans", id)}
+                          />
+                        </div>
                       </div>
 
                       <div className="pr-20">

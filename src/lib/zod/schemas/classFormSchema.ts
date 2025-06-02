@@ -1,8 +1,14 @@
 import { z } from "zod";
 
 export const classFormSchema = z.object({
-  name: z.string().min(1, "Class name is required"),
-  schedule: z.string().min(1, "Schedule is required"),
+  name: z
+    .string()
+    .min(1, "Class name is required")
+    .max(100, "Class name must be at most 100 characters"),
+  schedule: z
+    .string()
+    .min(1, "Schedule is required")
+    .max(100, "Schedule must be at most 100 characters"),
   coaches: z
     .array(
       z.object({
@@ -22,7 +28,10 @@ export const classFormSchema = z.object({
         }
       });
     }),
-  description: z.string().min(1, "Description is required"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(500, "Description must be at most 500 characters"),
   image: z.preprocess(
     (val) => (typeof val === "string" ? undefined : val),
     z

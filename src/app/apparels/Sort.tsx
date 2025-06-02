@@ -49,10 +49,6 @@ export default function Sort() {
                   <Label className='cursor-pointer' htmlFor="latest">Latest</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="popular" id="popular" />
-                  <Label className='cursor-pointer' htmlFor="popular">Popular</Label>
-                </div>
-                <div className="flex items-center space-x-2">
                   <RadioGroupItem value="price&dir=desc" id="price-high-to-low" />
                   <Label className='cursor-pointer' htmlFor="price-high-to-low">Price High to Low</Label>
                 </div>
