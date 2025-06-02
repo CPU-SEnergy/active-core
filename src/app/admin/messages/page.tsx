@@ -1,63 +1,41 @@
-"use client";
-
-import type React from "react";
-
 import ChatList from "@/components/ChatList";
-import { getFirebaseAuth } from "@/lib/firebaseClient";
-import { type User, onAuthStateChanged } from "firebase/auth";
-import { useState, useEffect } from "react";
+import { clientConfig, serverConfig } from "@/lib/config";
+import { toUser } from "@/utils/helpers/user";
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies, headers } from "next/headers";
 
-export default function Page() {
-  const auth = getFirebaseAuth();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+export default async function Page() {
+  const tokens = await getTokens(cookies(), {
+    ...serverConfig,
+    apiKey: clientConfig.apiKey,
+    headers: headers(),
+  });
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (firebaseUser) => {
-        setUser(firebaseUser);
-        setLoading(false);
-      },
-      (error) => {
-        setError(error);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [auth]);
-
-  useEffect(() => {
-    if (user) {
-      user
-        .getIdTokenResult(true)
-        .then((idTokenResult) => {
-          console.log("Custom Claims:", idTokenResult.claims);
-          if (
-            idTokenResult.claims.role === "admin" ||
-            idTokenResult.claims.role === "cashier"
-          ) {
-            console.log("User is an admin");
-            setIsAdmin(true);
-          }
-        })
-        .catch((error) => {
-          console.error("Error reading token claims:", error);
-        });
+  try {
+    if (!tokens) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <h1 className="text-2xl font-bold">Unauthorized</h1>
+        </div>
+      );
     }
-  }, [user]);
 
-  if (loading) return <div className="pt-5">Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!user)
-    return <h2 className="text-center p-8">Please log in to access chats</h2>;
+    const isAdmin =
+      tokens?.decodedToken?.role === "admin" ||
+      tokens?.decodedToken?.role === "cashier";
 
-  return (
-    <div className="flex-1">
-      {user && <ChatList user={user} isAdmin={isAdmin} />}
-    </div>
-  );
+    const user = toUser(tokens);
+
+    return (
+      <div className="flex-1">
+        <ChatList user={user} isAdmin={isAdmin} />
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="p-8 text-center text-red-500">
+        Error: {error instanceof Error ? error.message : "Something went wrong"}
+      </div>
+    );
+  }
 }

@@ -1,27 +1,14 @@
-"use client";
+"use client"
 
-import { useEffect, useState, useMemo } from "react";
-import { Search, ChevronUp, ChevronDown } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { timeFilters } from "@/lib/timeFilters";
+import { useEffect, useState, useMemo } from "react"
+import { Search, ChevronUp, ChevronDown } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
+import { timeFilters } from "@/lib/timeFilters"
 
 function DashboardSkeleton() {
   return (
@@ -114,74 +101,74 @@ function DashboardSkeleton() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 interface KPI {
-  title: string;
-  value: string | number;
-  change: number;
-  prefix?: string;
+  title: string
+  value: string | number
+  change: number
+  prefix?: string
 }
 
 interface KPIData {
   yearly: {
-    totalRevenue: number;
-    totalMonthlyCustomers: number;
-    activeCustomers: string;
-    revenueComparison: string;
-    customerComparison: string;
-    activeCustomersComparison: string;
-  };
+    totalRevenue: number
+    totalMonthlyCustomers: number
+    activeCustomers: string
+    revenueComparison: string
+    customerComparison: string
+    activeCustomersComparison: string
+  }
   monthly: {
-    totalRevenue: number;
-    totalMonthlyCustomers: number;
-    activeCustomers: string;
-    monthlyRevenueComparison: string;
-  };
+    totalRevenue: number
+    totalMonthlyCustomers: number
+    activeCustomers: string
+    monthlyRevenueComparison: string
+  }
 }
 
 interface Customer {
-  customerId: string | null;
-  firstName: string;
-  lastName: string;
-  type: string;
+  customerId: string | null
+  firstName: string
+  lastName: string
+  type: string
 }
 
 interface AvailedPlan {
-  membershipPlanId: string;
-  name: string;
-  amount: number;
-  duration: number;
-  startDate: string;
-  expiryDate: string;
+  membershipPlanId: string
+  name: string
+  amount: number
+  duration: number
+  startDate: string
+  expiryDate: string
 }
 
 interface Payment {
-  id: string;
-  paymentMethod: string;
-  isNewCustomer: boolean;
-  createdAt: string;
-  isWalkIn: boolean;
-  customer: Customer;
-  availedPlan: AvailedPlan;
+  id: string
+  paymentMethod: string
+  isNewCustomer: boolean
+  createdAt: string
+  isWalkIn: boolean
+  customer: Customer
+  availedPlan: AvailedPlan
 }
 
 interface ActivityItem {
-  id: string;
-  customerName: string;
-  customerType: string;
-  paymentMethod: string;
-  planName: string;
-  planDuration: number;
-  amount: number;
-  createdAt: string;
-  isWalkIn: boolean;
-  isNewCustomer: boolean;
+  id: string
+  customerName: string
+  customerType: string
+  paymentMethod: string
+  planName: string
+  planDuration: number
+  amount: number
+  createdAt: string
+  isWalkIn: boolean
+  isNewCustomer: boolean
 }
 
 function KPICard({ title, value, change, prefix }: KPI) {
-  const isPositive = change >= 0;
+  const isPositive = change >= 0
 
   return (
     <Card>
@@ -193,9 +180,7 @@ function KPICard({ title, value, change, prefix }: KPI) {
           </div>
           <div
             className={`text-xs px-2 py-1 rounded-full ${
-              isPositive
-                ? "bg-green-100 text-green-600"
-                : "bg-red-100 text-red-600"
+              isPositive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
             }`}
           >
             {isPositive ? "+" : ""}
@@ -204,106 +189,82 @@ function KPICard({ title, value, change, prefix }: KPI) {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 function ActivityTable({ activities }: { activities: ActivityItem[] }) {
-  const [sortField, setSortField] = useState<keyof ActivityItem>("createdAt");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [sortField, setSortField] = useState<keyof ActivityItem>("createdAt")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
   const handleSort = (field: keyof ActivityItem) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
-      setSortField(field);
-      setSortDirection(
-        field === "createdAt" || field === "amount" ? "desc" : "asc"
-      );
+      setSortField(field)
+      setSortDirection(field === "createdAt" || field === "amount" ? "desc" : "asc")
     }
-  };
+  }
 
   const sortedActivities = useMemo(() => {
     return [...activities].sort((a, b) => {
       if (sortField === "amount") {
-        return sortDirection === "asc"
-          ? a.amount - b.amount
-          : b.amount - a.amount;
+        return sortDirection === "asc" ? a.amount - b.amount : b.amount - a.amount
       } else if (sortField === "createdAt") {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+        const dateA = new Date(a.createdAt).getTime()
+        const dateB = new Date(b.createdAt).getTime()
+        return sortDirection === "asc" ? dateA - dateB : dateB - dateA
       } else {
-        const valueA = String(a[sortField]).toLowerCase();
-        const valueB = String(b[sortField]).toLowerCase();
-        return sortDirection === "asc"
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
+        const valueA = String(a[sortField]).toLowerCase()
+        const valueB = String(b[sortField]).toLowerCase()
+        return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA)
       }
-    });
-  }, [activities, sortField, sortDirection]);
+    })
+  }, [activities, sortField, sortDirection])
 
   const renderSortIndicator = (field: keyof ActivityItem) => {
-    if (sortField !== field) return null;
+    if (sortField !== field) return null
     return sortDirection === "asc" ? (
       <ChevronUp className="inline h-4 w-4 ml-1" />
     ) : (
       <ChevronDown className="inline h-4 w-4 ml-1" />
-    );
-  };
+    )
+  }
 
   const formatPaymentMethod = (method: string) => {
     return method
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+      .join(" ")
+  }
 
   const getInitials = (name: string) => {
-    const parts = name.split(" ");
+    const parts = name.split(" ")
     if (parts.length >= 2 && parts[0] && parts[1]) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
     }
-    return name.substring(0, 2).toUpperCase();
-  };
+    return name.substring(0, 2).toUpperCase()
+  }
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleSort("customerName")}
-          >
+          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("customerName")}>
             Customer {renderSortIndicator("customerName")}
           </TableHead>
-          <TableHead
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleSort("customerType")}
-          >
+          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("customerType")}>
             Type {renderSortIndicator("customerType")}
           </TableHead>
-          <TableHead
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleSort("paymentMethod")}
-          >
+          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("paymentMethod")}>
             Payment Method {renderSortIndicator("paymentMethod")}
           </TableHead>
-          <TableHead
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleSort("planName")}
-          >
+          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("planName")}>
             Plan {renderSortIndicator("planName")}
           </TableHead>
-          <TableHead
-            className="whitespace-nowrap cursor-pointer"
-            onClick={() => handleSort("createdAt")}
-          >
+          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("createdAt")}>
             Date {renderSortIndicator("createdAt")}
           </TableHead>
-          <TableHead
-            className="whitespace-nowrap cursor-pointer text-right"
-            onClick={() => handleSort("amount")}
-          >
+          <TableHead className="whitespace-nowrap cursor-pointer text-right" onClick={() => handleSort("amount")}>
             Amount {renderSortIndicator("amount")}
           </TableHead>
         </TableRow>
@@ -311,10 +272,7 @@ function ActivityTable({ activities }: { activities: ActivityItem[] }) {
       <TableBody>
         {sortedActivities.length === 0 ? (
           <TableRow>
-            <TableCell
-              colSpan={6}
-              className="whitespace-nowrap text-center py-8 text-gray-500"
-            >
+            <TableCell colSpan={6} className="whitespace-nowrap text-center py-8 text-gray-500">
               No activity found matching your criteria
             </TableCell>
           </TableRow>
@@ -341,20 +299,14 @@ function ActivityTable({ activities }: { activities: ActivityItem[] }) {
                   {activity.customerType}
                 </Badge>
               </TableCell>
-              <TableCell className="whitespace-nowrap">
-                {formatPaymentMethod(activity.paymentMethod)}
-              </TableCell>
+              <TableCell className="whitespace-nowrap">{formatPaymentMethod(activity.paymentMethod)}</TableCell>
               <TableCell>
                 <div>
                   <div>{activity.planName}</div>
-                  <div className="text-xs text-gray-500">
-                    {activity.planDuration} days
-                  </div>
+                  <div className="text-xs text-gray-500">{activity.planDuration} days</div>
                 </div>
               </TableCell>
-              <TableCell className="whitespace-nowrap">
-                {new Date(activity.createdAt).toLocaleString()}
-              </TableCell>
+              <TableCell className="whitespace-nowrap">{new Date(activity.createdAt).toLocaleString()}</TableCell>
               <TableCell className="whitespace-nowrap text-center font-medium">
                 ₱ {activity.amount.toLocaleString()}
               </TableCell>
@@ -363,43 +315,40 @@ function ActivityTable({ activities }: { activities: ActivityItem[] }) {
         )}
       </TableBody>
     </Table>
-  );
+  )
 }
 
 export default function Dashboard() {
-  const [timeFilter, setTimeFilter] = useState<string>("24h");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [kpiData, setKpiData] = useState<KPIData | null>(null);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [timeFilter, setTimeFilter] = useState<string>("24h")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [kpiData, setKpiData] = useState<KPIData | null>(null)
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [revenuePeriod, setRevenuePeriod] = useState<"yearly" | "monthly" | "daily">("yearly")
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const currentYear = new Date().getFullYear();
-        const currentMonth = (new Date().getMonth() + 1)
-          .toString()
-          .padStart(2, "0");
+        const currentYear = new Date().getFullYear()
+        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, "0")
 
-        const [yearResponse, monthResponse, paymentsResponse] =
-          await Promise.all([
-            fetch(`/api/admin/overview/kpi/${currentYear}`),
-            fetch(`/api/admin/overview/kpi/${currentYear}/${currentMonth}`),
-            fetch("/api/admin/overview/recent-activity"),
-          ]);
+        const [yearResponse, monthResponse, paymentsResponse] = await Promise.all([
+          fetch(`/api/admin/overview/kpi/${currentYear}`),
+          fetch(`/api/admin/overview/kpi/${currentYear}/${currentMonth}`),
+          fetch("/api/admin/overview/recent-activity"),
+        ])
 
-        if (!yearResponse.ok) throw new Error("Failed to fetch yearly data");
-        if (!monthResponse.ok) throw new Error("Failed to fetch monthly data");
-        if (!paymentsResponse.ok)
-          throw new Error("Failed to fetch payments data");
+        if (!yearResponse.ok) throw new Error("Failed to fetch yearly data")
+        if (!monthResponse.ok) throw new Error("Failed to fetch monthly data")
+        if (!paymentsResponse.ok) throw new Error("Failed to fetch payments data")
 
-        const yearData = await yearResponse.json();
-        const monthData = await monthResponse.json();
-        const paymentsData = await paymentsResponse.json();
+        const yearData = await yearResponse.json()
+        const monthData = await monthResponse.json()
+        const paymentsData = await paymentsResponse.json()
 
         if (!monthData || typeof monthData.monthlyRevenue === "undefined") {
-          throw new Error("Invalid monthly data structure");
+          throw new Error("Invalid monthly data structure")
         }
 
         setKpiData({
@@ -417,24 +366,24 @@ export default function Dashboard() {
             activeCustomers: monthData.monthlyActive?.toString() || "0",
             monthlyRevenueComparison: monthData.monthlyRevenueComparison,
           },
-        });
+        })
 
-        setPayments(paymentsData);
+        setPayments(paymentsData)
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch data");
+        console.error("Error fetching data:", err)
+        setError(err instanceof Error ? err.message : "Failed to fetch data")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   // Transform payments to a consistent format for display
   const activityItems: ActivityItem[] = useMemo(() => {
     return payments.map((payment) => {
-      const customerName = `${payment.customer.firstName} ${payment.customer.lastName}`;
+      const customerName = `${payment.customer.firstName} ${payment.customer.lastName}`
 
       return {
         id: payment.id,
@@ -447,51 +396,81 @@ export default function Dashboard() {
         createdAt: payment.createdAt,
         isWalkIn: payment.isWalkIn,
         isNewCustomer: payment.isNewCustomer,
-      };
-    });
-  }, [payments]);
+      }
+    })
+  }, [payments])
 
   // Filter activities based on search query and time filter
   const filteredActivities = useMemo(() => {
     return activityItems.filter((activity) => {
       const matchesSearch =
-        activity.customerName
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        activity.planName.toLowerCase().includes(searchQuery.toLowerCase());
+        activity.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activity.planName.toLowerCase().includes(searchQuery.toLowerCase())
 
-      const activityDate = new Date(activity.createdAt);
-      const now = new Date();
-      const hoursDiff =
-        (now.getTime() - activityDate.getTime()) / (1000 * 60 * 60);
+      const activityDate = new Date(activity.createdAt)
+      const now = new Date()
+      const hoursDiff = (now.getTime() - activityDate.getTime()) / (1000 * 60 * 60)
 
       switch (timeFilter) {
         case "24h":
-          return matchesSearch && hoursDiff <= 24;
+          return matchesSearch && hoursDiff <= 24
         case "7d":
-          return matchesSearch && hoursDiff <= 168;
+          return matchesSearch && hoursDiff <= 168
         case "30d":
-          return matchesSearch && hoursDiff <= 720;
+          return matchesSearch && hoursDiff <= 720
         default:
-          return matchesSearch;
+          return matchesSearch
       }
-    });
-  }, [activityItems, searchQuery, timeFilter]);
+    })
+  }, [activityItems, searchQuery, timeFilter])
 
   if (loading) {
-    return <DashboardSkeleton />;
+    return <DashboardSkeleton />
   }
 
   if (error) {
-    return <div className="p-6 text-red-500">Error: {error}</div>;
+    return <div className="p-6 text-red-500">Error: {error}</div>
   }
+
+  const getRevenueData = () => {
+    if (!kpiData) return { value: 0, change: 0, title: "Total Revenue" }
+
+    switch (revenuePeriod) {
+      case "yearly":
+        return {
+          value: kpiData.yearly.totalRevenue,
+          change: Number.parseFloat(kpiData.yearly.revenueComparison),
+          title: "Total Revenue (Yearly)",
+        }
+      case "monthly":
+        return {
+          value: kpiData.monthly.totalRevenue,
+          change: Number.parseFloat(kpiData.monthly.monthlyRevenueComparison),
+          title: "Total Revenue (Monthly)",
+        }
+      case "daily":
+        return {
+          value: Math.round(kpiData.monthly.totalRevenue / 30),
+          change: Number.parseFloat(kpiData.monthly.monthlyRevenueComparison),
+          title: "Total Revenue (Daily)",
+        }
+      default:
+        return {
+          value: kpiData.yearly.totalRevenue,
+          change: Number.parseFloat(kpiData.yearly.revenueComparison),
+          title: "Total Revenue (Yearly)",
+        }
+    }
+  }
+
+  const revenueData = getRevenueData()
 
   const kpis: KPI[] = kpiData
     ? [
         {
-          title: "Total Revenue (Year)",
-          value: kpiData.yearly.totalRevenue,
-          change: Number.parseFloat(kpiData.yearly.revenueComparison),
+          title: revenueData.title,
+          value: revenueData.value,
+          change: revenueData.change,
           prefix: "₱",
         },
         {
@@ -505,7 +484,7 @@ export default function Dashboard() {
           change: Number.parseFloat(kpiData.yearly.activeCustomersComparison),
         },
       ]
-    : [];
+    : []
 
   return (
     <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
@@ -514,6 +493,19 @@ export default function Dashboard() {
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center justify-between">
               KPIs
+              <Select
+                value={revenuePeriod}
+                onValueChange={(value: "yearly" | "monthly" | "daily") => setRevenuePeriod(value)}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                </SelectContent>
+              </Select>
             </h2>
             <div className="space-y-4 lg:flex lg:flex-wrap flex-col">
               {kpis.map((kpi, index) => (
@@ -538,13 +530,8 @@ export default function Dashboard() {
 
           <div className="bg-white rounded-lg border p-2">
             <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b">
-              <h2 className="text-lg font-semibold mb-4 lg:mb-0">
-                Recent Activity
-              </h2>
-              <Select
-                value={timeFilter}
-                onValueChange={(value) => setTimeFilter(value)}
-              >
+              <h2 className="text-lg font-semibold mb-4 lg:mb-0">Recent Activity</h2>
+              <Select value={timeFilter} onValueChange={(value) => setTimeFilter(value)}>
                 <SelectTrigger className="w-[100px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -562,5 +549,5 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  );
+  )
 }

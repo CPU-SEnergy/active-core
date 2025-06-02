@@ -36,14 +36,26 @@ import { Switch } from "@/components/ui/switch";
 import { Search, X, CheckCircle2, AlertCircle } from "lucide-react";
 
 const customerPaymentSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name must be at most 50 characters"),
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .max(50, "Last name must be at most 50 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .max(20, "Phone number must be at most 20 characters")
+    .optional(),
   sex: z.enum(["male", "female", "other"]),
   type: z.enum(["regular", "student", "senior"]),
   membershipPlanId: z.string().min(1, "Membership plan is required"),
-  paymentMethod: z.string().min(1, "Payment method is required"),
+  paymentMethod: z
+    .string()
+    .min(1, "Payment method is required")
+    .max(50, "Payment method must be at most 50 characters"),
   isWalkIn: z.boolean().default(false),
   userId: z.string().optional(),
 });
@@ -169,8 +181,7 @@ export function CustomerPaymentModal() {
         toast.success(result.message);
         reset();
         setSelectedUserId(null);
-        mutate("/api/payments");
-        mutate("/api/active-customer"); // Refresh the customer list
+        mutate("/api/admin/active-customers");
         setOpen(false);
       } else {
         toast.error(result.error || "Failed to process payment");
@@ -180,7 +191,6 @@ export function CustomerPaymentModal() {
       toast.error("Error processing payment. Please try again.");
     }
   };
-
   const handleWalkInToggle = (checked: boolean) => {
     setIsWalkIn(checked);
     setValue("isWalkIn", checked);
@@ -552,7 +562,7 @@ export function CustomerPaymentModal() {
                     ) : (
                       membershipPlans?.map((plan: any) => (
                         <SelectItem key={plan.id} value={plan.id}>
-                          {plan.name} - ${plan.price} ({plan.duration} days)
+                          {plan.name} - P{plan.price} ({plan.duration} days)
                         </SelectItem>
                       ))
                     )}
