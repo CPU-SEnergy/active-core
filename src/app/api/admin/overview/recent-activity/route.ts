@@ -5,9 +5,13 @@ export async function GET() {
   try {
     getFirebaseAdminApp();
 
-    const paymentsCollection = await db.payments.query(($) =>
-      $.field("createdAt").order("desc")
-    );
+    const thirtyOneDaysAgo = new Date();
+    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 11);
+
+    const paymentsCollection = await db.payments.query(($) => [
+      $.field("createdAt").gte(thirtyOneDaysAgo),
+      $.field("createdAt").order("desc"),
+    ]);
 
     const cleanPayments = paymentsCollection.map((doc) => ({
       ...doc.data,
