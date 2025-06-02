@@ -10,8 +10,6 @@ import Link from "next/link"
 import { getISOWeek } from "date-fns"
 import Footer from "@/components/Footer"
 
-
-
 // Custom animations
 const smokeRevealKeyframes = `
   @keyframes smokeReveal {
@@ -79,8 +77,6 @@ const smokeOverlayKeyframes = `
   }
 `
 
-
-
 // Add new animation for champions background
 const championsBackgroundKeyframes = `
   @keyframes gradientShift {
@@ -141,10 +137,6 @@ export default function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [scrolled, setScrolled] = useState(false)
   const [scrollY, setScrollY] = useState(0)
-  const [particles, setParticles] = useState<
-    Array<{ id: number; size: number; delay: number; duration: number; left: string }>
-  >([])
-
   const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -159,28 +151,12 @@ export default function HomePage() {
       certifications?: string[]
       contact?: string
       age?: number
-      [key: string]: unknown 
+      [key: string]: unknown
     }>
   >([])
   const [isLoadingCoach, setIsLoadingCoach] = useState(true)
   const [coachError, setCoachError] = useState<string | null>(null)
 
-
-  useEffect(() => {
-    const newParticles = []
-    for (let i = 0; i < 20; i++) {
-      newParticles.push({
-        id: i,
-        size: Math.floor(Math.random() * 6) + 2, // 2-7px
-        delay: Math.random() * 5, // 0-5s delay
-        duration: Math.random() * 10 + 10, // 10-20s duration
-        left: `${Math.random() * 100}%`,
-      })
-    }
-    setParticles(newParticles)
-  }, [])
-
- 
   useEffect(() => {
     const fetchCoaches = async () => {
       setIsLoadingCoach(true)
@@ -240,8 +216,8 @@ export default function HomePage() {
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              video.play().catch(() => {
-                // Autoplay might be blocked, that's okay
+              video.play().catch((error) => {
+                console.warn("Autoplay failed:", error)
               })
             } else {
               video.pause()
@@ -253,64 +229,78 @@ export default function HomePage() {
 
       observer.observe(videoContainer)
 
-      // Handle hover to show controls in normal state
+      // Handle hover states
       videoContainer.addEventListener("mouseenter", () => {
         video.controls = true
-        videoOverlay.style.opacity = "0.3" // Make overlay more transparent on hover
+        videoOverlay.style.opacity = "0.3"
       })
 
       videoContainer.addEventListener("mouseleave", () => {
-        video.controls = false
-        videoOverlay.style.opacity = "1"
+        if (!document.fullscreenElement) {
+          video.controls = false
+          videoOverlay.style.opacity = "1"
+        }
       })
 
-      // Handle play button click to enter fullscreen
-      playButton.addEventListener("click", (e) => {
+      // Handle play button click with proper error handling
+      const handlePlayClick = async (e: Event) => {
         e.stopPropagation()
 
-        // Unmute the video
-        video.muted = false
+        try {
+          video.muted = false
 
-        // Request fullscreen
-        if (video.requestFullscreen) {
-          video.requestFullscreen()
-        } else if ("webkitRequestFullscreen" in video) {
-          /* Safari */
-          ;(video as HTMLVideoElement & { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.()
-        } else if ("msRequestFullscreen" in video) {
-          /* IE11 */
-          ;(video as HTMLVideoElement & { msRequestFullscreen?: () => void }).msRequestFullscreen?.()
+          // Check if fullscreen is supported
+          if (video.requestFullscreen) {
+            await video.requestFullscreen()
+          } else if (
+            (video as HTMLVideoElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen
+          ) {
+            await (video as HTMLVideoElement & { webkitRequestFullscreen?: () => Promise<void> })
+              .webkitRequestFullscreen!()
+          } else if ((video as HTMLVideoElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
+            await (video as HTMLVideoElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen!()
+          }
+
+          video.controls = true
+          await video.play()
+        } catch (error) {
+          console.error("Fullscreen or playback error:", error)
+          // Fallback: just play the video if fullscreen fails
+          try {
+            video.controls = true
+            await video.play()
+          } catch (playError) {
+            console.error("Playback failed:", playError)
+          }
         }
+      }
 
-        // Ensure controls are visible in fullscreen
-        video.controls = true
+      playButton.addEventListener("click", handlePlayClick)
 
-        // Play the video
-        video.play()
-      })
-
-      // Handle fullscreen change
-      document.addEventListener("fullscreenchange", () => {
-        if (!document.fullscreenElement) {
-          // Exited fullscreen
-          video.muted = true
+      // Handle fullscreen exit with error handling
+      const handleFullscreenChange = () => {
+        try {
+          if (!document.fullscreenElement) {
+            video.muted = true
+            video.controls = false
+            videoOverlay.style.opacity = "1"
+          }
+        } catch (error) {
+          console.error("Fullscreen change error:", error)
         }
-      })
+      }
 
-      document.addEventListener("webkitfullscreenchange", () => {
-        if (!(document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement) {
-          // Exited fullscreen in Safari
-          video.muted = true
-        }
-      })
+      document.addEventListener("fullscreenchange", handleFullscreenChange)
+      document.addEventListener("webkitfullscreenchange", handleFullscreenChange)
 
+      // Cleanup
       return () => {
         observer.disconnect()
-        playButton.removeEventListener("click", () => {})
+        playButton.removeEventListener("click", handlePlayClick)
         videoContainer.removeEventListener("mouseenter", () => {})
         videoContainer.removeEventListener("mouseleave", () => {})
-        document.removeEventListener("fullscreenchange", () => {})
-        document.removeEventListener("webkitfullscreenchange", () => {})
+        document.removeEventListener("fullscreenchange", handleFullscreenChange)
+        document.removeEventListener("webkitfullscreenchange", handleFullscreenChange)
       }
     }
   }, [])
@@ -436,7 +426,6 @@ export default function HomePage() {
                 ILOILO MARTIAL ARTIST ASSOCIATION
               </h1>
 
-
               <p
                 className="text-xl md:text-2xl text-white mb-8 py-5"
                 style={{
@@ -482,7 +471,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row items-center">
               <div
-                className="md:w-1/2 mb-8 md:mb-0 md:pr-8 animate-punch-in"
+                className="w-full md:w-1/2 mb-8 md:mb-0 md:pr-8 animate-punch-in"
                 data-aos="fade-right"
                 data-aos-duration="1000"
               >
@@ -517,56 +506,12 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* Meet the Champions! */}
+        </section>        {/* Meet the Champions! */}
         <section className="py-24 bg-white relative overflow-hidden">
           {/* Animated Background */}
           <div
-            className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"
+            className="absolute inset-0 bg-white animate-gradient-shift"
             style={{ backgroundSize: "400% 400%" }}
-          ></div>
-
-          {/* Geometric Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute left-1/2 top-1/4 w-[800px] h-[800px] border border-gray-400 rounded-full animate-subtle-wave"></div>
-            <div
-              className="absolute left-1/2 top-1/4 w-[600px] h-[600px] border border-gray-500 rounded-full animate-subtle-wave"
-              style={{ animationDelay: "1s" }}
-            ></div>
-            <div
-              className="absolute left-1/2 top-1/4 w-[400px] h-[400px] border border-gray-600 rounded-full animate-subtle-wave"
-              style={{ animationDelay: "2s" }}
-            ></div>
-          </div>
-
-          {/* Floating Particles */}
-          {particles.map((particle) => (
-            <div
-              key={particle.id}
-              className="absolute bottom-0 rounded-full bg-gray-500 animate-floating-particle"
-              style={
-                {
-                  width: `${particle.size}px`,
-                  height: `${particle.size}px`,
-                  left: particle.left,
-                  opacity: 0,
-                  "--delay": `${particle.delay}s`,
-                  "--duration": `${particle.duration}s`,
-                } as React.CSSProperties
-              }
-            ></div>
-          ))}
-
-          {/* Glowing Orbs */}
-          <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-white/5 blur-xl animate-pulse-glow"></div>
-          <div
-            className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full bg-white/5 blur-xl animate-pulse-glow"
-            style={{ animationDelay: "2s" }}
-          ></div>
-          <div
-            className="absolute top-3/4 left-2/3 w-24 h-24 rounded-full bg-white/5 blur-xl animate-pulse-glow"
-            style={{ animationDelay: "1s" }}
           ></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -594,13 +539,20 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </section>
+        </section>        
+          {/* Outreach Workshop Section */}
+        <section className="py-48 bg-black/95 backdrop-blur-sm text-white relative overflow-hidden">          {/* Diagonal top cut */}
+          <div className="absolute top-0 left-0 w-[150%] h-40 bg-white transform -skew-y-3 origin-top-left -translate-y-12 -translate-x-8"></div>          {/* Diagonal bottom cut - opposite direction */}          <div className="absolute bottom-0 left-0 w-[150%] h-96 bg-white transform -skew-y-3 origin-bottom-left translate-y-96 -translate-x-8"></div>
 
-        {/* Outreach Workshop Section */}
-        <section className="py-16 bg-black text-white relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
-              <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg">
+            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">              <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg"
+                style={{
+                  textShadow: `
+                    0 0 2px rgb(255, 255, 255),
+                    0 0 4px rgba(255, 255, 255, 0.4),
+                    0 0 6px rgba(255, 255, 255, 0.2)
+                  `
+                }}>
                 Community Outreach
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -608,13 +560,11 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 items-center">
-              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">
-                <div className="relative rounded-lg overflow-hidden cursor-pointer" id="workshop-video-container">
+            <div className="flex flex-col lg:flex-row gap-8 items-center">              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">                <div className="relative rounded-lg overflow-hidden cursor-pointer h-[450px]" id="workshop-video-container">
                   <video
                     id="workshop-video"
                     ref={videoRef}
-                    className="w-full rounded-lg"
+                    className="w-full h-full object-cover rounded-lg"
                     poster="/placeholder.svg?height=500&width=800&text=Workshop+Video"
                     muted
                     loop
@@ -651,7 +601,7 @@ export default function HomePage() {
               </div>
               <div className="lg:w-1/3" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya Antique</h3>
+                  <h3 className="text-2xl font-bold">Martial Arts Workshop in Semirara Caluya, Antique</h3>
                   <p className="text-gray-300">
                     Our team recently conducted a special martial arts workshop for students in Semirara, Caluya
                     Antique. This initiative aims to introduce martial arts disciplines to communities, promoting
@@ -662,20 +612,18 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* Coach of the Week */}
+        </section>        {/* Coach of the Week */}
         <section
-          className="py-16 bg-gray-50 relative"
+          className="py-16 bg-white relative"
           style={{
-            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000")',
+            backgroundImage: 'url("")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
           }}
         >
           {/* Overlay for background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-200 animate-gradient-shift"></div>
+          <div className="absolute inset-0 bg-white"></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
@@ -727,7 +675,7 @@ export default function HomePage() {
                       </h3>
                       <span className="ml-auto bg-black text-white px-3 py-1 rounded-full text-xs font-bold">
                         {coaches[currentCoachIndex]?.experience
-                          ? `${coaches[currentCoachIndex].experience} Experience`
+                          ? `Experience : ${coaches[currentCoachIndex].experience} years`
                           : "Experience not available"}
                       </span>
                     </div>
@@ -818,7 +766,7 @@ export default function HomePage() {
         <section
           className="py-16 bg-gray-50 relative"
           style={{
-            //backgroundImage: 'url("/pictures/Third Part Backdrop.jpg")',
+            //backgroundImage: 'url("/pictures/facility.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
@@ -832,7 +780,7 @@ export default function HomePage() {
               <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
                 <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
                   <Image
-                    src="/pictures/Second Part Picture.jpg"
+                    src="/pictures/facility.jpg"
                     alt="IMAA Headquarters"
                     width={700}
                     height={500}
@@ -850,7 +798,7 @@ export default function HomePage() {
                   <h3 className="text-2xl font-bold text-black mb-4 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[3px] after:bottom-[-4px] after:left-0 after:bg-gradient-to-r after:from-black after:to-gray-800 after:transition-all hover:after:w-full">
                     IMAA Main Facility
                   </h3>
-                  <p className="text-gray-600 mb-6">Our 5,000 sq ft facility features:</p>
+                  <p className="text-gray-600 mb-6">Our facility features:</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {facilities.map((facility, index) => (
                       <div key={index} className="flex items-center">
@@ -859,23 +807,23 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Location</h4>
-                    <p className="text-gray-600">123 Martial Arts Avenue, Iloilo City, 5000</p>
+                    <p className="text-gray-600">Uncle Toms bldg. Diversion Road, Iloilo City 5000</p>
                   </div>
-
                   <div className="mb-6">
                     <h4 className="font-bold text-black mb-2">Operating Hours</h4>
                     <p className="text-gray-600">Monday-Saturday: 7AM - 12PM and 3PM to 9PM</p>
-                  </div>                  {/* Location Map */}                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                  </div>{" "}
+                  {/* Location Map */}{" "}
+                  <div className="rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                     <a
                       href="https://www.google.com/maps?q=10.70443302427233,122.5528555203559"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block relative group"
                     >
-                      <Image 
+                      <Image
                         src="/pictures/imma map.png"
                         alt="IMAA Location Map - Click to open in Google Maps"
                         width={800}
@@ -992,11 +940,11 @@ function PhotoCarousel() {
     >
       {/* Main Image */}
       <div
-        className="relative h-[400px] md:h-[500px] w-full overflow-hidden cursor-pointer"
+        className="relative h-[300px] sm:h-[400px] md:h-[500px] w-full overflow-hidden cursor-pointer"
         onClick={() => setExpandedImage(photos[currentIndex]?.src ?? null)}
       >
         <Image
-          src={photos[currentIndex]?.src || "/placeholder.svg"}
+          src={photos[currentIndex]?.src || ""}
           alt={photos[currentIndex]?.alt || "Default Alt Text"}
           fill
           className="object-cover transition-all duration-700 group-hover:scale-105"
@@ -1072,7 +1020,7 @@ function PhotoCarousel() {
         >
           <div className="relative max-w-5xl max-h-[90vh] w-full">
             <Image
-              src={expandedImage || "/placeholder.svg"}
+              src={expandedImage || ""}
               alt="Expanded view"
               width={1200}
               height={800}
@@ -1107,24 +1055,24 @@ function PhotoCarousel() {
 // Helper Components
 interface ChampionCardProps {
   name: string
-  age?: number 
+  age?: number
   image: string
   achievement: string
   delay?: number
 }
 
 function ChampionCard({ name, image, achievement }: ChampionCardProps) {
+  const [showAll, setShowAll] = useState(false);
+  const achievements = achievement.split('\n');
+  const hasMoreAchievements = achievements.length > 1;
+  const displayedAchievements = showAll ? achievements : achievements.slice(0, 1);
+
   return (
     <Card className="relative bg-white/10 backdrop-blur-md rounded-lg overflow-hidden shadow-md group hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 transition-all duration-700 border border-white/20">
       {/* Change to monochromatic gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>
-
-      <div className="relative h-64 w-full overflow-hidden z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-end justify-center p-4">
-          <span className="text-white font-bold text-lg">{achievement}</span>
-        </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-gray-500/20 to-black/30 opacity-70 group-hover:opacity-90 transition-opacity duration-700"></div>      <div className="relative h-64 w-full overflow-hidden z-10">
         <Image
-          src={image || "/placeholder.svg"}
+          src={image || ""}
           alt={name}
           fill
           className="object-cover transition-all duration-700 group-hover:scale-125 group-hover:rotate-3"
@@ -1140,8 +1088,21 @@ function ChampionCard({ name, image, achievement }: ChampionCardProps) {
           {name}
           <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
         </h3>
-        <p className="text-gray-600 mb-3 font-medium">{achievement}</p>
-        <div className="mt-4 flex justify-end"></div>
+        <div>
+          {displayedAchievements.map((ach, index) => (
+            <p key={index} className="text-gray-600 font-medium mb-1">
+              {ach}
+            </p>
+          ))}
+          {hasMoreAchievements && (
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="text-black/70 hover:text-black text-sm mt-2 font-medium underline transition-colors"
+            >
+              {showAll ? "Show Less" : "Show More"}
+            </button>
+          )}
+        </div>
       </CardContent>
 
       {/* Change to monochromatic glow */}
@@ -1159,16 +1120,18 @@ interface TestimonialCardProps {
 }
 
 function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
-  return (
-    <Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700">
-      <div className="flex items-center mb-6">
-        <div className="relative">
+  const [showAll, setShowAll] = useState(false)
+  const maxLength = 150
+  const shouldTruncate = quote.length > maxLength
+  const displayedQuote = shouldTruncate && !showAll ? `${quote.slice(0, maxLength)}...` : quote
+
+  return (    <Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700 min-h-[280px] h-full">
+      <div className="flex items-center mb-6">        <div className="relative w-12 h-12 mr-4">
           <Image
-            src={image || "/placeholder.svg"}
+            src={image || "/advert pic 1.jpeg"}
             alt={name}
-            width={48}
-            height={48}
-            className="rounded-full object-cover mr-4 transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
+            fill
+            className="rounded-full object-cover transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
           />
         </div>
         <div>
@@ -1179,36 +1142,40 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
           <p className="text-gray-500 text-sm">{role}</p>
         </div>
       </div>
-      <p className="text-gray-600 italic relative">
+      <div className="text-gray-600 italic relative">
         <span className="absolute -top-4 -left-2 text-4xl text-black/20">&quot;</span>
-        {quote}
+        <p>{displayedQuote}</p>
         <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
-      </p>
+        {shouldTruncate && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-black/70 hover:text-black text-sm mt-4 font-medium underline transition-colors"
+          >
+            {showAll ? "Show Less" : "See More"}
+          </button>
+        )}
+      </div>
     </Card>
   )
 }
 
 // Data
-const champions = [
-  {
-    name: "Juan Dela Cruz",
-    image: "/pictures/advert pic 1.jpeg",
-    achievement: "Gold Medalist - SEA Games 2023",
-  },
-  {
-    name: "Maria Santos",
-    image: "/pictures/advert pic 2.jpeg",
-    achievement: "Silver Medalist - Asian Championships 2023",
-  },
-  {
-    name: "Carlos Reyes",
-    image: "/pictures/advert pic 3.jpeg",
-    achievement: "National Champion 2022 of Palarong Pambansa",
-  },
-  {
-    name: "Andrea Gomez",
-    image: "/pictures/advert pic 1.jpeg",
-    achievement: "Gold Medalist - Youth World Championships 2023",
+const champions = [  {
+    name: "Jen Espada",
+    image: "/pictures/jen espada.jpg",
+    achievement: "2023 Silver Medalist BJJ - Mangahan Guimaras\n2023 Bronze Medalist - National Muaythai Championship\n2023 ROTC Games Kickboxing - Silver\n2024 Silver Medalist - Copa de Dumau Cebu BJJ\n2025 Gold Medalist - Dumau Iloilo BJJ",
+  },  {
+    name: "Lawrence Belmonte",
+    image: "/pictures/lawrence.jpg",
+    achievement: "2023 ROTC Games Silver Medalist\n2023 National Muaythai Championship\n2024 Gold (Open) Silver (Weight) Copa de Dumau Cebu BJJ\n2025 Relentless BJJ Open Gold\n2025 Gold (No Gi Weight) Silver (No Gi Open) Bronze (With Gi Weight) Bronze (With Gi Open) Copa de Dumau Iloilo BJJ",
+  },  {
+    name: "Leandro Lima",
+    image: "/pictures/leandro lima.jpg", 
+    achievement: "2024 Silver (With Gi Weight) Copa de Dumau Cebu BJJ\n2025 Silver Relentless Open BJJ\n2025 Silver (With Gi Weight) Bronze (With Gi Open) Copa de Dumau Iloilo",
+  },  {
+    name: "Iain Nicholas Jaguilon",
+    image: "/pictures/Iain Nicholas Jaguilon.jpg",
+    achievement: "2024 Silver Medal - Copa de Dumau Cebu BJJ Open\n2024 Relentless Super Fights\n2025 Copa de Dumau Iloilo",
   },
 ]
 
@@ -1221,26 +1188,25 @@ const testimonials = [
       "I've been training under coach Rho since 2022, I trained everyday ever since. Now, I've won multiple competitions such as Kickboxing, Muay Thai and Jiu Jitsu. Martial arts taught me discipline, consistency and confidence. Before martial arts, I was 98 kilos and after a month I went to 88 and 78 in the next month. IMAA helped me propel to victory. Throughout the years, I've won three golds, one silver and four bronze",
   },
   {
-    name: "Sarah Lim",
-    role: "Student since 2020",
-    image: "/placeholder.svg?height=100&width=100",
+    name: "LA Holleza",
+    role: "Student",
+    image: "/pictures/holleza.jpg",
     quote:
-      "As a woman, I was initially hesitant to start martial arts, but IMAA made me feel completely comfortable. The self-defense skills I've learned are invaluable, and I've made lifelong friends here.",
+      "I started to train because my goal is to be fit and healthy. I then got hooked with muaythai and Brazilian Jiu Jitsu. Now I am competing and improving my skills in tournaments. Not only that, I also got fit and healthier than ever, also my self confidence went up in dealing with life struggles.",
   },
   {
-    name: "David Chen",
-    role: "Parent of student",
-    image: "/placeholder.svg?height=100&width=100",
+    name: "Justin Laguda",
+    role: "Student",
+    image: "/pictures/laguda.jpg",
     quote:
-      "My son has been training at IMAA for three years. Not only has he developed incredible martial arts skills, but also discipline, confidence, and respect that carries over to all aspects of his life.",
+      "I started boxing in order for me to be able to defend myself. Now, I am 1-1 in my boxing record, long way to go but I am enjoying the process, the grit and the grind of training. Everyday I make myself better than yesterday.",
   },
 ]
 
 const facilities = [
-  "Competition-grade mats",
-  "Weight training area",
-  "MMA cage",
-  "Boxing ring",
-  "Locker rooms",
-  "Pro shop",
+  "Striking Area",
+  "Brazilian Jiu-Jitsu Area",
+  "Strength and Conditioning Area",
+  "Boxing Area",
+  "Equipment Area",
 ]

@@ -101,15 +101,16 @@ export default function Navbar() {
             className="hidden md:flex space-x-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-          >
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="text-white hover:bg-gray-100 px-5 py-2 rounded-md text-lg md:text-base"
+            transition={{ delay: 0.6, duration: 0.5 }}          >            {isAdmin && (
+              <Button
+                variant="ghost"
+                asChild
+                className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-black transition-colors duration-300 px-6 py-2 text-lg font-medium"
               >
-                Admin Page
-              </Link>
+                <Link href="/admin">
+                  Admin Page
+                </Link>
+              </Button>
             )}
             <LogoutButton user={user} />
           </motion.div>

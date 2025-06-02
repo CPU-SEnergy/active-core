@@ -110,15 +110,14 @@ export default function Page({ params }: { params: { id: string } }) {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  return (    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20">
       {classDataLoading ? (
         <ClassDetailSkeleton />
       ) : (
         classData && (
           <>
             {/* Add Back Button under navbar */}
-            <div className="w-full border-b border-gray-200 bg-white/50 backdrop-blur-sm">
+            <div className="w-full border-b border-gray-200 bg-white top-20 z-10">
               <div className="max-w-7xl mx-auto px-6 py-4">
                 <Link href="/sports-classes">
                   <Button 
