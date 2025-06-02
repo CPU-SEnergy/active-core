@@ -6,7 +6,7 @@ export async function GET() {
     getFirebaseAdminApp();
 
     const thirtyOneDaysAgo = new Date();
-    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 11);
+    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
 
     const paymentsCollection = await db.payments.query(($) => [
       $.field("createdAt").gte(thirtyOneDaysAgo),
