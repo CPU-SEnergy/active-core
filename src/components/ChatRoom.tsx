@@ -62,7 +62,6 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [, setIsNearTop] = useState(false);
   const firstMessageKeyRef = useRef<string | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const checkScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [participants, setParticipants] = useState<Record<string, any>>({});
@@ -404,6 +403,10 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     });
 
     return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
       set(userRef, {
         name: userDisplayName,
         online: false,
@@ -413,41 +416,10 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     };
   }, [roomId, user.uid, userDisplayName, database]);
 
-  const updateTypingStatus = (isTyping: boolean) => {
-    const userRef = ref(database, `systemChats/${roomId}/users/${user.uid}`);
-    set(userRef, {
-      name: userDisplayName,
-      online: true,
-      lastActive: Date.now(),
-      isTyping,
-    });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-
-    // Update typing status
-    if (!isTyping) {
-      setIsTyping(true);
-      updateTypingStatus(true);
-    }
-
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
-      updateTypingStatus(false);
-    }, 2000);
-  };
-
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     try {
-      setIsTyping(false);
-      updateTypingStatus(false);
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
@@ -484,6 +456,8 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
     }
   };
 
+
+
   return (
     <div className="flex flex-col h-full">
       <div
@@ -494,7 +468,7 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
             <ul>
               {Object.entries(participants).map(([userId, participant]) => (
                 <li key={userId}>
-                  {participant.name || userId}{" "}
+                  {participant.name}{" "}
                   {participant.role ? ` (${participant.role})` : ""}
                 </li>
               ))}
@@ -610,9 +584,9 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
 
           const bubbleColorClass =
             isCurrentUser && isSenderAdmin
-              ? "bg-blue-700 text-white rounded-br-none"
+              ? "bg-black text-white rounded-br-none"
               : isSenderAdmin
-                ? "bg-blue-500/85 text-white rounded-br-none"
+                ? "bg-gray-800/85 text-white rounded-br-none"
                 : "bg-gray-200 text-black rounded-bl-none";
 
           const senderLabel = isCurrentUser
@@ -665,45 +639,25 @@ export function ChatRoom({ roomId, user, onOpenChatList }: ChatRoomProps) {
       <div
         className={`${isMobile ? "p-2 mx-2" : "p-2 mx-4"} border-t border-gray-300 bg-white rounded shadow-sm`}
       >
-        {isTyping && (
-          <div className="text-xs text-gray-500 mb-1 ml-2">
-            <span className="inline-flex items-center">
-              <span className="animate-pulse mr-1">●</span>
-              <span
-                className="animate-pulse mr-1"
-                style={{ animationDelay: "0.2s" }}
-              >
-                ●
-              </span>
-              <span
-                className="animate-pulse mr-1"
-                style={{ animationDelay: "0.4s" }}
-              >
-                ●
-              </span>
-              Typing...
-            </span>
-          </div>
-        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             sendMessage();
-          }}
-          className="relative flex items-center"
-        >
-          <input
+            }}
+            className="relative flex items-center w-full"
+          >
+            <input
             type="text"
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message"
-            className={`flex-grow ${isMobile ? "p-1.5 text-sm" : "p-2"} border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full ${isMobile ? "p-1.5 text-sm" : "p-2"} border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10`}
             aria-label="Message input"
-          />
+            />
           <button
             type="submit"
-            className={`absolute right-2 ${isMobile ? "px-1.5 py-0.5" : "px-2 py-1"} bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center`}
+            className={`absolute right-2 ${isMobile ? "px-1.5 py-0.5" : "px-2 py-1"} bg-black text-white rounded hover:bg-gray-700 transition flex items-center justify-center`}
             aria-label="Send message"
             disabled={!input.trim()}
           >
