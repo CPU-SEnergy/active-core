@@ -51,32 +51,20 @@ const faqs: FAQ[] = [
   {
     question: "What is your location?",
     answer:
-      "We are located at 123 Main Street, Downtown City. Our store is open Monday to Friday from 9 AM to 6 PM, and weekends from 10 AM to 4 PM.",
+      "We are located at Uncle Tom's Bldg, Diversion Road.",
     keywords: ["location", "address", "where", "store", "office"],
   },
   {
     question: "What are your business hours?",
     answer:
-      "Our business hours are Monday to Friday: 9 AM - 6 PM, and weekends: 10 AM - 4 PM. We're closed on major holidays.",
+      "Our business hours are Monday to Saturday: 7 AM - 12 PM and 3 PM - 9 PM",
     keywords: ["hours", "time", "open", "close", "schedule", "when"],
   },
   {
     question: "How can I contact you?",
     answer:
-      "You can contact us via phone at (555) 123-4567, email at info@company.com, or visit our store during business hours.",
+      "You can contact us via phone at (0921) 270 1685, email at ilonggomartialartistassociatio@gmail.com",
     keywords: ["contact", "phone", "email", "call", "reach"],
-  },
-  {
-    question: "What services do you offer?",
-    answer:
-      "We offer a wide range of services including product sales, customer support, technical assistance, and consultation services.",
-    keywords: ["services", "offer", "provide", "what", "do"],
-  },
-  {
-    question: "Do you offer delivery?",
-    answer:
-      "Yes, we offer delivery services within the city. Delivery usually takes 2-3 business days and costs $10 for orders under $50.",
-    keywords: ["delivery", "shipping", "deliver", "send"],
   },
 ]
 
@@ -178,22 +166,16 @@ const ChatWidget = ({ userId, role }: ChatWidgetProps) => {
   }
 
   const connectToAdmin = async () => {
-    // Redirect to login page if user is not logged in
     if (!user) {
       addBotMessage("You need to be logged in to chat with an admin. Redirecting you to the login page...")
-
-      // Give user time to read the message before redirecting
       setTimeout(() => {
         window.location.href = "/auth/login"
       }, 2000)
       return
     }
-
-    // If user is logged in, proceed with connecting to admin
     setIsConnectedToAdmin(true)
     addBotMessage("Connecting you to an admin. Please wait a moment...")
 
-    // Create user session for admin chat
     const database = getDatabase(app)
     const roomRef = ref(database, `systemChats/${roomId}`)
 
