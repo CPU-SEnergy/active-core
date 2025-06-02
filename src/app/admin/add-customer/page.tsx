@@ -82,6 +82,12 @@ const AddCustomerPage = () => {
     console.error("Error fetching membership plans:", plansError);
   }
 
+  const sortedCustomers = customers?.sort((a, b) => {
+    const dateA = new Date(a.timeApproved);
+    const dateB = new Date(b.timeApproved);
+    return dateB.getTime() - dateA.getTime();
+  });
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -182,7 +188,7 @@ const AddCustomerPage = () => {
             <div className="p-4 text-center text-red-500">
               Error loading customers
             </div>
-          ) : !customers || customers.length === 0 ? (
+          ) : !sortedCustomers || sortedCustomers.length === 0 ? (
             <div className="p-4 text-center">No customers found</div>
           ) : (
             <Table className="min-w-full">
@@ -197,7 +203,7 @@ const AddCustomerPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
+                {sortedCustomers.map((customer) => (
                   <TableRow key={customer.id} className="text-sm">
                     <TableCell>
                       <div className="font-medium">
