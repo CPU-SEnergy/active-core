@@ -1,6 +1,8 @@
 import type React from "react";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 interface InputTextProps {
   id: string;
@@ -21,9 +23,11 @@ export const InputText = ({
   error,
   className,
 }: InputTextProps) => {
+  const [showPassword, setShowPassword] = useState(false);
   const autocompleteType =
     type === "password" ? "new-password" : type === "email" ? "email" : "off";
   const isPhoneNumber = id === "phoneNumber" || type === "tel";
+  const isPassword = type === "password";
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isPhoneNumber) {
