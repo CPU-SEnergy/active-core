@@ -89,11 +89,12 @@ export default function EarningsChart({
 
   const chartData = earnings.map((earning, index) => ({
     month: months[index],
-    earnings: earning,
+    earnings: Number(earning) || 0,
   }));
 
   const formatTooltipCurrency = (amount: number) => {
-    return `₱${amount.toLocaleString()}`;
+    if (!amount || isNaN(amount)) return "₱0";
+    return `₱${Math.round(amount).toLocaleString()}`;
   };
 
   return (
