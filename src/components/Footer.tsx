@@ -92,7 +92,12 @@ export default function Footer() {
 // Helper Components
 function SocialIcon({ icon }: { icon: React.ReactNode }) {
   return (
-    <Link href="#" className="text-gray-400 hover:text-white transition duration-300">
+    <Link 
+      href="https://www.facebook.com/people/Ilonggo-martial-artist-association/61576952401707/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-gray-400 hover:text-white transition duration-300 hover:scale-110 transform"
+    >
       {icon}
     </Link>
   )
