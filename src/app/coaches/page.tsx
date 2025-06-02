@@ -123,8 +123,7 @@ export default function CoachDeck() {
   });
   
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="w-full h-[40vh] sm:h-[50vh] relative flex items-center justify-center">
+    <div className="min-h-screen bg-black text-white">      <div className="w-full h-[40vh] sm:h-[50vh] relative flex items-center justify-center pt-20">
         <div className="relative z-10 text-center py-24 md:py-32 px-4">
           <h1
             className="text-5xl md:text-7xl font-bold text-white mb-6 glow-text"

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { ref, getDatabase, get, onValue } from "firebase/database";
 import { app } from "@/lib/firebaseClient";
-import type { User } from "firebase/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatRoom from "@/components/ChatRoom";
+import { User } from "@/auth/AuthContext";
 
 interface ChatUser {
   id: string;
