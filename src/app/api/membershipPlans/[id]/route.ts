@@ -16,14 +16,11 @@ export async function GET(
       );
     }
 
-    console.log("Fetching membership plan with ID:", id);
-
     getFirebaseAdminApp();
 
     const membershipPlan = await db.membershipPlans.get(id);
 
     if (!membershipPlan) {
-      console.log("Membership plan not found with ID:", id);
       return NextResponse.json(
         { error: "Membership plan not found" },
         { status: 404 }

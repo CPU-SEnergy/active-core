@@ -8,7 +8,6 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     getFirebaseAdminApp();
-    console.log(params);
 
     if (!params?.userId) {
       return NextResponse.json(

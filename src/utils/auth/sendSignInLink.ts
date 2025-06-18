@@ -13,7 +13,6 @@ export default async function sendSignInLink(email: string) {
   try {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem("emailForSignIn", email);
-    console.log("Email sent!");
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

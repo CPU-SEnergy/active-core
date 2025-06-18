@@ -81,7 +81,6 @@ export function ClassesModal() {
       }
 
       const result = await createClass(formData);
-      console.log("createClass result:", result);
 
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");

@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(null);
     }
 
-    console.log("resultsssssssssssss", results);
     const data = results.map((result) => {
       return {
         id: result.ref.id,

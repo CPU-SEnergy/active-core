@@ -480,7 +480,7 @@ export default function Dashboard() {
         },
         {
           title: "Active Customers",
-          value: kpiData.yearly.activeCustomers,
+          value: kpiData.yearly.activeCustomers + "%",
           change: Number.parseFloat(kpiData.yearly.activeCustomersComparison),
         },
       ]

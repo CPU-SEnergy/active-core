@@ -93,7 +93,6 @@ export function ApparelForm() {
         setPreview(null);
       } else {
         toast.error(result.message || "Failed to create apparel.");
-        console.log(result);
       }
     } catch (err) {
       console.error(err);

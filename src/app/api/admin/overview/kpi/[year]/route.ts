@@ -14,12 +14,9 @@ export async function GET(request: Request, { params }: { params: Params }) {
     const { year } = params;
     const previousYear = (Number.parseInt(year) - 1).toString();
 
-    console.log(`Fetching yearly data for: ${year}`);
-
     // This matches exactly how data is written in addCustomerWithPayment
     const yearDoc = await db.kpis.get(db.kpis.id(year));
     if (!yearDoc) {
-      console.log(`Year document not found for ${year}`);
       return Response.json({
         yearData: {},
         totalRevenue: 0,
@@ -39,7 +36,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
       const customersDoc = await db.customers.get(db.customers.id("stats"));
       if (customersDoc) {
         totalCustomers = customersDoc.data;
-        console.log("Total customers found:", totalCustomers);
       }
     } catch (error) {
       console.error("Error fetching total customers:", error);
@@ -76,17 +72,14 @@ export async function GET(request: Request, { params }: { params: Params }) {
         const monthDoc = await monthRef.get(monthRef.id(month));
 
         if (monthDoc) {
-          console.log(`Found data for ${year}-${month}:`, monthDoc.data);
           yearData[month] = monthDoc.data;
           totalRevenue += monthDoc.data.revenue;
           totalMonthlyCustomers += monthDoc.data.customers;
           hasAnyData = true;
         } else {
-          console.log(`No data for ${year}-${month}`);
           yearData[month] = null;
         }
       } catch (error) {
-        console.log(`No data for ${year}-${month}`);
         yearData[month] = null;
       }
     }
@@ -107,7 +100,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
           previousYearData[month] = null;
         }
       } catch (error) {
-        console.log(`No data for ${previousYear}-${month}`);
         previousYearData[month] = null;
       }
     }
@@ -164,8 +156,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
       message: hasAnyData ? undefined : `No data available for year ${year}`,
     };
 
-    console.log("Yearly result:", result);
-    console.log("June data specifically:", yearData["06"]);
     return Response.json(result);
   } catch (error) {
     console.error("Error fetching yearly data:", error);

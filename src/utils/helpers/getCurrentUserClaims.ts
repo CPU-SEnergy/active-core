@@ -22,6 +22,5 @@ export async function getCurrentUserCustomClaims() {
   }
 
   const user = await getUser(tokens.decodedToken.uid);
-  console.log("customClaim", user);
   return user;
 }
