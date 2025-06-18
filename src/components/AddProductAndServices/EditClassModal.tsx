@@ -110,7 +110,9 @@ export default function EditClassModal({ data }: EditClassModalProps) {
     try {
       setIsLoadingClassData(true);
 
-      const response = await fetch(`/api/classes/${data.id}`);
+      const response = await fetch(`/api/classes/${data.id}`, {
+        next: { revalidate: 0 },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch class data: ${response.statusText}`);
@@ -164,6 +166,7 @@ export default function EditClassModal({ data }: EditClassModalProps) {
 
     try {
       const result = await editClass(updatedFormData);
+      mutate("/api/classes");
 
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");
@@ -174,7 +177,6 @@ export default function EditClassModal({ data }: EditClassModalProps) {
         setOpen(false);
         toast.success(result.message || "Class updated successfully!");
         reset();
-        mutate("/api/classes");
       } else {
         toast.error(result.message || "Error updating class.");
       }
