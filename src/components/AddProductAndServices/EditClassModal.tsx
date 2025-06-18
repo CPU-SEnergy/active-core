@@ -166,17 +166,17 @@ export default function EditClassModal({ data }: EditClassModalProps) {
 
     try {
       const result = await editClass(updatedFormData);
-      mutate("/api/classes");
-
+      
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");
         return;
       }
-
+      
       if (result.status === 200) {
         setOpen(false);
         toast.success(result.message || "Class updated successfully!");
         reset();
+        mutate("/api/classes");
       } else {
         toast.error(result.message || "Error updating class.");
       }

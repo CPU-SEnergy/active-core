@@ -110,10 +110,10 @@ export function EditMembershipPlanModal({
       updatedFormData.append("planType", formData.planType);
 
       const result = await editMembershipPlan(updatedFormData);
-      mutate("/api/membershipPlans");
-
-      if (result.status === 200) {
+      
+      if (result.success) {
         setOpen(false);
+        mutate("/api/membershipPlans");
         toast.success("Membership plan updated successfully!");
       } else {
         toast.error(result.message || "Error updating membership plan.");

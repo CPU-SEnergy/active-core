@@ -147,11 +147,11 @@ export function EditCoach({ data }: { data: COACHDATA }) {
 
     try {
       const result = await editCoach(updatedFormData);
-      mutate("/api/coaches");
 
       if (result.status === 200) {
         setOpen(false);
-        toast.success(result.message || "Coach updated successfully!");
+        mutate("/api/coaches");
+        toast.success("Coach updated successfully!");
         reset();
       } else {
         toast.error(result.message || "Error updating coach.");

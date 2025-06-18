@@ -8,6 +8,7 @@ import { ProductAndServicesType } from "@/lib/types/product-services";
 import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { revalidatePath } from "next/cache";
 
 export async function createCoach(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
@@ -80,6 +81,7 @@ export async function createCoach(formData: FormData) {
     };
 
     await db.coaches.add(coachData, { as: "server" });
+    revalidatePath("/");
 
     return { message: "Coach created successfully!", status: 200 };
   } catch (error) {
