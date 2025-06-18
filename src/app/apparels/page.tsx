@@ -237,19 +237,13 @@ export default function ApparelPage({
                   {[...Array(8)].map((_, index) => (
                     <div
                       key={index}
-                      className="border rounded-md overflow-hidden bg-white shadow-sm"
+                      className="border rounded-md overflow-hidden bg-white"
                     >
-                      <Skeleton className="aspect-square w-full" />
-                      <div className="p-3 sm:p-4">
-                        <Skeleton className="h-5 w-3/4 mb-2" />
-                        <div className="space-y-1 min-h-[2.5rem]">
-                          <Skeleton className="h-3 w-full" />
-                          <Skeleton className="h-3 w-4/5" />
-                        </div>
-                        <div className="mt-2 flex items-center gap-2">
-                          <Skeleton className="h-5 w-20" />
-                          <Skeleton className="h-3 w-12" />
-                        </div>
+                      <Skeleton className="aspect-[3/4] w-full" />
+                      <div className="p-3 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-4 w-1/3" />
                       </div>
                     </div>
                   ))}
@@ -338,10 +332,9 @@ export default function ApparelPage({
                       );
 
                       return (
-                        <Link
-                          href={`/apparels/${apparel.id}`}
+                        <div
                           key={apparel.id}
-                          className="group border rounded-md overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
+                          className="border rounded-md overflow-hidden bg-white shadow-sm"
                         >
                           <div className="aspect-square relative overflow-hidden">
                             <Image
@@ -349,7 +342,7 @@ export default function ApparelPage({
                               alt={apparel.name}
                               fill
                               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                              className="object-cover"
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                             {hasDiscount && (
                               <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -392,7 +385,7 @@ export default function ApparelPage({
                               )}
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       );
                     })}
                   </div>
