@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { ClassesModal } from "@/components/AddProductAndServices/ClassFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 import fetcher from "@/lib/fetcher";
-import useSWR from "swr";
 import type { CLASSDATA } from "@/lib/types/product-services";
 import EditClassModal from "@/components/AddProductAndServices/EditClassModal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +12,7 @@ import ProductAndServicesSwitch from "@/components/AddProductAndServices/Product
 import CoachList from "@/components/CoachList";
 import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
 import { removeItem } from "@/app/actions/admin/products-services/removeItem";
+import { useState, useEffect } from "react";
 
 function ClassesSkeleton() {
   return (
@@ -47,11 +47,25 @@ function ClassesSkeleton() {
 }
 
 export default function ClassesPage() {
-  const {
-    data: classes,
-    error,
-    isLoading,
-  } = useSWR<CLASSDATA[]>(`/api/classes`, fetcher);
+  const [classes, setClasses] = useState<CLASSDATA[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const data = await fetcher('/api/classes');
+        setClasses(data);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching classes:", err);
+        setError(err as Error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchClasses();
+  }, []);
 
   if (error) {
     console.error("Error fetching classes:", error);
