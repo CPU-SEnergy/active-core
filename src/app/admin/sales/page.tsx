@@ -243,7 +243,7 @@ export default function SalesDashboard() {
                     {customerData?.totalCustomers || 0}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {customerData?.totalWalkInCustomers || 0} walk-in customers
+                   <span className="font-bold"> +{customerData?.totalWalkInCustomers || 0}</span> customers with no account
                   </div>
                 </div>
               )}
