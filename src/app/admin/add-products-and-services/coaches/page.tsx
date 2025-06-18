@@ -67,18 +67,25 @@ export default function CoachesPage() {
     return <>Error fetching coaches</>;
   }
 
+  if (isLoading) {
+    return <CoachesSkeleton />;
+  }
+
   return (
     <>
-      {isLoading && <CoachesSkeleton />}
-      {coaches && (
-        <div className="min-h-screen bg-white">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-2xl font-semibold">Coaches</h1>
-              <SelectProductAndServices />
+      <div className="min-h-screen bg-white">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-semibold">Coaches</h1>
+            <SelectProductAndServices />
+          </div>
+          <CoachForm />
+          {coaches && coaches.length === 0 && (
+            <div className="text-center text-gray-500">
+              No coaches available
             </div>
-            <CoachForm />
-
+          )}
+          {coaches && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {coaches.map((coach) => (
                 <Card key={coach.id} className="relative group">
@@ -142,9 +149,9 @@ export default function CoachesPage() {
                 </Card>
               ))}
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }

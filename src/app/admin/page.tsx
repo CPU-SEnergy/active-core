@@ -36,6 +36,7 @@ import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { Button } from "@/components/ui/button";
 import fetcher from "@/lib/fetcher";
 import useSWR from "swr";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 interface RecentActivity {
   id: string;
   customerId: string | null;
@@ -306,20 +307,16 @@ export default function Dashboard() {
 
             {/* Data Availability Notice */}
             {(monthlyData?.message ||
-              yearlyData?.message ||
-              customerData?.message) && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <div className="flex items-center gap-2 text-blue-700 text-sm">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>
-                    {monthlyData?.message ||
-                      yearlyData?.message ||
-                      customerData?.message}{" "}
-                    - Showing default values.
-                  </span>
-                </div>
-              </div>
-            )}
+          yearlyData?.message ||
+          customerData?.message) && (
+          <Alert className="mb-4 p-3">
+            <AlertDescription>
+              {monthlyData?.message ||
+                yearlyData?.message ||
+                customerData?.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
             <div className="space-y-4">
               {kpis.map((kpi, index) => (
