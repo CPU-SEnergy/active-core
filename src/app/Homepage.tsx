@@ -145,11 +145,7 @@ export default function HomePage() {
     data: coaches,
     error,
     isLoading,
-  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher);
 
   // Set current coach based on week of year when coaches data is available
   useEffect(() => {

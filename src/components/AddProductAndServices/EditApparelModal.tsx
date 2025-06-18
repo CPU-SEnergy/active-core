@@ -99,7 +99,9 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
     try {
       setIsLoadingApparelData(true);
 
-      const response = await fetch(`/api/apparels/${data.id}`);
+      const response = await fetch(`/api/apparels/${data.id}`, {
+        next: { revalidate: 0 },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -152,10 +154,10 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
       }
 
       const result = await editApparel(updatedFormData);
+      mutate("/api/apparels");
       if (result.success) {
         setOpen(false);
         toast.success("Apparel updated successfully!");
-        mutate("/api/apparels");
       } else {
         toast.error(result.message || "Failed to update apparel.");
       }

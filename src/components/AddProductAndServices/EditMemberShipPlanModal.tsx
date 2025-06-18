@@ -61,7 +61,9 @@ export function EditMembershipPlanModal({
     try {
       setIsLoadingPlanData(true);
 
-      const response = await fetch(`/api/membershipPlans/${data.id}`);
+      const response = await fetch(`/api/membershipPlans/${data.id}`, {
+        next: { revalidate: 0 },
+      });
 
       if (!response.ok) {
         throw new Error(
@@ -108,11 +110,11 @@ export function EditMembershipPlanModal({
       updatedFormData.append("planType", formData.planType);
 
       const result = await editMembershipPlan(updatedFormData);
+      mutate("/api/membershipPlans");
 
       if (result.status === 200) {
         setOpen(false);
         toast.success("Membership plan updated successfully!");
-        mutate("/api/membershipPlans");
       } else {
         toast.error(result.message || "Error updating membership plan.");
       }

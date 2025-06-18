@@ -80,6 +80,7 @@ export function CoachForm() {
       }
 
       const result = await createCoach(formData);
+      mutate("/api/coaches");
 
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");
@@ -88,10 +89,8 @@ export function CoachForm() {
 
       if (result.status === 200) {
         toast.success(result.message || "Coach added successfully!");
-
         reset();
         setPreview(null);
-        mutate("/api/coaches");
         setOpen(false);
       } else {
         toast.error(result.message || "Error creating a coach.");

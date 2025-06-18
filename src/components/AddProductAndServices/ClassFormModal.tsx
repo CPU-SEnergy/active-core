@@ -60,7 +60,9 @@ export function ClassesModal() {
     data: coaches,
     error,
     isLoading,
-  } = useSWR<COACHDATA[]>("/api/coaches", fetcher);
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
+      revalidateOnMount: true,
+  });
 
   if (error) {
     console.error("Error fetching coaches:", error);
@@ -79,6 +81,8 @@ export function ClassesModal() {
       }
 
       const result = await createClass(formData);
+      mutate("/api/classes");
+
 
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");
@@ -89,7 +93,6 @@ export function ClassesModal() {
         toast.success(result.message || "Class added successfully!");
         reset();
         setPreview(null);
-        mutate("/api/classes");
         setOpen(false);
       } else {
         toast.error(result.message || "Error creating a class.");
