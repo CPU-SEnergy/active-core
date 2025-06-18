@@ -40,7 +40,7 @@ export function EarningsChartSkeleton() {
       <CardContent className="pb-4 sm:pb-6">
         <div className="h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] xl:h-[400px]">
           <div className="h-full w-full flex items-end justify-between gap-0.5 sm:gap-1 md:gap-2 px-1 sm:px-2 md:px-4">
-            {Array.from({ length: 12 }).map((_, index) => (
+            {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
                 className="flex flex-col items-center gap-1 sm:gap-2 flex-1"
