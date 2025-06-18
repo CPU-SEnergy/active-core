@@ -20,8 +20,6 @@ export async function createCoach(formData: FormData) {
     return { message: "Form data not received", status: 400 };
   }
 
-  console.log("FormData entries:", Array.from(formData.entries()));
-
   const file = formData.get("image");
   if (!(file instanceof File)) {
     return { message: "Invalid file format", status: 422 };
@@ -51,7 +49,6 @@ export async function createCoach(formData: FormData) {
 
   try {
     getFirebaseAdminApp();
-    console.log("Parsed data:", data);
 
     const file = formData.get("image");
     if (!(file instanceof File)) {

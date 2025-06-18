@@ -67,8 +67,6 @@ export default function MembershipPlansPage() {
     return <MembershipPlanSkeleton />;
   }
 
-  console.log("membership page", membershipPlans);
-
   return (
     <>
       <div className="min-h-screen bg-white">

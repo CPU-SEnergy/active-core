@@ -16,14 +16,11 @@ export async function GET(
       );
     }
 
-    console.log("Fetching apparel with ID:", id);
-
     getFirebaseAdminApp();
 
     const apparel = await db.apparels.get(id);
 
     if (!apparel) {
-      console.log("Apparel not found with ID:", id);
       return NextResponse.json({ error: "Apparel not found" }, { status: 404 });
     }
 

@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
   });
 
   const user = await getUser(tokens.decodedToken.uid);
-  console.log("User custom claims updated", user!.customClaims);
   const response = new NextResponse(
     JSON.stringify({
       customClaims: user!.customClaims,
@@ -30,8 +29,6 @@ export async function GET(request: NextRequest) {
       headers: { "content-type": "application/json" },
     }
   );
-
-  console.log(await getUser(tokens.decodedToken.uid));
 
   return refreshNextResponseCookies(request, response, serverConfig);
 }

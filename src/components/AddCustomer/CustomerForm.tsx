@@ -156,11 +156,7 @@ export function CustomerPaymentModal() {
       } else {
         // Ensure userId is set in the form data
         data.userId = selectedUserId;
-        console.log("Submitting with userId:", selectedUserId);
       }
-
-      console.log("Submitting form with data:", data);
-      console.log("Selected user ID at submission:", selectedUserId);
 
       const result = await addCustomerWithPayment(
         {
@@ -235,9 +231,6 @@ export function CustomerPaymentModal() {
 
     // Show a success toast
     toast.success(`Selected user: ${user.firstName} ${user.lastName}`);
-
-    console.log("User selected:", user.id);
-    console.log("Form userId value:", watch("userId"));
   };
 
   const clearUserSelection = () => {
@@ -250,9 +243,6 @@ export function CustomerPaymentModal() {
     setValue("sex", "male");
     setValue("type", "regular");
     setUserSelectionError(null);
-
-    console.log("User selection cleared");
-    console.log("Form userId value after clear:", watch("userId"));
   };
 
   // Find the selected user object - using uid instead of id

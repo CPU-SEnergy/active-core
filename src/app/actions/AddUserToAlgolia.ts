@@ -31,7 +31,6 @@ export async function addUserToAlgolia(user: User) {
       },
     });
 
-    console.log("User added to Algolia:", response);
     return { success: true, response };
   } catch (error) {
     console.error("Error adding user to Algolia:", error);
@@ -53,7 +52,6 @@ export async function updatePartialUserToAlgolia(
       attributesToUpdate: userData,
     });
 
-    console.log("User updated in Algolia:", response);
     return { success: true, response };
   } catch (error) {
     console.error("Error updating user in Algolia:", error);
@@ -71,7 +69,6 @@ export async function deleteUserFromAlgolia(uuid: string) {
       objectID: uuid,
     });
 
-    console.log("User deleted from Algolia:", response);
     return { success: true, response };
   } catch (error) {
     console.error("Error deleting user from Algolia:", error);

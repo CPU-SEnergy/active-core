@@ -17,7 +17,6 @@ export async function GET() {
       ...data.data,
     }));
 
-    console.log("coaches api", coaches);
     return NextResponse.json(coaches);
   } catch (error) {
     console.error("Error fetching coaches: ", error);

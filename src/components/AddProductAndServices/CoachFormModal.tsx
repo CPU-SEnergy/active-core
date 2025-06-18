@@ -80,7 +80,6 @@ export function CoachForm() {
       }
 
       const result = await createCoach(formData);
-      console.log("createCoach result:", result);
 
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");

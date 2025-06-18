@@ -18,8 +18,6 @@ export async function createMembershipPlan(formData: FormData) {
     return { message: "Form data not received", status: 400 };
   }
 
-  console.log("FormData entries:", Array.from(formData.entries()));
-
   const rawPrice = formData.get("price");
   const parsedPrice = rawPrice ? Number(rawPrice) : 0;
 
@@ -49,7 +47,6 @@ export async function createMembershipPlan(formData: FormData) {
 
   try {
     getFirebaseAdminApp();
-    console.log("Parsed data:", data);
 
     const membershipPlanData = {
       name: data.name,

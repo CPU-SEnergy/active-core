@@ -29,11 +29,7 @@ export async function createClass(formData: FormData) {
     image: formData.get("image"),
   };
 
-  console.log("Raw data:", rawData);
-
   const parse = classFormSchema.safeParse(rawData);
-
-  console.log("Parsed data:", parse);
 
   if (!parse.success) {
     return {
@@ -75,8 +71,6 @@ export async function createClass(formData: FormData) {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-
-    console.log("Class data:", classData);
 
     await db.classes.add(classData, { as: "server" });
 

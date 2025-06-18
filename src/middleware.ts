@@ -51,8 +51,6 @@ export async function middleware(request: NextRequest) {
 
       const role = decodedToken.role;
 
-      console.log("User role, middleware", { role });
-
       const isAdminRoute = path.startsWith("/admin");
 
       if (isAdminRoute) {

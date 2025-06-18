@@ -21,7 +21,6 @@ export async function editClass(formData: FormData) {
   }
 
   const id = formData.get("id") as Schema["classes"]["Id"];
-  console.log("Class ID:", id);
   if (!id || typeof id !== "string") {
     return { message: "Invalid class ID", status: 400 };
   }
@@ -35,11 +34,7 @@ export async function editClass(formData: FormData) {
     existingImageUrl: formData.get("existingImageUrl"),
   };
 
-  console.log("Raw data for update:", rawData);
-
   const parse = classFormSchema.safeParse(rawData);
-  console.log("Parsed data:", parse);
-
   if (!parse.success) {
     return {
       message: "Validation failed",
@@ -77,8 +72,6 @@ export async function editClass(formData: FormData) {
       imageUrl,
       updatedAt: new Date(),
     };
-
-    console.log("Updated class data:", updatedClassData);
 
     await db.classes.update(id, updatedClassData, { as: "server" });
 
