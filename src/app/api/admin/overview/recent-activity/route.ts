@@ -1,26 +1,53 @@
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { db } from "@/lib/schema/firestore";
+import { intervalToDuration, formatDuration, subDays } from "date-fns";
 
 export async function GET() {
   try {
     getFirebaseAdminApp();
 
-    const paymentsCollection = await db.payments.query(($) =>
-      $.field("createdAt").order("desc")
+    const payments = await db.payments.all();
+    const now = new Date();
+    const cutoffDate = subDays(now, 30);
+
+    const recentPayments = payments.filter(
+      (p) => p.data.createdAt && new Date(p.data.createdAt) >= cutoffDate
     );
 
-    const cleanPayments = paymentsCollection.map((doc) => ({
-      ...doc.data,
-    }));
-
-    if (!cleanPayments) {
-      return new Response(JSON.stringify({ error: "Document not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
+    const customers = recentPayments.map((p) => {
+      const expiry = new Date(p.data.availedPlan.expiryDate);
+      const duration = intervalToDuration({
+        start: now,
+        end: expiry > now ? expiry : now,
       });
-    }
 
-    return new Response(JSON.stringify(cleanPayments), {
+      const remainingTime =
+        expiry > now
+          ? formatDuration(duration, {
+              format: ["months", "days", "hours", "minutes"],
+              delimiter: " ",
+            })
+          : "Expired";
+
+      return {
+        id: p.ref.id,
+        customerId: p.data.customer.customerId,
+        paymentMethod: p.data.paymentMethod,
+        firstName: p.data.customer.firstName,
+        lastName: p.data.customer.lastName,
+        price: p.data.availedPlan.amount,
+        requestNumber: p.data.id,
+        timeApproved: p.data.createdAt
+          ? p.data.createdAt.toLocaleString()
+          : "N/A",
+        subscription: p.data.availedPlan.name,
+        remainingTime,
+        duration: p.data.availedPlan.duration ? p.data.availedPlan.duration.toLocaleString()
+          : "N/A",
+      };
+    });
+
+    return new Response(JSON.stringify(customers), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
