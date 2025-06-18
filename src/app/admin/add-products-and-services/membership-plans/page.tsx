@@ -3,7 +3,6 @@
 import { Card } from "@/components/ui/card";
 import { MembershipPlanForm } from "@/components/AddProductAndServices/MembershipPlanModal";
 import SelectProductAndServices from "../SelectProductAndServices";
-import useSWR from "swr";
 import { MEMBERSHIPDATA } from "@/lib/types/product-services";
 import fetcher from "@/lib/fetcher";
 import { EditMembershipPlanModal } from "@/components/AddProductAndServices/EditMemberShipPlanModal";
@@ -11,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
 import { removeItem } from "@/app/actions/admin/products-services/removeItem";
+import { useState, useEffect } from "react";
 
 function MembershipPlanSkeleton() {
   return (
@@ -50,11 +50,24 @@ function MembershipPlanSkeleton() {
 }
 
 export default function MembershipPlansPage() {
-  const {
-    data: membershipPlans,
-    error,
-    isLoading,
-  } = useSWR<MEMBERSHIPDATA[]>("/api/membershipPlans", fetcher);
+  const [membershipPlans, setMembershipPlans] = useState<MEMBERSHIPDATA[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchMembershipPlans = async () => {
+      try {
+        const data = await fetcher("/api/membershipPlans");
+        setMembershipPlans(data);
+        setIsLoading(false);
+      } catch (err) {
+        setError(err as Error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembershipPlans();
+  }, []);
 
   if (error) {
     console.error("Error fetching membership:", error);
