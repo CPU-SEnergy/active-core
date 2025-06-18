@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { CoachForm } from "@/components/AddProductAndServices/CoachFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
 import fetcher from "@/lib/fetcher";
+import useSWR from "swr";
 import { COACHDATA } from "@/lib/types/product-services";
 import { EditCoach } from "@/components/AddProductAndServices/EditCoachModal";
 import { convertTimestampToDate } from "@/utils/helpers/convertTimestampToDate";
@@ -12,7 +13,6 @@ import ProductAndServicesSwitch from "@/components/AddProductAndServices/Product
 import { Skeleton } from "@/components/ui/skeleton";
 import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
 import { removeItem } from "@/app/actions/admin/products-services/removeItem";
-import { useEffect, useState } from "react";
 
 function CoachesSkeleton() {
   return (
@@ -56,26 +56,11 @@ function CoachesSkeleton() {
 }
 
 export default function CoachesPage() {
-  const [coaches, setCoaches] = useState<COACHDATA[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const fetchCoaches = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetcher('/api/coaches');
-        setCoaches(data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error("Error fetching coaches:", err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch coaches'));
-        setIsLoading(false);
-      }
-    };
-
-    fetchCoaches();
-  }, []);
+  const {
+    data: coaches,
+    error,
+    isLoading,
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher);
 
   if (error) {
     console.error("Error fetching coaches:", error);
