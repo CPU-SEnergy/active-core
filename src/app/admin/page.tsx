@@ -317,7 +317,6 @@ export default function Dashboard() {
             </AlertDescription>
           </Alert>
         )}
-
             <div className="space-y-4">
               {kpis.map((kpi, index) => (
                 <KPICard key={index} {...kpi} />
