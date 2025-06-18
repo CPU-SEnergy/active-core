@@ -40,7 +40,12 @@ function ApparelsSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+function calculateFinalPrice(price: number, discount?: number): number {
+  if (!discount || discount <= 0 || discount >= price) return price;
+  return price - discount;
 }
 
 export default function ApparelsPage() {
@@ -117,20 +122,32 @@ export default function ApparelsPage() {
                     <h3 className="font-medium">{apparel.name}</h3>
                   </div>
                   <p className="text-sm inline-flex gap-1">
-                    {apparel.discount ? (
-                      <>
-                        <span className="line-through text-gray-500 font-semibold">
-                          P {apparel.price.toFixed(2)}
+                    {(() => {
+                      const hasDiscount =
+                        apparel.discount &&
+                        apparel.discount > 0 &&
+                        apparel.discount < apparel.price;
+
+                      const finalPrice = calculateFinalPrice(
+                        apparel.price,
+                        apparel.discount
+                      );
+
+                      return hasDiscount ? (
+                        <>
+                          <span className="line-through text-gray-500 font-semibold">
+                            ₱{apparel.price.toFixed(2)}
+                          </span>
+                          <span className="text-red-500 font-semibold">
+                            ₱{finalPrice.toFixed(2)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-semibold">
+                          ₱{apparel.price.toFixed(2)}
                         </span>
-                        <span className="text-red-500 font-semibold">
-                          P {apparel.discount.toFixed(2)}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-semibold">
-                        P {apparel.price.toFixed(2)}
-                      </span>
-                    )}
+                      );
+                    })()}
                   </p>
                 </div>
               </Card>
