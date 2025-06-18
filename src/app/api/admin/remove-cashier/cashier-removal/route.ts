@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
     await db.cashier.remove(targetUid);
 
     const user = await getUser(targetUid);
-    console.log("User custom claims updated", user!.customClaims);
 
     const response = new NextResponse(
       JSON.stringify({

@@ -7,7 +7,6 @@ export const checkAndAssignAdminRole = async (
   userId: string,
   email: string
 ) => {
-  console.log("Checking admin role for user:", email);
 
   const { setCustomUserClaims } = getFirebaseAuth({
     serviceAccount: serverConfig.serviceAccount,
@@ -41,12 +40,9 @@ export const checkAndAssignAdminRole = async (
       };
     }
 
-    console.log("Raw ALLOWED_EMAIL value:", envValue);
-
     try {
       if (envValue.startsWith("[") && envValue.endsWith("]")) {
         allowedEmails = JSON.parse(envValue);
-        console.log("Parsed as JSON array:", allowedEmails);
 
         if (allowedEmails.length === 0) {
           console.warn(
@@ -63,7 +59,6 @@ export const checkAndAssignAdminRole = async (
           .split(",")
           .map((email) => email.trim())
           .filter((email) => email.length > 0);
-        console.log("Parsed as comma-separated:", allowedEmails);
 
         if (allowedEmails.length === 0) {
           console.warn(
@@ -88,18 +83,12 @@ export const checkAndAssignAdminRole = async (
       };
     }
 
-    console.log("Final allowed emails array:", allowedEmails);
-    console.log("Checking if user email is in allowed list:", email);
-
     if (allowedEmails.includes(email)) {
-      console.log("✅ User is in allowed list, setting admin role");
       await setCustomUserClaims(userId, {
         role: "admin",
       });
-      console.log("✅ Admin role set successfully");
       return { success: true, isAdmin: true, message: "Admin role assigned" };
     } else {
-      console.log("ℹ️  User is not in allowed list, no admin role assigned");
       return {
         success: true,
         isAdmin: false,

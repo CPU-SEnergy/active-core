@@ -62,8 +62,6 @@ export default function ClassesPage() {
     return <ClassesSkeleton />;
   }
 
-  console.log("coaches page", classes);
-
   return (
     <>
       <div className="min-h-screen bg-white">

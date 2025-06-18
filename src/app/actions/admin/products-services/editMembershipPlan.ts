@@ -31,15 +31,6 @@ export async function editMembershipPlan(formData: FormData) {
     const durationRaw = formData.get("duration");
     const planType = formData.get("planType") as MEMBERSHIPDATA["planType"];
 
-    console.log("Raw form values:", {
-      id,
-      name,
-      description,
-      priceRaw,
-      durationRaw,
-      planType,
-    });
-
     let price = Number(priceRaw);
     if (typeof priceRaw === "string") {
       try {
@@ -90,9 +81,7 @@ export async function editMembershipPlan(formData: FormData) {
       planType,
       updatedAt: new Date(),
     };
-
-    console.log("Updating membership plan with data:", updateData);
-
+  
     await db.membershipPlans.update(
       id as Schema["membershipPlans"]["Id"],
       updateData,

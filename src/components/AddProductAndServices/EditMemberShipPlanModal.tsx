@@ -107,15 +107,6 @@ export function EditMembershipPlanModal({
 
       updatedFormData.append("planType", formData.planType);
 
-      console.log("Submitting form data:", {
-        id: data.id,
-        name: formData.name,
-        description: formData.description,
-        price: formData.price.toString(),
-        duration: formData.duration.toString(),
-        planType: formData.planType,
-      });
-
       const result = await editMembershipPlan(updatedFormData);
 
       if (result.status === 200) {
