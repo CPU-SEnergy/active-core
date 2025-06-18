@@ -1,25 +1,65 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useMemo } from "react"
-import { Search, ChevronUp, ChevronDown } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { timeFilters } from "@/lib/timeFilters"
+import { useState, useCallback } from "react";
+import {
+  Search,
+  RefreshCw,
+  AlertCircle,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Tag,
+  User,
+  UserCheck,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { Button } from "@/components/ui/button";
+import fetcher from "@/lib/fetcher";
+import useSWR from "swr";
+interface RecentActivity {
+  id: string;
+  customerId: string | null;
+  paymentMethod: string;
+  firstName: string;
+  lastName: string;
+  price: number;
+  requestNumber: string;
+  timeApproved: string;
+  subscription: string;
+  remainingTime: string;
+  duration: string;
+}
 
 function DashboardSkeleton() {
   return (
-    <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
-      <aside className="w-full lg:w-64 bg-white p-6 border-r">
+    <div className="flex min-h-screen bg-gray-50 w-full flex-col lg:flex-row">
+      <aside className="w-full lg:w-80 bg-white p-6 border-r border-gray-200 shadow-sm">
         <nav className="space-y-6">
           <div>
             <Skeleton className="h-8 w-32 mb-4" />
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <Card key={i}>
+                <Card key={i} className="shadow-sm">
                   <CardContent className="p-4">
                     <Skeleton className="h-4 w-24 mb-2" />
                     <div className="flex items-center justify-between">
@@ -35,13 +75,13 @@ function DashboardSkeleton() {
       </aside>
 
       <div className="flex-1 p-6">
-        <div className="max-w-4xl">
+        <div className="max-w-6xl mx-auto">
           <div className="relative mb-6">
             <Skeleton className="h-10 w-full" />
           </div>
 
-          <div className="bg-white rounded-lg border">
-            <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b border-gray-100">
               <Skeleton className="h-6 w-32 mb-4 lg:mb-0" />
               <Skeleton className="h-10 w-[100px]" />
             </div>
@@ -49,28 +89,22 @@ function DashboardSkeleton() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>
-                    <Skeleton className="h-4 w-24" />
-                  </TableHead>
-                  <TableHead>
-                    <Skeleton className="h-4 w-16" />
-                  </TableHead>
-                  <TableHead>
-                    <Skeleton className="h-4 w-32" />
-                  </TableHead>
-                  <TableHead>
-                    <Skeleton className="h-4 w-24" />
-                  </TableHead>
-                  <TableHead>
-                    <Skeleton className="h-4 w-16" />
-                  </TableHead>
-                  <TableHead>
-                    <Skeleton className="h-4 w-20" />
-                  </TableHead>
+                  {[
+                    "Customer",
+                    "Type",
+                    "Payment Method",
+                    "Plan",
+                    "Date",
+                    "Amount",
+                  ].map((header, i) => (
+                    <TableHead key={i}>
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                  ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[...Array(5)].map((_, index) => (
+                {[...Array(8)].map((_, index) => (
                   <TableRow key={index}>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -101,413 +135,193 @@ function DashboardSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 interface KPI {
-  title: string
-  value: string | number
-  change: number
-  prefix?: string
-}
-
-interface KPIData {
-  yearly: {
-    totalRevenue: number
-    totalMonthlyCustomers: number
-    activeCustomers: string
-    revenueComparison: string
-    customerComparison: string
-    activeCustomersComparison: string
-  }
-  monthly: {
-    totalRevenue: number
-    totalMonthlyCustomers: number
-    activeCustomers: string
-    monthlyRevenueComparison: string
-  }
-}
-
-interface Customer {
-  customerId: string | null
-  firstName: string
-  lastName: string
-  type: string
-}
-
-interface AvailedPlan {
-  membershipPlanId: string
-  name: string
-  amount: number
-  duration: number
-  startDate: string
-  expiryDate: string
-}
-
-interface Payment {
-  id: string
-  paymentMethod: string
-  isNewCustomer: boolean
-  createdAt: string
-  isWalkIn: boolean
-  customer: Customer
-  availedPlan: AvailedPlan
-}
-
-interface ActivityItem {
-  id: string
-  customerName: string
-  customerType: string
-  paymentMethod: string
-  planName: string
-  planDuration: number
-  amount: number
-  createdAt: string
-  isWalkIn: boolean
-  isNewCustomer: boolean
+  title: string;
+  value: string | number;
+  change: number;
+  prefix?: string;
 }
 
 function KPICard({ title, value, change, prefix }: KPI) {
-  const isPositive = change >= 0
+  const isPositive = change >= 0;
 
   return (
-    <Card>
+    <Card className="shadow-sm border-gray-200 hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-4">
-        <div className="text-sm text-gray-500">{title}</div>
-        <div className="flex items-center justify-between mt-1">
-          <div className="text-2xl font-semibold">
-            {prefix && prefix} {value}
+        <div className="text-sm text-gray-600 font-medium">{title}</div>
+        <div className="flex items-center justify-between mt-2">
+          <div className="text-2xl font-bold text-gray-900">
+            {prefix}
+            <span className={prefix ? "ml-1" : ""}>
+              {typeof value === "number" ? value.toLocaleString() : value}
+            </span>
           </div>
           <div
-            className={`text-xs px-2 py-1 rounded-full ${
-              isPositive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+            className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+              isPositive
+                ? "bg-green-100 text-green-700 border border-green-200"
+                : "bg-red-100 text-red-700 border border-red-200"
             }`}
           >
             {isPositive ? "+" : ""}
-            {change}%
+            {change.toFixed(1)}%
           </div>
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-function ActivityTable({ activities }: { activities: ActivityItem[] }) {
-  const [sortField, setSortField] = useState<keyof ActivityItem>("createdAt")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-
-  const handleSort = (field: keyof ActivityItem) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortDirection(field === "createdAt" || field === "amount" ? "desc" : "asc")
-    }
-  }
-
-  const sortedActivities = useMemo(() => {
-    return [...activities].sort((a, b) => {
-      if (sortField === "amount") {
-        return sortDirection === "asc" ? a.amount - b.amount : b.amount - a.amount
-      } else if (sortField === "createdAt") {
-        const dateA = new Date(a.createdAt).getTime()
-        const dateB = new Date(b.createdAt).getTime()
-        return sortDirection === "asc" ? dateA - dateB : dateB - dateA
-      } else {
-        const valueA = String(a[sortField]).toLowerCase()
-        const valueB = String(b[sortField]).toLowerCase()
-        return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA)
-      }
-    })
-  }, [activities, sortField, sortDirection])
-
-  const renderSortIndicator = (field: keyof ActivityItem) => {
-    if (sortField !== field) return null
-    return sortDirection === "asc" ? (
-      <ChevronUp className="inline h-4 w-4 ml-1" />
-    ) : (
-      <ChevronDown className="inline h-4 w-4 ml-1" />
-    )
-  }
-
-  const formatPaymentMethod = (method: string) => {
-    return method
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  }
-
-  const getInitials = (name: string) => {
-    const parts = name.split(" ")
-    if (parts.length >= 2 && parts[0] && parts[1]) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-    }
-    return name.substring(0, 2).toUpperCase()
-  }
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("customerName")}>
-            Customer {renderSortIndicator("customerName")}
-          </TableHead>
-          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("customerType")}>
-            Type {renderSortIndicator("customerType")}
-          </TableHead>
-          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("paymentMethod")}>
-            Payment Method {renderSortIndicator("paymentMethod")}
-          </TableHead>
-          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("planName")}>
-            Plan {renderSortIndicator("planName")}
-          </TableHead>
-          <TableHead className="whitespace-nowrap cursor-pointer" onClick={() => handleSort("createdAt")}>
-            Date {renderSortIndicator("createdAt")}
-          </TableHead>
-          <TableHead className="whitespace-nowrap cursor-pointer text-right" onClick={() => handleSort("amount")}>
-            Amount {renderSortIndicator("amount")}
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sortedActivities.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={6} className="whitespace-nowrap text-center py-8 text-gray-500">
-              No activity found matching your criteria
-            </TableCell>
-          </TableRow>
-        ) : (
-          sortedActivities.map((activity) => (
-            <TableRow key={activity.id}>
-              <TableCell className="whitespace-nowrap flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
-                  {getInitials(activity.customerName)}
-                </div>
-                <div>
-                  <div>{activity.customerName}</div>
-                  <div className="flex gap-1 mt-0.5">
-                    {activity.isWalkIn && (
-                      <Badge variant="outline" className="text-xs py-0 h-5">
-                        Walk-in
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="whitespace-nowrap">
-                <Badge variant="secondary" className="capitalize">
-                  {activity.customerType}
-                </Badge>
-              </TableCell>
-              <TableCell className="whitespace-nowrap">{formatPaymentMethod(activity.paymentMethod)}</TableCell>
-              <TableCell>
-                <div>
-                  <div>{activity.planName}</div>
-                  <div className="text-xs text-gray-500">{activity.planDuration} days</div>
-                </div>
-              </TableCell>
-              <TableCell className="whitespace-nowrap">{new Date(activity.createdAt).toLocaleString()}</TableCell>
-              <TableCell className="whitespace-nowrap text-center font-medium">
-                ₱ {activity.amount.toLocaleString()}
-              </TableCell>
-            </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
-  )
+  );
 }
 
 export default function Dashboard() {
-  const [timeFilter, setTimeFilter] = useState<string>("24h")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [kpiData, setKpiData] = useState<KPIData | null>(null)
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [revenuePeriod, setRevenuePeriod] = useState<"yearly" | "monthly" | "daily">("yearly")
+  const [revenuePeriod, setRevenuePeriod] = useState<
+    "yearly" | "monthly" | "daily"
+  >("yearly");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const currentYear = new Date().getFullYear()
-        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, "0")
+  const {
+    dailyData,
+    yearlyData,
+    monthlyData,
+    customerData,
+    isLoading,
+    error,
+    mutateAll,
+  } = useDashboardData();
 
-        const [yearResponse, monthResponse, paymentsResponse] = await Promise.all([
-          fetch(`/api/admin/overview/kpi/${currentYear}`),
-          fetch(`/api/admin/overview/kpi/${currentYear}/${currentMonth}`),
-          fetch("/api/admin/overview/recent-activity"),
-        ])
-
-        if (!yearResponse.ok) throw new Error("Failed to fetch yearly data")
-        if (!monthResponse.ok) throw new Error("Failed to fetch monthly data")
-        if (!paymentsResponse.ok) throw new Error("Failed to fetch payments data")
-
-        const yearData = await yearResponse.json()
-        const monthData = await monthResponse.json()
-        const paymentsData = await paymentsResponse.json()
-
-        if (!monthData || typeof monthData.monthlyRevenue === "undefined") {
-          throw new Error("Invalid monthly data structure")
-        }
-
-        setKpiData({
-          yearly: {
-            totalRevenue: yearData.totalRevenue || 0,
-            totalMonthlyCustomers: yearData.totalMonthlyCustomers || 0,
-            activeCustomers: yearData.activeCustomers || "0",
-            revenueComparison: yearData.revenueComparison,
-            customerComparison: yearData.customerComparison,
-            activeCustomersComparison: yearData.activeCustomersComparison,
-          },
-          monthly: {
-            totalRevenue: monthData.monthlyRevenue || 0,
-            totalMonthlyCustomers: monthData.monthlyCustomers || 0,
-            activeCustomers: monthData.monthlyActive?.toString() || "0",
-            monthlyRevenueComparison: monthData.monthlyRevenueComparison,
-          },
-        })
-
-        setPayments(paymentsData)
-      } catch (err) {
-        console.error("Error fetching data:", err)
-        setError(err instanceof Error ? err.message : "Failed to fetch data")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
-
-  // Transform payments to a consistent format for display
-  const activityItems: ActivityItem[] = useMemo(() => {
-    return payments.map((payment) => {
-      const customerName = `${payment.customer.firstName} ${payment.customer.lastName}`
-
-      return {
-        id: payment.id,
-        customerName,
-        customerType: payment.customer.type,
-        paymentMethod: payment.paymentMethod,
-        planName: payment.availedPlan.name,
-        planDuration: payment.availedPlan.duration,
-        amount: payment.availedPlan.amount,
-        createdAt: payment.createdAt,
-        isWalkIn: payment.isWalkIn,
-        isNewCustomer: payment.isNewCustomer,
-      }
-    })
-  }, [payments])
-
-  // Filter activities based on search query and time filter
-  const filteredActivities = useMemo(() => {
-    return activityItems.filter((activity) => {
-      const matchesSearch =
-        activity.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        activity.planName.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const activityDate = new Date(activity.createdAt)
-      const now = new Date()
-      const hoursDiff = (now.getTime() - activityDate.getTime()) / (1000 * 60 * 60)
-
-      switch (timeFilter) {
-        case "24h":
-          return matchesSearch && hoursDiff <= 24
-        case "7d":
-          return matchesSearch && hoursDiff <= 168
-        case "30d":
-          return matchesSearch && hoursDiff <= 720
-        default:
-          return matchesSearch
-      }
-    })
-  }, [activityItems, searchQuery, timeFilter])
-
-  if (loading) {
-    return <DashboardSkeleton />
+  if (isLoading) {
+    return <DashboardSkeleton />;
   }
 
   if (error) {
-    return <div className="p-6 text-red-500">Error: {error}</div>
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6 max-w-md w-full text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <div className="text-red-500 text-lg font-semibold mb-2">
+            Error Loading Dashboard
+          </div>
+          <div className="text-gray-600 mb-4">
+            Failed to load dashboard data. Please check your connection and try
+            again.
+          </div>
+          <button
+            onClick={mutateAll}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const getRevenueData = () => {
-    if (!kpiData) return { value: 0, change: 0, title: "Total Revenue" }
-
     switch (revenuePeriod) {
       case "yearly":
         return {
-          value: kpiData.yearly.totalRevenue,
-          change: Number.parseFloat(kpiData.yearly.revenueComparison),
+          value: yearlyData?.totalRevenue || 0,
+          change: parseFloat(yearlyData?.revenueComparison || "0"),
           title: "Total Revenue (Yearly)",
-        }
+        };
       case "monthly":
         return {
-          value: kpiData.monthly.totalRevenue,
-          change: Number.parseFloat(kpiData.monthly.monthlyRevenueComparison),
+          value: monthlyData?.monthlyRevenue || 0,
+          change: monthlyData?.monthlyRevenueComparison || 0,
           title: "Total Revenue (Monthly)",
-        }
+        };
       case "daily":
         return {
-          value: Math.round(kpiData.monthly.totalRevenue / 30),
-          change: Number.parseFloat(kpiData.monthly.monthlyRevenueComparison),
+          value: dailyData?.summary.dailyRevenue || 0,
+          change: dailyData?.summary.revenueChange || 0,
           title: "Total Revenue (Daily)",
-        }
+        };
       default:
         return {
-          value: kpiData.yearly.totalRevenue,
-          change: Number.parseFloat(kpiData.yearly.revenueComparison),
+          value: yearlyData?.totalRevenue || 0,
+          change: parseFloat(yearlyData?.revenueComparison || "0"),
           title: "Total Revenue (Yearly)",
-        }
+        };
     }
-  }
+  };
 
-  const revenueData = getRevenueData()
+  const revenueData = getRevenueData();
 
-  const kpis: KPI[] = kpiData
-    ? [
-        {
-          title: revenueData.title,
-          value: revenueData.value,
-          change: revenueData.change,
-          prefix: "₱",
-        },
-        {
-          title: "Monthly Customers",
-          value: kpiData.yearly.totalMonthlyCustomers,
-          change: Number.parseFloat(kpiData.yearly.customerComparison),
-        },
-        {
-          title: "Active Customers",
-          value: kpiData.yearly.activeCustomers + "%",
-          change: Number.parseFloat(kpiData.yearly.activeCustomersComparison),
-        },
-      ]
-    : []
+  const kpis: KPI[] = [
+    {
+      title: revenueData.title,
+      value: revenueData.value,
+      change: revenueData.change,
+      prefix: "₱",
+    },
+    {
+      title: "Total Customers",
+      value: customerData?.totalCustomers || 0,
+      change: parseFloat(yearlyData?.customerComparison || "0"),
+    },
+    {
+      title: "Active Customers Ratio",
+      value: `${monthlyData?.monthlyActive?.toFixed(1) || "0.0"}%`,
+      change: monthlyData?.monthlyActiveCustomersComparison || 0,
+    },
+  ];
 
   return (
-    <div className="flex h-screen bg-gray-50 w-full flex-col lg:flex-row">
-      <aside className="w-full lg:w-64 bg-white p-6 border-r">
+    <div className="flex min-h-screen bg-gray-50 w-full flex-col lg:flex-row">
+      {/* Sidebar */}
+      <aside className="w-full lg:w-64 bg-white p-6 border-r border-gray-200 shadow-sm">
         <nav className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4 flex items-center justify-between">
-              KPIs
-              <Select
-                value={revenuePeriod}
-                onValueChange={(value: "yearly" | "monthly" | "daily") => setRevenuePeriod(value)}
-              >
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="yearly">Yearly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                </SelectContent>
-              </Select>
-            </h2>
-            <div className="space-y-4 lg:flex lg:flex-wrap flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">KPIs</h2>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={revenuePeriod}
+                  onValueChange={(value: "yearly" | "monthly" | "daily") =>
+                    setRevenuePeriod(value)
+                  }
+                >
+                  <SelectTrigger className="w-[120px] border-gray-300">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                  </SelectContent>
+                </Select>
+                <button
+                  onClick={mutateAll}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={isLoading}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Data Availability Notice */}
+            {(monthlyData?.message ||
+              yearlyData?.message ||
+              customerData?.message) && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-center gap-2 text-blue-700 text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>
+                    {monthlyData?.message ||
+                      yearlyData?.message ||
+                      customerData?.message}{" "}
+                    - Showing default values.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
               {kpis.map((kpi, index) => (
                 <KPICard key={index} {...kpi} />
               ))}
@@ -516,38 +330,396 @@ export default function Dashboard() {
         </nav>
       </aside>
 
+      {/* Main Content */}
       <div className="flex-1 p-6">
-        <div className="max-w-4xl">
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-            <Input
-              placeholder="Search by customer or plan"
-              className="pl-10 bg-gray-100 border-0"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="bg-white rounded-lg border p-2">
-            <div className="p-4 flex flex-col lg:flex-row items-center justify-between border-b">
-              <h2 className="text-lg font-semibold mb-4 lg:mb-0">Recent Activity</h2>
-              <Select value={timeFilter} onValueChange={(value) => setTimeFilter(value)}>
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeFilters.map((filter) => (
-                    <SelectItem key={filter.value} value={filter.value}>
-                      {filter.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <ActivityTable activities={filteredActivities} />
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <CustomerTable />
           </div>
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+function CustomerTable() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
+  const [sortField, setSortField] =
+    useState<keyof RecentActivity>("timeApproved");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const itemsPerPage = 10;
+
+  const {
+    data: customers,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<RecentActivity[]>("/api/admin/overview/recent-activity", fetcher, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 5000,
+  });
+
+  const handleRefresh = useCallback(() => {
+    mutate();
+  }, [mutate]);
+
+  const handleSort = useCallback(
+    (field: keyof RecentActivity) => {
+      if (sortField === field) {
+        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      } else {
+        setSortField(field);
+        setSortDirection("asc");
+      }
+    },
+    [sortField, sortDirection]
+  );
+
+  const filteredAndSortedCustomers = customers
+    ? customers
+        .filter((customer) => {
+          const matchesSearch =
+            searchQuery === "" ||
+            `${customer.firstName} ${customer.lastName}`
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            (customer.customerId &&
+              customer.customerId
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())) ||
+            customer.requestNumber
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase());
+
+          const matchesSubscription =
+            subscriptionFilter === "all" ||
+            customer.subscription === subscriptionFilter;
+
+          return matchesSearch && matchesSubscription;
+        })
+        .sort((a, b) => {
+          if (sortField === "price") {
+            return sortDirection === "asc"
+              ? a.price - b.price
+              : b.price - a.price;
+          } else if (sortField === "timeApproved") {
+            return sortDirection === "asc"
+              ? new Date(a.timeApproved).getTime() -
+                  new Date(b.timeApproved).getTime()
+              : new Date(b.timeApproved).getTime() -
+                  new Date(a.timeApproved).getTime();
+          } else {
+            const aValue = a[sortField]?.toString().toLowerCase() || "";
+            const bValue = b[sortField]?.toString().toLowerCase() || "";
+            return sortDirection === "asc"
+              ? aValue.localeCompare(bValue)
+              : bValue.localeCompare(aValue);
+          }
+        })
+    : [];
+
+  const subscriptionTypes = customers
+    ? [
+        "all",
+        ...Array.from(
+          new Set(customers.map((customer) => customer.subscription))
+        ),
+      ]
+    : ["all"];
+
+  const totalPages = Math.ceil(
+    filteredAndSortedCustomers.length / itemsPerPage
+  );
+  const paginatedCustomers = filteredAndSortedCustomers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  if (isLoading) return <DashboardSkeleton />;
+
+  if (error)
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
+          <AlertCircle size={18} />
+          <span>
+            Error: {error.message || "Failed to load active customers"}
+          </span>
+        </div>
+        <Button onClick={handleRefresh} variant="outline" className="mt-4">
+          <RefreshCw size={16} className="mr-2" />
+          Try Again
+        </Button>
+      </div>
+    );
+
+  if (!customers || customers.length === 0)
+    return (
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Active Customers</h2>
+          <div className="flex gap-2">
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search customers..."
+                className="pl-9 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button variant="outline" onClick={handleRefresh} size="icon">
+              <RefreshCw size={16} />
+            </Button>
+          </div>
+        </div>
+        <div className="border rounded-lg p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="bg-gray-100 p-4 rounded-full">
+              <UserCheck size={32} className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium">No active customers found</h3>
+            <p className="text-gray-500 max-w-md">
+              There are currently no active customers in the system. Customers
+              will appear here when they have an active subscription.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+
+  return (
+    <div className="p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <h2 className="text-xl font-semibold">Recent Transactions</h2>
+        <p className="text-sm text-gray-500">
+          Transactions for the last 30 days
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search customers..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select
+            value={subscriptionFilter}
+            onValueChange={setSubscriptionFilter}
+          >
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Filter by subscription" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Subscriptions</SelectItem>
+              {subscriptionTypes
+                .filter((type) => type !== "all")
+                .map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            size="icon"
+            className="flex-shrink-0"
+          >
+            <RefreshCw size={16} />
+          </Button>
+        </div>
+      </div>
+
+      <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50 hover:bg-gray-50">
+                <TableHead
+                  className="font-semibold text-black cursor-pointer"
+                  onClick={() => handleSort("firstName")}
+                >
+                  <div className="flex items-center gap-1">
+                    <User size={14} />
+                    Customer
+                    {sortField === "firstName" && (
+                      <span className="ml-1">
+                        {sortDirection === "asc" ? "↑" : "↓"}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-black cursor-pointer"
+                  onClick={() => handleSort("price")}
+                >
+                  <div className="flex items-center gap-1">
+                    Price
+                    {sortField === "price" && (
+                      <span className="ml-1">
+                        {sortDirection === "asc" ? "↑" : "↓"}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-black cursor-pointer"
+                  onClick={() => handleSort("paymentMethod")}
+                >
+                  <div className="flex items-center gap-1">
+                    <Calendar size={14} />
+                    Payment Method
+                    {sortField === "paymentMethod" && (
+                      <span className="ml-1">
+                        {sortDirection === "asc" ? "↑" : "↓"}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+
+                <TableHead
+                  className="font-semibold text-black cursor-pointer"
+                  onClick={() => handleSort("timeApproved")}
+                >
+                  <div className="flex items-center gap-1">
+                    <Calendar size={14} />
+                    Time Approved
+                    {sortField === "timeApproved" && (
+                      <span className="ml-1">
+                        {sortDirection === "asc" ? "↑" : "↓"}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-black cursor-pointer"
+                  onClick={() => handleSort("subscription")}
+                >
+                  <div className="flex items-center gap-1">
+                    <Tag size={14} />
+                    Subscription
+                    {sortField === "subscription" && (
+                      <span className="ml-1">
+                        {sortDirection === "asc" ? "↑" : "↓"}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedCustomers.map((customer) => (
+                <TableRow key={customer.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
+                        {getInitials(customer.firstName, customer.lastName)}
+                      </div>
+                      <div>
+                        <div>
+                          {customer.firstName} {customer.lastName}
+                        </div>
+                        {!customer.customerId && (
+                          <div className="text-xs text-gray-500">Walk-in</div>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="font-medium">
+                    ₱{customer.price.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {customer.paymentMethod.charAt(0).toUpperCase() +
+                      customer.paymentMethod.slice(1)}
+                  </TableCell>
+                  <TableCell>{customer.timeApproved}</TableCell>
+                  <TableCell>
+                    
+                      <div>
+                        <div>{customer.subscription}</div>
+                        <div className="text-xs text-gray-500">
+                          {customer.duration} days
+                        </div>
+                      </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* Pagination controls */}
+      {filteredAndSortedCustomers.length > 0 && (
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-gray-500">
+            Showing{" "}
+            {Math.min(
+              filteredAndSortedCustomers.length,
+              (currentPage - 1) * itemsPerPage + 1
+            )}{" "}
+            to{" "}
+            {Math.min(
+              filteredAndSortedCustomers.length,
+              currentPage * itemsPerPage
+            )}{" "}
+            of {filteredAndSortedCustomers.length} customers
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="h-8 w-8"
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="h-8 w-8"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="h-8 w-8"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="h-8 w-8"
+            >
+              <ChevronsRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

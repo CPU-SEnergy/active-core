@@ -190,7 +190,7 @@ export default function SalesMetrics({
           </div>
 
           <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div className="text-sm text-gray-500 mb-2">Total Members</div>
+            <div className="text-sm text-gray-500 mb-2">Total Active Members</div>
             <div className="flex justify-between items-center">
               <span className="text-xl lg:text-2xl font-semibold text-gray-900">
                 {formatNumber(totalCustomers)}
@@ -204,7 +204,7 @@ export default function SalesMetrics({
           </div>
 
           <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div className="text-sm text-gray-500 mb-3">Memberships:</div>
+            <div className="text-sm text-gray-500 mb-3">Active Memberships:</div>
             {hasData ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
