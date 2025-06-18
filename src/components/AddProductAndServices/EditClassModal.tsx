@@ -48,9 +48,7 @@ export default function EditClassModal({ data }: EditClassModalProps) {
     data: coaches,
     error: coachesError,
     isLoading: coachesLoading,
-  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
-    dedupingInterval: 60 * 60 * 24,
-  });
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher);
 
   const {
     register,

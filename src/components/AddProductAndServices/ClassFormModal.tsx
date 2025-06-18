@@ -60,9 +60,7 @@ export function ClassesModal() {
     data: coaches,
     error,
     isLoading,
-  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
-    dedupingInterval: 60 * 60 * 24,
-  });
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher);
 
   if (error) {
     console.error("Error fetching coaches:", error);

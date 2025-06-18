@@ -54,9 +54,7 @@ export default function MembershipPlansPage() {
     data: membershipPlans,
     error,
     isLoading,
-  } = useSWR<MEMBERSHIPDATA[]>("/api/membershipPlans", fetcher, {
-    dedupingInterval: 60 * 60 * 24,
-  });
+  } = useSWR<MEMBERSHIPDATA[]>("/api/membershipPlans", fetcher);
 
   if (error) {
     console.error("Error fetching membership:", error);
