@@ -85,7 +85,7 @@ export default function RegisterPageClient() {
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center p-2 sm:p-4 bg-gray-50 overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center p-2 sm:p-4 bg-gray-50 overflow-auto">
       <Card className="w-full max-w-sm sm:max-w-md lg:max-w-5xl h-full max-h-[95vh] flex flex-col lg:flex-row overflow-hidden rounded-lg sm:rounded-2xl shadow-xl bg-white border border-gray-200">
         <CardContent className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
           <div className="w-full max-w-sm mx-auto h-full flex flex-col">
@@ -300,7 +300,7 @@ export default function RegisterPageClient() {
             )}
 
             {/* Login link */}
-            <div className="text-center pt-2 sm:pt-3 border-t border-gray-200 flex-shrink-0">
+            <div className="text-center mt-8 pt-2 sm:pt-3 border-t border-gray-200 flex-shrink-0">
               <p className="text-xs sm:text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link
