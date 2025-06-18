@@ -73,6 +73,7 @@ export default function DonutCharts({
     individual: 0,
     walkIn: 0,
   };
+  const total = memberships.package + memberships.individual + memberships.walkIn;
 
   const chartData = [
     {
@@ -92,13 +93,11 @@ export default function DonutCharts({
     },
   ];
 
-  const total = chartData.reduce((sum, item) => sum + item.value, 0);
-
   return (
     <Card className="w-full h-full bg-white shadow-sm border border-gray-200">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg font-semibold text-gray-900">
-          Memberships
+          Currently Active Memberships
         </CardTitle>
       </CardHeader>
       <CardContent className="pb-6">
@@ -118,22 +117,40 @@ export default function DonutCharts({
                       dataKey="value"
                       strokeWidth={2}
                       stroke="#ffffff"
+                      style={{ cursor: 'pointer' }}
                     >
                       {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                          style={{ 
+                            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+                            transition: 'all 0.2s ease-in-out'
+                          }}
+                        />
                       ))}
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        fontSize: "12px",
-                        padding: "8px",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "6px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                        backgroundColor: "white",
+                        backgroundColor: 'white',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        padding: '12px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#374151',
                       }}
-                      formatter={(value: number) => [`${value} members`, ""]}
-                      labelFormatter={() => ""}
+                      labelStyle={{
+                        color: '#111827',
+                        fontWeight: '600',
+                        marginBottom: '4px',
+                      }}
+                      formatter={(value: number, name: string) => [
+                        `${value} members (${total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'}%)`,
+                        name
+                      ]}
+                      cursor={{ fill: 'transparent' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -170,7 +187,7 @@ export default function DonutCharts({
             {chartData.map((entry, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center p-3 sm:p-2 md:p-3 bg-white rounded-lg border border-gray-100 min-w-0"
+                className="flex flex-col items-center p-3 sm:p-2 md:p-3 bg-white rounded-lg border border-gray-100 min-w-0 transition-all duration-200 hover:shadow-md hover:border-gray-200"
               >
                 <div className="flex items-center gap-2 mb-2 sm:mb-1 w-full justify-center">
                   <div
