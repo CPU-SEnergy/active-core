@@ -86,9 +86,9 @@ export function ApparelForm() {
 
       const result = await createApparel(formData);
       if (result.status === 201) {
-        toast.success("Apparel created successfully!");
+        setOpen(false); 
         mutate("/api/apparels");
-        setOpen(false);
+        toast.success("Apparel created successfully!");
         reset();
         setPreview(null);
       } else {

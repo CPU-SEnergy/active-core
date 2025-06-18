@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { mutate } from "swr";
+import fetcher from "@/lib/fetcher";
 
 interface DeleteButtonProps {
   id: string;
@@ -30,26 +31,28 @@ export default function DeleteButton({
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
-    setError(null);
-    setLoading(true);
+  setError(null);
+  setLoading(true);
 
-    try {
-      const result = await onDelete(id);
-      mutate(`/api/${collectionName}`);
-      mutate(`/api/${collectionName}/${id}`);
+  try {
+    const result = await onDelete(id);
 
-      if (result.success) {
-        toast.success("Item deleted successfully");
-        setDialogOpen(false);
-      } else {
-        throw new Error(result.error || "Failed to delete item");
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to delete item");
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      await mutate(`/api/${collectionName}`, () => fetcher(`/api/${collectionName}`));
+      await mutate(`/api/${collectionName}/${id}`, () => fetcher(`/api/${collectionName}/${id}`));
+
+      toast.success("Item deleted successfully");
+      setDialogOpen(false);
+    } else {
+      throw new Error(result.error || "Failed to delete item");
     }
-  };
+  } catch (error) {
+    setError(error instanceof Error ? error.message : "Failed to delete item");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>

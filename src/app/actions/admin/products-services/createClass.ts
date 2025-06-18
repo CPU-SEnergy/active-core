@@ -8,6 +8,7 @@ import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { classFormSchema } from "@/lib/zod/schemas/classFormSchema";
+import { revalidatePath } from "next/cache";
 
 export async function createClass(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
@@ -73,6 +74,7 @@ export async function createClass(formData: FormData) {
     };
 
     await db.classes.add(classData, { as: "server" });
+    revalidatePath("/");
 
     return { message: "Class created successfully!", status: 200 };
   } catch (error) {

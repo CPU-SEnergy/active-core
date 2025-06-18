@@ -152,11 +152,12 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
       if (formData.image instanceof File) {
         updatedFormData.append("image", formData.image);
       }
-
+ 
       const result = await editApparel(updatedFormData);
-      mutate("/api/apparels");
+      
       if (result.success) {
         setOpen(false);
+        mutate("/api/apparels");
         toast.success("Apparel updated successfully!");
       } else {
         toast.error(result.message || "Failed to update apparel.");

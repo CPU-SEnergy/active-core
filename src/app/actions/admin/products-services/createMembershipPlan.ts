@@ -6,6 +6,7 @@ import { db } from "@/lib/schema/firestore";
 import { ZodFormattedError } from "zod";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { revalidatePath } from "next/cache";
 
 export async function createMembershipPlan(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
@@ -63,6 +64,8 @@ export async function createMembershipPlan(formData: FormData) {
     await db.membershipPlans.add(membershipPlanData, {
       as: "server",
     });
+    
+    revalidatePath("/");
 
     return { message: "Membership plan created", status: 201 };
   } catch (error) {

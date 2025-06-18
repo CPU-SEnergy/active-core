@@ -5,6 +5,7 @@ import { uploadImage } from "../../upload/image";
 import { ProductAndServicesType } from "@/lib/types/product-services";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { getCurrentUserCustomClaims } from "@/utils/helpers/getCurrentUserClaims";
+import { revalidatePath } from "next/cache";
 
 export async function editCoach(formData: FormData) {
   const user = await getCurrentUserCustomClaims();
@@ -60,6 +61,7 @@ export async function editCoach(formData: FormData) {
     };
 
     await db.coaches.update(id, updateData, { as: "server" });
+    revalidatePath("/");
 
     return {
       success: true,

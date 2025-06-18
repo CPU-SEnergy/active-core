@@ -63,11 +63,11 @@ export function MembershipPlanForm() {
       formData.append("planType", data.planType);
 
       const result = await createMembershipPlan(formData);
-      mutate("/api/membershipPlans");
       
       if (result.status === 201) {
-        toast.success("Membership plan created successfully!");
         setOpen(false);
+        mutate("/api/membershipPlans");
+        toast.success("Membership plan created successfully!");
         reset();
       } else {
         toast.error(result.message || "Failed to create membership plan.");
