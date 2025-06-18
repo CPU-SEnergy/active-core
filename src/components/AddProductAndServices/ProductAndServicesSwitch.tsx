@@ -22,6 +22,7 @@ export default function ProductAndServicesSwitch({
     startTransition(async () => {
       const result = await updateIsActiveStatus(collectionName, id, checked);
       mutate(`/api/${collectionName}`);
+      mutate(`/api/${collectionName}/${id}`);
 
       if (!result.success) {
         console.error(result.error ?? "Failed to update status");

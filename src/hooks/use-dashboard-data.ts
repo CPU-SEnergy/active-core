@@ -55,9 +55,10 @@ interface CustomerData {
 }
 
 const fetcher = async (url: string) => {
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    next: { revalidate: 0 },
+  });
   if (!res.ok) {
-    // Don't throw error for 404s, let the component handle missing data
     if (res.status === 404) {
       const errorData = await res.json();
       return errorData;

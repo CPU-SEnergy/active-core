@@ -87,7 +87,9 @@ export function EditCoach({ data }: { data: COACHDATA }) {
     try {
       setIsLoadingCoachData(true);
 
-      const response = await fetch(`/api/coaches/${data.id}`);
+      const response = await fetch(`/api/coaches/${data.id}`, {
+        next: { revalidate: 0 },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch coach data: ${response.statusText}`);
@@ -145,11 +147,12 @@ export function EditCoach({ data }: { data: COACHDATA }) {
 
     try {
       const result = await editCoach(updatedFormData);
+      mutate("/api/coaches");
+
       if (result.status === 200) {
         setOpen(false);
         toast.success(result.message || "Coach updated successfully!");
         reset();
-        mutate("/api/coaches", undefined, true);
       } else {
         toast.error(result.message || "Error updating coach.");
       }
