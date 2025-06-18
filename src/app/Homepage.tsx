@@ -1,14 +1,15 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Image from "next/image"
-import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
-import Link from "next/link"
-import { getISOWeek } from "date-fns"
-import Footer from "@/components/Footer"
+import React, { useState, useEffect, useRef } from 'react';
+import useSWR from 'swr';
+import { getISOWeek } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { CheckCircle, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
+import fetcher from '@/lib/fetcher';
+import { COACHDATA } from '@/lib/types/product-services';
+import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 // Custom animations
 const smokeRevealKeyframes = `
@@ -24,7 +25,7 @@ const smokeRevealKeyframes = `
       transform: translateX(0);
     }
   }
-`
+`;
 
 const comingSoonKeyframes = `
   @keyframes comingSoon {
@@ -46,7 +47,7 @@ const comingSoonKeyframes = `
       transform: scale(1);
     }
   }
-`
+`;
 
 const glowButtonKeyframes = `
   @keyframes glowPulse {
@@ -60,7 +61,7 @@ const glowButtonKeyframes = `
       box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     }
   }
-`
+`;
 
 const smokeOverlayKeyframes = `
   @keyframes smokeOverlay {
@@ -75,9 +76,8 @@ const smokeOverlayKeyframes = `
       backdrop-filter: blur(0);
     }
   }
-`
+`;
 
-// Add new animation for champions background
 const championsBackgroundKeyframes = `
   @keyframes gradientShift {
     0% {
@@ -131,84 +131,51 @@ const championsBackgroundKeyframes = `
       transform: translateX(-50%) translateY(0) rotate(0);
     }
   }
-`
+`;
 
 export default function HomePage() {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [scrolled, setScrolled] = useState(false)
-  const [scrollY, setScrollY] = useState(0)
-  const [currentCoachIndex, setCurrentCoachIndex] = useState(0)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [currentCoachIndex, setCurrentCoachIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [coaches, setCoaches] = useState<
-    Array<{
-      id: string
-      name: string
-      specialization: string
-      imageUrl: string
-      bio?: string
-      experience?: string
-      certifications?: string[]
-      contact?: string
-      age?: number
-      [key: string]: unknown
-    }>
-  >([])
-  const [isLoadingCoach, setIsLoadingCoach] = useState(true)
-  const [coachError, setCoachError] = useState<string | null>(null)
+  // SWR for fetching coaches data
+  const {
+    data: coaches,
+    error,
+    isLoading,
+  } = useSWR<COACHDATA[]>("/api/coaches", fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
+  // Set current coach based on week of year when coaches data is available
   useEffect(() => {
-    const fetchCoaches = async () => {
-      setIsLoadingCoach(true)
-      setCoachError(null)
-
-      try {
-        const response = await fetch("/api/coaches")
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch coaches: ${response.status}`)
-        }
-
-        const data = await response.json()
-
-        if (data.error) {
-          throw new Error(data.error)
-        }
-
-        console.log("Coaches data from API:", data)
-        setCoaches(data)
-
-        // Set current coach based on week of year
-        const now = new Date()
-        const weekNumber = getISOWeek(now)
-        setCurrentCoachIndex(weekNumber % data.length)
-      } catch (error) {
-        console.error("Error fetching coaches:", error)
-        setCoachError(error instanceof Error ? error.message : "Failed to fetch coaches")
-      } finally {
-        setIsLoadingCoach(false)
-      }
+    if (coaches && coaches.length > 0) {
+      const now = new Date();
+      const weekNumber = getISOWeek(now);
+      setCurrentCoachIndex(weekNumber % coaches.length);
     }
-
-    fetchCoaches()
-  }, [])
+  }, [coaches]);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 100)
-      setScrollY(window.scrollY)
-    }
+      setScrolled(window.scrollY > 100);
+      setScrollY(window.scrollY);
+    };
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Video player functionality
   useEffect(() => {
-    const videoContainer = document.getElementById("workshop-video-container")
-    const video = document.getElementById("workshop-video") as HTMLVideoElement
-    const playButton = document.getElementById("play-workshop-btn")
-    const videoOverlay = document.getElementById("video-overlay")
+    const videoContainer = document.getElementById("workshop-video-container");
+    const video = document.getElementById("workshop-video") as HTMLVideoElement;
+    const playButton = document.getElementById("play-workshop-btn");
+    const videoOverlay = document.getElementById("video-overlay");
 
     if (video && playButton && videoContainer && videoOverlay) {
       // Auto-play without sound when in view
@@ -217,98 +184,98 @@ export default function HomePage() {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               video.play().catch((error) => {
-                console.warn("Autoplay failed:", error)
-              })
+                console.warn("Autoplay failed:", error);
+              });
             } else {
-              video.pause()
+              video.pause();
             }
-          })
+          });
         },
-        { threshold: 0.5 },
-      )
+        { threshold: 0.5 }
+      );
 
-      observer.observe(videoContainer)
+      observer.observe(videoContainer);
 
       // Handle hover states
       videoContainer.addEventListener("mouseenter", () => {
-        video.controls = true
-        videoOverlay.style.opacity = "0.3"
-      })
+        video.controls = true;
+        videoOverlay.style.opacity = "0.3";
+      });
 
       videoContainer.addEventListener("mouseleave", () => {
         if (!document.fullscreenElement) {
-          video.controls = false
-          videoOverlay.style.opacity = "1"
+          video.controls = false;
+          videoOverlay.style.opacity = "1";
         }
-      })
+      });
 
       // Handle play button click with proper error handling
       const handlePlayClick = async (e: Event) => {
-        e.stopPropagation()
+        e.stopPropagation();
 
         try {
-          video.muted = false
+          video.muted = false;
 
           // Check if fullscreen is supported
           if (video.requestFullscreen) {
-            await video.requestFullscreen()
+            await video.requestFullscreen();
           } else if (
             (video as HTMLVideoElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen
           ) {
             await (video as HTMLVideoElement & { webkitRequestFullscreen?: () => Promise<void> })
-              .webkitRequestFullscreen!()
+              .webkitRequestFullscreen!();
           } else if ((video as HTMLVideoElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
-            await (video as HTMLVideoElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen!()
+            await (video as HTMLVideoElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen!();
           }
 
-          video.controls = true
-          await video.play()
+          video.controls = true;
+          await video.play();
         } catch (error) {
-          console.error("Fullscreen or playback error:", error)
+          console.error("Fullscreen or playback error:", error);
           // Fallback: just play the video if fullscreen fails
           try {
-            video.controls = true
-            await video.play()
+            video.controls = true;
+            await video.play();
           } catch (playError) {
-            console.error("Playback failed:", playError)
+            console.error("Playback failed:", playError);
           }
         }
-      }
+      };
 
-      playButton.addEventListener("click", handlePlayClick)
+      playButton.addEventListener("click", handlePlayClick);
 
       // Handle fullscreen exit with error handling
       const handleFullscreenChange = () => {
         try {
           if (!document.fullscreenElement) {
-            video.muted = true
-            video.controls = false
-            videoOverlay.style.opacity = "1"
+            video.muted = true;
+            video.controls = false;
+            videoOverlay.style.opacity = "1";
           }
         } catch (error) {
-          console.error("Fullscreen change error:", error)
+          console.error("Fullscreen change error:", error);
         }
-      }
+      };
 
-      document.addEventListener("fullscreenchange", handleFullscreenChange)
-      document.addEventListener("webkitfullscreenchange", handleFullscreenChange)
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
 
       // Cleanup
       return () => {
-        observer.disconnect()
-        playButton.removeEventListener("click", handlePlayClick)
-        videoContainer.removeEventListener("mouseenter", () => {})
-        videoContainer.removeEventListener("mouseleave", () => {})
-        document.removeEventListener("fullscreenchange", handleFullscreenChange)
-        document.removeEventListener("webkitfullscreenchange", handleFullscreenChange)
-      }
+        observer.disconnect();
+        playButton.removeEventListener("click", handlePlayClick);
+        videoContainer.removeEventListener("mouseenter", () => { });
+        videoContainer.removeEventListener("mouseleave", () => { });
+        document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      };
     }
-  }, [])
+  }, []);
 
   // Inject custom animations
   useEffect(() => {
     // Create style element
-    const style = document.createElement("style")
+    const style = document.createElement("style");
 
     // Add keyframes
     style.textContent = `
@@ -346,37 +313,34 @@ export default function HomePage() {
     .animate-subtle-wave {
       animation: subtleWave 8s ease-in-out infinite;
     }
-  `
+  `;
 
     // Append to head
-    document.head.appendChild(style)
+    document.head.appendChild(style);
 
     // Clean up
     return () => {
-      document.head.removeChild(style)
-    }
-  }, [])
+      document.head.removeChild(style);
+    };
+  }, []);
 
   useEffect(() => {
     // Only run in browser environment
     if (typeof window !== "undefined") {
       try {
         // Preload smoke image with error handling
-        const smokeImage = new window.Image(1, 1)
-        smokeImage.crossOrigin = "anonymous"
-        smokeImage.onload = () => {
-          console.log("Smoke texture loaded successfully")
-        }
+        const smokeImage = new window.Image(1, 1);
+        smokeImage.crossOrigin = "anonymous";
         smokeImage.onerror = () => {
-          console.warn("Could not load smoke texture, using fallback")
-        }
+          console.warn("Could not load smoke texture, using fallback");
+        };
         smokeImage.src =
-          "https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748"
+          "https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fv0%2FXvzEDnm6Hs.png?alt=media&token=5c7f77a3-0b9d-4942-8770-b9bed72c7748";
       } catch (error) {
-        console.error("Error in smoke image preloading:", error)
+        console.error("Error in smoke image preloading:", error);
       }
     }
-  }, [])
+  }, []);
 
   return (
     <main className="bg-white text-gray-900 overflow-x-hidden">
@@ -398,7 +362,7 @@ export default function HomePage() {
               backgroundSize: "200% 100%",
               animation: "smokeOverlay 3s forwards",
               backgroundRepeat: "no-repeat",
-              backgroundColor: "rgba(0,0,0,0.85)", // Darker fallback if image fails to load
+              backgroundColor: "rgba(0,0,0,0.85)",
               mixBlendMode: "multiply",
             }}
           ></div>
@@ -440,9 +404,9 @@ export default function HomePage() {
                 className="bg-white text-black relative overflow-hidden group font-bold transition-all duration-500"
                 style={{ animation: "glowPulse 2s infinite" }}
                 onClick={() => {
-                  const advertisementSection = document.querySelector(".advertisement-section")
+                  const advertisementSection = document.querySelector(".advertisement-section");
                   if (advertisementSection) {
-                    advertisementSection.scrollIntoView({ behavior: "smooth" })
+                    advertisementSection.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
               >
@@ -497,7 +461,7 @@ export default function HomePage() {
                 <div className="flex flex-wrap gap-4">
                   <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
                     <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                      <Link href="/sports-classes">Explore Classes</Link>
+                      <a href="/sports-classes">Explore Classes</a>
                     </span>
                     <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
                     <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
@@ -506,7 +470,9 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>        {/* Meet the Champions! */}
+        </section>
+
+        {/* Meet the Champions! */}
         <section className="py-24 bg-white relative overflow-hidden">
           {/* Animated Background */}
           <div
@@ -539,20 +505,27 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </section>        
-          {/* Outreach Workshop Section */}
-        <section className="py-48 bg-black/95 backdrop-blur-sm text-white relative overflow-hidden">          {/* Diagonal top cut */}
-          <div className="absolute top-0 left-0 w-[150%] h-40 bg-white transform -skew-y-3 origin-top-left -translate-y-12 -translate-x-8"></div>          {/* Diagonal bottom cut - opposite direction */}          <div className="absolute bottom-0 left-0 w-[150%] h-96 bg-white transform -skew-y-3 origin-bottom-left translate-y-96 -translate-x-8"></div>
+        </section>
+
+        {/* Outreach Workshop Section */}
+        <section className="py-48 bg-black/95 backdrop-blur-sm text-white relative overflow-hidden">
+          {/* Diagonal top cut */}
+          <div className="absolute top-0 left-0 w-[150%] h-40 bg-white transform -skew-y-3 origin-top-left -translate-y-12 -translate-x-8"></div>
+          {/* Diagonal bottom cut - opposite direction */}
+          <div className="absolute bottom-0 left-0 w-[150%] h-96 bg-white transform -skew-y-3 origin-bottom-left translate-y-96 -translate-x-8"></div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">              <h2 className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg"
+            <div className="text-center mb-12" data-aos="fade-up" data-aos-duration="1000">
+              <h2
+                className="text-4xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:w-0 after:h-[5px] after:bottom-[-8px] after:left-0 after:bg-gradient-to-r after:from-white after:to-gray-400 after:transition-all after:duration-700 hover:after:w-full after:shadow-lg"
                 style={{
                   textShadow: `
                     0 0 2px rgb(255, 255, 255),
                     0 0 4px rgba(255, 255, 255, 0.4),
                     0 0 6px rgba(255, 255, 255, 0.2)
-                  `
-                }}>
+                  `,
+                }}
+              >
                 Community Outreach
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -560,12 +533,14 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 items-center">              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">                <div className="relative rounded-lg overflow-hidden cursor-pointer h-[450px]" id="workshop-video-container">
+            <div className="flex flex-col lg:flex-row gap-8 items-center">
+              <div className="lg:w-2/3" data-aos="fade-right" data-aos-duration="1000">
+                <div className="relative rounded-lg overflow-hidden cursor-pointer h-[450px]" id="workshop-video-container">
                   <video
                     id="workshop-video"
                     ref={videoRef}
                     className="w-full h-full object-cover rounded-lg"
-                    poster="/placeholder.svg?height=500&width=800&text=Workshop+Video"
+                    poster="https://images.pexels.com/photos/416978/pexels-photo-416978.jpeg?auto=compress&cs=tinysrgb&w=800"
                     muted
                     loop
                     preload="metadata"
@@ -612,7 +587,9 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>        {/* Coach of the Week */}
+        </section>
+
+        {/* Coach of the Week */}
         <section
           className="py-16 bg-white relative"
           style={{
@@ -633,7 +610,7 @@ export default function HomePage() {
               <p className="text-xl text-gray-600">Recognizing excellence in our coaching staff</p>
             </div>
 
-            {isLoadingCoach ? (
+            {isLoading ? (
               <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
                 <div className="animate-pulse flex flex-col items-center">
                   <div className="h-32 w-32 bg-gray-200 rounded-full mb-4"></div>
@@ -641,16 +618,16 @@ export default function HomePage() {
                   <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
               </Card>
-            ) : coachError ? (
+            ) : error ? (
               <Card className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto p-8 text-center">
                 <div className="text-red-500">
-                  <p>Unable to load coach data: {coachError}</p>
+                  <p>Unable to load coach data: {error.message}</p>
                   <Button onClick={() => window.location.reload()} className="mt-4 bg-black text-white">
                     Try Again
                   </Button>
                 </div>
               </Card>
-            ) : coaches.length > 0 ? (
+            ) : coaches && coaches.length > 0 ? (
               <Card
                 className="bg-white rounded-lg shadow-2xl overflow-hidden max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.02] hover:rotate-1"
                 data-aos="zoom-in"
@@ -659,11 +636,9 @@ export default function HomePage() {
               >
                 <div className="flex flex-col md:flex-row">
                   <div className="md:w-1/3 relative overflow-hidden">
-                    <Image
-                      src={coaches[currentCoachIndex]?.imageUrl || "/placeholder.svg?height=600&width=400&text=Coach"}
+                    <img
+                      src={coaches[currentCoachIndex]?.imageUrl || "https://images.pexels.com/photos/1431282/pexels-photo-1431282.jpeg?auto=compress&cs=tinysrgb&w=400"}
                       alt={`Coach of the Week - ${coaches[currentCoachIndex]?.name || "Unknown Coach"}`}
-                      width={400}
-                      height={600}
                       className="w-full h-full object-cover transition-all duration-700 hover:scale-125 hover:rotate-6"
                     />
                   </div>
@@ -691,13 +666,13 @@ export default function HomePage() {
                         <span className="font-bold text-black mr-2">Certifications:</span>
                         <span className="text-gray-600">
                           {coaches[currentCoachIndex]?.certifications
-                            ? coaches[currentCoachIndex].certifications.join(", ")
+                            ? coaches[currentCoachIndex].certifications!.join(", ")
                             : "Certifications not available"}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-3">
-                      <Link href={`/coaches/profile/${coaches[currentCoachIndex]?.id || 0}`} passHref>
+                      <a href={`/coaches/profile/${coaches[currentCoachIndex]?.id || 0}`}>
                         <Button className="bg-black text-white relative overflow-hidden group transition-all duration-500">
                           <span className="relative z-10 group-hover:text-white transition-colors duration-500">
                             View Coach
@@ -705,7 +680,7 @@ export default function HomePage() {
                           <span className="absolute inset-0 bg-gradient-to-r from-white to-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
                           <span className="absolute -inset-[3px] bg-gradient-to-r from-white to-black opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700 group-hover:duration-200"></span>
                         </Button>
-                      </Link>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -722,7 +697,7 @@ export default function HomePage() {
         <section
           className="py-16 bg-white relative overflow-hidden"
           style={{
-            backgroundImage: 'url("/placeholder.svg?height=1000&width=1000")',
+            backgroundImage: 'url("https://images.pexels.com/photos/1552252/pexels-photo-1552252.jpeg?auto=compress&cs=tinysrgb&w=1000")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
@@ -766,7 +741,6 @@ export default function HomePage() {
         <section
           className="py-16 bg-gray-50 relative"
           style={{
-            //backgroundImage: 'url("/pictures/facility.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundAttachment: "fixed",
@@ -775,7 +749,7 @@ export default function HomePage() {
           {/* Overlay for background */}
           <div className="absolute inset-0 bg-gray-50/95"></div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="lg:w-1/2 animate-punch-in" data-aos="fade-right" data-aos-duration="1000">
                 <div className="overflow-hidden rounded-lg shadow-xl transition-all duration-700 hover:scale-110 hover:rotate-3 hover:shadow-2xl">
@@ -846,7 +820,8 @@ export default function HomePage() {
         <Footer />
       </div>
       <div
-        className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"}`}
+        className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-500 ${scrolled ? "opacity-0" : "opacity-100"
+          }`}
       >
         <div className="flex flex-col items-center">
           <p className="text-white mb-2 text-sm font-medium">Scroll Down</p>
@@ -856,7 +831,7 @@ export default function HomePage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
 // Photo Carousel
@@ -999,9 +974,8 @@ function PhotoCarousel() {
           <button
             key={index}
             onClick={() => handleDotClick(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "bg-white scale-125" : "bg-white/50"
-            }`}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex ? "bg-white scale-125" : "bg-white/50"
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
@@ -1125,58 +1099,58 @@ function TestimonialCard({ name, role, image, quote }: TestimonialCardProps) {
   const shouldTruncate = quote.length > maxLength
   const displayedQuote = shouldTruncate && !showAll ? `${quote.slice(0, maxLength)}...` : quote
 
-  return (    <Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700 min-h-[280px] h-full">
-      <div className="flex items-center mb-6">        <div className="relative w-12 h-12 mr-4">
-          <Image
-            src={image || "/advert pic 1.jpeg"}
-            alt={name}
-            fill
-            className="rounded-full object-cover transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
-          />
-        </div>
-        <div>
-          <h4 className="font-bold text-black relative group">
-            {name}
-            <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
-          </h4>
-          <p className="text-gray-500 text-sm">{role}</p>
-        </div>
+  return (<Card className="bg-gray-50 rounded-lg p-8 shadow-sm hover:translate-y-[-25px] hover:rotate-y-[5deg] hover:scale-105 hover:shadow-2xl hover:border-t-black transition-all duration-700 min-h-[280px] h-full">
+    <div className="flex items-center mb-6">        <div className="relative w-12 h-12 mr-4">
+      <Image
+        src={image || "/advert pic 1.jpeg"}
+        alt={name}
+        fill
+        className="rounded-full object-cover transition-all duration-500 hover:scale-125 ring-2 ring-black ring-offset-2"
+      />
+    </div>
+      <div>
+        <h4 className="font-bold text-black relative group">
+          {name}
+          <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-black transition-all duration-500 group-hover:w-full"></span>
+        </h4>
+        <p className="text-gray-500 text-sm">{role}</p>
       </div>
-      <div className="text-gray-600 italic relative">
-        <span className="absolute -top-4 -left-2 text-4xl text-black/20">&quot;</span>
-        <p>{displayedQuote}</p>
-        <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
-        {shouldTruncate && (
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className="text-black/70 hover:text-black text-sm mt-4 font-medium underline transition-colors"
-          >
-            {showAll ? "Show Less" : "See More"}
-          </button>
-        )}
-      </div>
-    </Card>
+    </div>
+    <div className="text-gray-600 italic relative">
+      <span className="absolute -top-4 -left-2 text-4xl text-black/20">&quot;</span>
+      <p>{displayedQuote}</p>
+      <span className="absolute -bottom-4 -right-2 text-4xl text-black/20">&quot;</span>
+      {shouldTruncate && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="text-black/70 hover:text-black text-sm mt-4 font-medium underline transition-colors"
+        >
+          {showAll ? "Show Less" : "See More"}
+        </button>
+      )}
+    </div>
+  </Card>
   )
 }
 
 // Data
-const champions = [  {
-    name: "Jen Espada",
-    image: "/pictures/jen espada.jpg",
-    achievement: "2023 Silver Medalist BJJ - Mangahan Guimaras\n2023 Bronze Medalist - National Muaythai Championship\n2023 ROTC Games Kickboxing - Silver\n2024 Silver Medalist - Copa de Dumau Cebu BJJ\n2025 Gold Medalist - Dumau Iloilo BJJ",
-  },  {
-    name: "Lawrence Belmonte",
-    image: "/pictures/lawrence.jpg",
-    achievement: "2023 ROTC Games Silver Medalist\n2023 National Muaythai Championship\n2024 Gold (Open) Silver (Weight) Copa de Dumau Cebu BJJ\n2025 Relentless BJJ Open Gold\n2025 Gold (No Gi Weight) Silver (No Gi Open) Bronze (With Gi Weight) Bronze (With Gi Open) Copa de Dumau Iloilo BJJ",
-  },  {
-    name: "Leandro Lima",
-    image: "/pictures/leandro lima.jpg", 
-    achievement: "2024 Silver (With Gi Weight) Copa de Dumau Cebu BJJ\n2025 Silver Relentless Open BJJ\n2025 Silver (With Gi Weight) Bronze (With Gi Open) Copa de Dumau Iloilo",
-  },  {
-    name: "Iain Nicholas Jaguilon",
-    image: "/pictures/Iain Nicholas Jaguilon.jpg",
-    achievement: "2024 Silver Medal - Copa de Dumau Cebu BJJ Open\n2024 Relentless Super Fights\n2025 Copa de Dumau Iloilo",
-  },
+const champions = [{
+  name: "Jen Espada",
+  image: "/pictures/jen espada.jpg",
+  achievement: "2023 Silver Medalist BJJ - Mangahan Guimaras\n2023 Bronze Medalist - National Muaythai Championship\n2023 ROTC Games Kickboxing - Silver\n2024 Silver Medalist - Copa de Dumau Cebu BJJ\n2025 Gold Medalist - Dumau Iloilo BJJ",
+}, {
+  name: "Lawrence Belmonte",
+  image: "/pictures/lawrence.jpg",
+  achievement: "2023 ROTC Games Silver Medalist\n2023 National Muaythai Championship\n2024 Gold (Open) Silver (Weight) Copa de Dumau Cebu BJJ\n2025 Relentless BJJ Open Gold\n2025 Gold (No Gi Weight) Silver (No Gi Open) Bronze (With Gi Weight) Bronze (With Gi Open) Copa de Dumau Iloilo BJJ",
+}, {
+  name: "Leandro Lima",
+  image: "/pictures/leandro lima.jpg",
+  achievement: "2024 Silver (With Gi Weight) Copa de Dumau Cebu BJJ\n2025 Silver Relentless Open BJJ\n2025 Silver (With Gi Weight) Bronze (With Gi Open) Copa de Dumau Iloilo",
+}, {
+  name: "Iain Nicholas Jaguilon",
+  image: "/pictures/Iain Nicholas Jaguilon.jpg",
+  achievement: "2024 Silver Medal - Copa de Dumau Cebu BJJ Open\n2024 Relentless Super Fights\n2025 Copa de Dumau Iloilo",
+},
 ]
 
 const testimonials = [
