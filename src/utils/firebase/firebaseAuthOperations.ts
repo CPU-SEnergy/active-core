@@ -14,7 +14,6 @@ import { loginWithCredential } from "../../../not-api";
 import { checkAndAssignAdminRole } from "./checkAndAssignAdmin";
 
 export const createFirebaseUser = async (formResult: RegisterFormProps) => {
-  console.log("Starting user creation for email:", formResult.email);
 
   try {
     const auth = authClient();
@@ -24,7 +23,6 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
       formResult.email,
       formResult.password
     );
-    console.log("Firebase user created successfully:", userCredential.user.uid);
 
     const firestore = getFirestore(app);
     const userRef = doc(
@@ -42,11 +40,9 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
       sex: formResult.sex,
       createdAt: Timestamp.now(),
     });
-    console.log("User document created in Firestore");
 
     await checkAndAssignAdminRole(userCredential.user.uid, formResult.email);
 
-    console.log("Adding user to Algolia...");
     const algoliaResult = await addUserToAlgolia({
       uuid: userCredential.user.uid,
       firstName: formResult.firstName,
@@ -56,19 +52,13 @@ export const createFirebaseUser = async (formResult: RegisterFormProps) => {
 
     if (!algoliaResult.success) {
       console.warn("Failed to add user to Algolia:", algoliaResult.error);
-    } else {
-      console.log("User added to Algolia successfully");
     }
 
-    console.log("Logging in user...");
     try {
       await loginWithCredential(userCredential);
-      console.log("User logged in successfully");
     } catch (loginError) {
       console.error("Login error (but user was created):", loginError);
     }
-
-    console.log("User creation process completed successfully");
 
     return {
       success: true,

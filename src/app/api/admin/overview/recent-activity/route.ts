@@ -20,8 +20,6 @@ export async function GET() {
       });
     }
 
-    console.log(cleanPayments);
-
     return new Response(JSON.stringify(cleanPayments), {
       status: 200,
       headers: { "Content-Type": "application/json" },

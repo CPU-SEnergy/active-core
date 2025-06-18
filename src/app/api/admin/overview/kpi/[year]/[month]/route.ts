@@ -14,12 +14,9 @@ export async function GET(request: Request, { params }: { params: Params }) {
     const { year, month } = params;
     const monthId = month.padStart(2, "0");
 
-    console.log(`Fetching data for year: ${year}, month: ${monthId}`);
-
     // This matches exactly how data is written in addCustomerWithPayment
     const yearDoc = await db.kpis.get(db.kpis.id(year));
     if (!yearDoc) {
-      console.log(`Year document not found for ${year}`);
       return Response.json({
         monthlyRevenue: 0,
         monthlyCustomers: 0,
@@ -36,7 +33,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
     const monthDoc = await monthRef.get(monthRef.id(monthId));
 
     if (!monthDoc) {
-      console.log(`Month document not found for ${year}-${monthId}`);
       return Response.json({
         monthlyRevenue: 0,
         monthlyCustomers: 0,
@@ -48,8 +44,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
         message: `No data available for ${year}-${monthId}`,
       });
     }
-
-    console.log(`Found month document for ${year}-${monthId}:`, monthDoc.data);
 
     // Get previous month data
     let previousMonthDoc = null;
@@ -67,12 +61,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
       previousMonthDoc = await previousMonthRef.get(
         previousMonthRef.id(previousMonth)
       );
-      console.log(
-        `Previous month document found for ${previousYear}-${previousMonth}:`,
-        previousMonthDoc?.data
-      );
     } catch (error) {
-      console.log(
+      console.error(
         `No previous month document found for ${previousYear}-${previousMonth}`
       );
     }
@@ -83,7 +73,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
       const customersDoc = await db.customers.get(db.customers.id("stats"));
       if (customersDoc) {
         totalCustomers = customersDoc.data;
-        console.log("Total customers found:", totalCustomers);
       }
     } catch (error) {
       console.error("Error fetching total customers:", error);
@@ -121,7 +110,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
       isDataAvailable: true,
     };
 
-    console.log("Returning result:", result);
     return Response.json(result);
   } catch (error: unknown) {
     console.error("Error fetching monthly data:", error);

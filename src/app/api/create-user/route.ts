@@ -29,8 +29,6 @@ export async function POST(request: Request) {
       createdAt: FieldValue.serverTimestamp(),
     });
 
-    console.log("User added to Firestore" + firstName);
-
     return new Response(
       JSON.stringify({ message: "User created successfully" }),
       {

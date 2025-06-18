@@ -83,7 +83,6 @@ export default function Home() {
     error,
     isLoading,
   } = useSWR<CLASSDATA[]>(`/api/classes`, fetcher);
-  console.log(classes, "classes");
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading classes</div>;

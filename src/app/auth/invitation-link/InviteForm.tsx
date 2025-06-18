@@ -42,7 +42,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       return;
     }
 
-    console.log(email, "email");
     await sendSignInLink(email);
     setIsLoading(false);
   }

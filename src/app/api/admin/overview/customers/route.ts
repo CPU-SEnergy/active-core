@@ -5,13 +5,10 @@ export async function GET() {
   try {
     getFirebaseAdminApp();
 
-    console.log("Fetching customer statistics...");
-
     // Get customer statistics
     const customersDoc = await db.customers.get(db.customers.id("stats"));
 
     if (!customersDoc) {
-      console.log("No customer stats document found");
       return Response.json({
         totalCustomers: 0,
         totalWalkInCustomers: 0,
@@ -25,8 +22,6 @@ export async function GET() {
     const regularCustomers =
       customerData.totalCustomers - customerData.totalWalkInCustomers;
 
-    console.log("Customer stats found:", customerData);
-
     const result = {
       totalCustomers: customerData.totalCustomers || 0,
       totalWalkInCustomers: customerData.totalWalkInCustomers || 0,
@@ -34,7 +29,6 @@ export async function GET() {
       isDataAvailable: true,
     };
 
-    console.log("Customer stats result:", result);
     return Response.json(result);
   } catch (error: unknown) {
     console.error("Error fetching customer statistics:", error);

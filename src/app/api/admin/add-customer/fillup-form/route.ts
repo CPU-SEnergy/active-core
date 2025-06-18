@@ -27,7 +27,6 @@ export async function POST(req: Request) {
       !data.dob ||
       !data.type
     ) {
-      console.log("Invalid data: ", data);
       return new Response(JSON.stringify({ error: "Invalid data" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
