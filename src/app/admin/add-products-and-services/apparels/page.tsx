@@ -63,6 +63,8 @@ export default function ApparelsPage() {
     return <ApparelsSkeleton />;
   }
 
+  console.log("Apparels data:", data);
+
   return (
     <div className="min-h-screen bg-white">
       <div className="p-6">
@@ -71,9 +73,11 @@ export default function ApparelsPage() {
           <SelectProductAndServices />
         </div>
         <ApparelForm />
-
+        {isLoading && <p>Loading apparels...</p>}
+        {!isLoading && !data && (
+          <p className="text-center text-gray-500">No apparels found.</p>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isLoading && <p>Loading apparels...</p>}
           {data &&
             data.length > 0 &&
             data.map((apparel) => (
