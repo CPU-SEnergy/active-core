@@ -2,17 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { db, Schema } from "@/lib/schema/firestore";
 
-type Params = {
-  id: string;
-};
-
-export async function GET(req: NextRequest,context: { params: Params }) {
+export async function GET(req: NextRequest,
+  { params }: { params: { id: string } }) {
+    
   try {
+  const id = params.id as Schema["coaches"]["Ref"]["id"];
+
+  if (!id) {
+    return NextResponse.json(
+      { error: "Coaches ID is required" },
+      { status: 400 }
+    );
+  }
+
   getFirebaseAdminApp();
 
-  const { id } = context.params;
-  const numericId = id as Schema["coaches"]["Ref"]["id"];
-  const coachData = await db.coaches.get(numericId);
+  const coachData = await db.coaches.get(id);
 
   if (!coachData) {
     return NextResponse.json({ error: "Coach not found" }, { status: 404});
