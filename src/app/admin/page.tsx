@@ -37,6 +37,7 @@ import { Button } from "@/components/ui/button";
 import fetcher from "@/lib/fetcher";
 import useSWR from "swr";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 interface RecentActivity {
   id: string;
   customerId: string | null;
