@@ -118,9 +118,7 @@ export default function CoachDeck() {
     data: coaches,
     isLoading,
     error,
-  } = useSWR<Coach[]>("/api/coaches", fetcher, {
-    dedupingInterval: 60 * 1000 * 60 * 24, // 24 hours
-  });
+  } = useSWR<Coach[]>("/api/coaches", fetcher);
   
   return (
     <div className="min-h-screen bg-black text-white">      <div className="w-full h-[40vh] sm:h-[50vh] relative flex items-center justify-center pt-20">

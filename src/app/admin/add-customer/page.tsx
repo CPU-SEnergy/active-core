@@ -70,9 +70,7 @@ const AddCustomerPage = () => {
     data: membershipPlans,
     error: plansError,
     isLoading: plansLoading,
-  } = useSWR("/api/membershipPlans", fetcher, {
-    dedupingInterval: 1000 * 60 * 60 * 24,
-  });
+  } = useSWR("/api/membershipPlans", fetcher);
 
   if (customersError) {
     console.error("Error fetching active customers:", customersError);
