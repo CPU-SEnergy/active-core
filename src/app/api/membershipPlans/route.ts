@@ -1,5 +1,6 @@
 import { db } from "@/lib/schema/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {

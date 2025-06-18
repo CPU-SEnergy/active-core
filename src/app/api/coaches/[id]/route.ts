@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 import { db, Schema } from "@/lib/schema/firestore";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest,
   { params }: { params: { id: string } }) {
-    
+
   try {
   const id = params.id as Schema["coaches"]["Ref"]["id"];
 

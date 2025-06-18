@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, Schema } from "@/lib/schema/firestore";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
-
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest,
   { params }: { params: { id: string } }) {
