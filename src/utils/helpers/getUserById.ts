@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 export default function useGetUserById(userId: string) {
   const { data, error, isLoading } = useSWR(`/api/user/${userId}`, fetcher, {
-    dedupingInterval: 60000,
+    dedupingInterval: 30000,
   });
 
   return {

@@ -50,11 +50,7 @@ function useApparels(
 
   const { data, error, isLoading } = useSWR<Product[]>(
     `/api/apparels?${queryParams.toString()}`,
-    fetcher,
-    {
-      dedupingInterval: 60 * 1000,
-      revalidateOnFocus: false,
-    }
+    fetcher
   );
 
   return { data, error, isLoading };

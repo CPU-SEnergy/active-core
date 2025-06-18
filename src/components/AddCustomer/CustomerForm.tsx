@@ -93,16 +93,13 @@ export function CustomerPaymentModal() {
     data: membershipPlans,
     error: plansError,
     isLoading: plansLoading,
-  } = useSWR(open ? "/api/membershipPlans" : null, fetcher, {
-    dedupingInterval: 60 * 60 * 24,
-  });
+  } = useSWR(open ? "/api/membershipPlans" : null, fetcher);
 
   const {
     data: users,
     error: usersError,
     isLoading: usersLoading,
   } = useSWR(open && !isWalkIn ? "/api/user" : null, fetcher, {
-    dedupingInterval: 60 * 60 * 24,
     onSuccess: (data) => {
       if (Array.isArray(data)) {
         setFilteredUsers(data);

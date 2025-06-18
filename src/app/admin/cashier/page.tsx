@@ -98,9 +98,7 @@ export default function CashierManagement() {
   // Fetch recent cashiers
   const { data, error, isLoading } = useSWR<
     { uid: string; name?: string; createdAt?: { seconds: number } }[]
-  >("/api/admin/add-cashier/recently-added", fetcher, {
-    dedupingInterval: 60000,
-  });
+  >("/api/admin/add-cashier/recently-added", fetcher);
 
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
