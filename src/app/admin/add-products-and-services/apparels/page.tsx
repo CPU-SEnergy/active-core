@@ -4,14 +4,14 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { ApparelForm } from "@/components/AddProductAndServices/ApparelFormModal";
 import SelectProductAndServices from "../SelectProductAndServices";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
 import { APPARELDATA } from "@/lib/types/product-services";
 import { EditApparel } from "@/components/AddProductAndServices/EditApparelModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProductAndServicesSwitch from "@/components/AddProductAndServices/ProductAndServicesSwitch";
 import DeleteButton from "@/components/AddProductAndServices/DeleteItemById";
 import { removeItem } from "@/app/actions/admin/products-services/removeItem";
+import { useState, useEffect } from "react";
+import fetcher from "@/lib/fetcher";
 
 function ApparelsSkeleton() {
   return (
@@ -49,21 +49,34 @@ function calculateFinalPrice(price: number, discount?: number): number {
 }
 
 export default function ApparelsPage() {
-  const { data, error, isLoading } = useSWR<APPARELDATA[]>(
-    "/api/apparels",
-    fetcher
-  );
+  const [data, setData] = useState<APPARELDATA[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchApparels = async () => {
+      try {
+        const apparelData = await fetcher("/api/apparels");
+        setData(apparelData);
+        console.log("Apparels data:", apparelData);
+      } catch (err) {
+        console.error("Error fetching apparels:", err);
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchApparels();
+  }, []);
 
   if (error) {
-    console.error("Error fetching apparels:", error);
     return <>Error fetching apparels</>;
   }
 
   if (isLoading) {
     return <ApparelsSkeleton />;
   }
-
-  console.log("Apparels data:", data);
 
   return (
     <div className="min-h-screen bg-white">
