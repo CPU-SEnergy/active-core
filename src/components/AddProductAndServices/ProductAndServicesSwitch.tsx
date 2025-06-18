@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { Switch } from "@/components/ui/switch";
 import { updateIsActiveStatus } from "@/app/actions/admin/products-services/UpdateIsActiveStatus";
 import { mutate } from "swr";
+import fetcher from "@/lib/fetcher";
 
 interface UpdateMembershipPlanSwitchProps {
   collectionName: AllowedCollections;
@@ -21,10 +22,15 @@ export default function ProductAndServicesSwitch({
   const handleToggle = (checked: boolean) => {
     startTransition(async () => {
       const result = await updateIsActiveStatus(collectionName, id, checked);
-      mutate(`/api/${collectionName}`);
-      mutate(`/api/${collectionName}/${id}`);
 
-      if (!result.success) {
+      if (result.success) {
+        await mutate(`/api/${collectionName}`, () =>
+          fetcher(`/api/${collectionName}`)
+        );
+        await mutate(`/api/${collectionName}/${id}`, () =>
+          fetcher(`/api/${collectionName}/${id}`)
+        );
+      } else {
         console.error(result.error ?? "Failed to update status");
       }
     });
