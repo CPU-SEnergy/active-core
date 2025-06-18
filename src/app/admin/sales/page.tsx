@@ -141,12 +141,10 @@ export default function SalesDashboard() {
           yearlyData?.message ||
           customerData?.message) && (
           <Alert>
-            <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               {monthlyData?.message ||
                 yearlyData?.message ||
-                customerData?.message}{" "}
-              - Showing default values.
+                customerData?.message}
             </AlertDescription>
           </Alert>
         )}
