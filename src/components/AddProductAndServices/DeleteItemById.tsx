@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { mutate } from "swr";
-import fetcher from "@/lib/fetcher";
 
 interface DeleteButtonProps {
   id: string;
