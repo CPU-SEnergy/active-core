@@ -92,6 +92,7 @@ export function CoachForm() {
         toast.success(result.message || "Coach added successfully!");
         reset();
         setPreview(null);
+        window.location.reload();
       } else {
         toast.error(result.message || "Error creating a coach.");
       }

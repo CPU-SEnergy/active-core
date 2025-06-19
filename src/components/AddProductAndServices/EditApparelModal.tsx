@@ -159,6 +159,7 @@ export function EditApparel({ data }: { data: APPARELDATA }) {
         setOpen(false);
         mutate("/api/apparels");
         toast.success("Apparel updated successfully!");
+        window.location.reload();
       } else {
         toast.error(result.message || "Failed to update apparel.");
       }

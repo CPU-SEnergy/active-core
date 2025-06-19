@@ -69,6 +69,7 @@ export function MembershipPlanForm() {
         mutate("/api/membershipPlans");
         toast.success("Membership plan created successfully!");
         reset();
+        window.location.reload();
       } else {
         toast.error(result.message || "Failed to create membership plan.");
       }

@@ -81,19 +81,20 @@ export function ClassesModal() {
       }
 
       const result = await createClass(formData);
-      mutate("/api/classes");
-
-
+      
+      
       if (!result || !result.status) {
         toast.error("Unexpected response from server.");
         return;
       }
-
+      
       if (result.status === 200) {
+        setOpen(false);
         toast.success(result.message || "Class added successfully!");
+        mutate("/api/classes");
         reset();
         setPreview(null);
-        setOpen(false);
+        window.location.reload();
       } else {
         toast.error(result.message || "Error creating a class.");
       }
