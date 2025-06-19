@@ -4,7 +4,6 @@ import { useTransition } from "react";
 import { Switch } from "@/components/ui/switch";
 import { updateIsActiveStatus } from "@/app/actions/admin/products-services/UpdateIsActiveStatus";
 import { mutate } from "swr";
-import fetcher from "@/lib/fetcher";
 
 interface UpdateMembershipPlanSwitchProps {
   collectionName: AllowedCollections;
