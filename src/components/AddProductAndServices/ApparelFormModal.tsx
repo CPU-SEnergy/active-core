@@ -91,6 +91,7 @@ export function ApparelForm() {
         toast.success("Apparel created successfully!");
         reset();
         setPreview(null);
+        window.location.reload();
       } else {
         toast.error(result.message || "Failed to create apparel.");
       }

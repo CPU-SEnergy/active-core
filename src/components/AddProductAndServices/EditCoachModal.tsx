@@ -153,6 +153,7 @@ export function EditCoach({ data }: { data: COACHDATA }) {
         mutate("/api/coaches");
         toast.success("Coach updated successfully!");
         reset();
+        window.location.reload();
       } else {
         toast.error(result.message || "Error updating coach.");
       }

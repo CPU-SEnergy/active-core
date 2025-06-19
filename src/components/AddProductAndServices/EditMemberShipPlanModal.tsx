@@ -115,6 +115,7 @@ export function EditMembershipPlanModal({
         setOpen(false);
         mutate("/api/membershipPlans");
         toast.success("Membership plan updated successfully!");
+        window.location.reload();
       } else {
         toast.error(result.message || "Error updating membership plan.");
       }

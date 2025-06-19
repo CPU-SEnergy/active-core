@@ -24,12 +24,10 @@ export default function ProductAndServicesSwitch({
       const result = await updateIsActiveStatus(collectionName, id, checked);
 
       if (result.success) {
-        await mutate(`/api/${collectionName}`, () =>
-          fetcher(`/api/${collectionName}`)
-        );
-        await mutate(`/api/${collectionName}/${id}`, () =>
-          fetcher(`/api/${collectionName}/${id}`)
-        );
+        mutate(`/api/${collectionName}`);
+        mutate(`/api/${collectionName}/${id}`);
+
+        window.location.reload();
       } else {
         console.error(result.error ?? "Failed to update status");
       }

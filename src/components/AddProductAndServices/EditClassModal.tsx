@@ -174,9 +174,10 @@ export default function EditClassModal({ data }: EditClassModalProps) {
       
       if (result.status === 200) {
         setOpen(false);
+        mutate("/api/classes");
         toast.success(result.message || "Class updated successfully!");
         reset();
-        mutate("/api/classes");
+        window.location.reload();
       } else {
         toast.error(result.message || "Error updating class.");
       }

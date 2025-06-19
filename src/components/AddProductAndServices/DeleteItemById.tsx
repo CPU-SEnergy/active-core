@@ -38,11 +38,12 @@ export default function DeleteButton({
     const result = await onDelete(id);
 
     if (result.success) {
-      await mutate(`/api/${collectionName}`, () => fetcher(`/api/${collectionName}`));
-      await mutate(`/api/${collectionName}/${id}`, () => fetcher(`/api/${collectionName}/${id}`));
+      mutate(`/api/${collectionName}`)
+      mutate(`/api/${collectionName}/${id}`);
 
       toast.success("Item deleted successfully");
       setDialogOpen(false);
+      window.location.reload();
     } else {
       throw new Error(result.error || "Failed to delete item");
     }
